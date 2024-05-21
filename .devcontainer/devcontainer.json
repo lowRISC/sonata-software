@@ -1,0 +1,18 @@
+{
+  "image": "ghcr.io/gregac/sonata-software-container:latest",
+  "remoteUser": "sonata",
+  "containerUser": "sonata",
+  "onCreateCommand": "git submodule init && git submodule update --init --recursive",
+  "settings": {
+    "terminal.integrated.profiles.linux": {
+      "Nix devshell": {
+        "path": "nix",
+        "args": [
+           "develop",
+           "github:lowRISC/sonata-software"
+        ]
+      }
+    },
+    "terminal.integrated.defaultProfile.linux": "Nix devshell"
+  }
+}
