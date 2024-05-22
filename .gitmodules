@@ -1,0 +1,4 @@
+[submodule "cheriot-rtos"]
+	path = cheriot-rtos
+	url = https://github.com/lowrisc/cheriot-rtos
+	branch = sonata
