@@ -55,7 +55,7 @@ do you want to permanently mark this value as trusted (y/N)? y
 warning: ignoring untrusted substituter 'https://nix-cache.lowrisc.org/public/', you are not a trusted user.
 ```
 
-For Linux users, there is also an environment with the sonata simulator included:
+There is also an environment with the sonata simulator included:
 ```
 nix develop .#env-with-sim
 sonata-simulator --help
@@ -102,6 +102,23 @@ Wrote 74752 bytes to build/cheriot/cheriot/release/sonata_simple_demo.uf2
 ```
 
 *Note, the output size may differ.*
+
+## Running with the simulator
+
+When using the `env-with-sim` environment (see above) a Sonata simulator binary is available.
+The `scripts/run_sim.sh` script can be used to run it against a binary, e.g. to run the binary built above in the simulator:
+
+```sh
+./scripts/run_sim.sh build/cheriot/cheriot/release/sonata_simple_demo
+```
+
+UART output can be seen in the uart0.log file.
+This can be observed using `tail -f` which will monitor the file and output as soon as something is written to the UART.
+Note with the simulator running in the foreground this will need to be run in another terminal
+
+```sh
+tail -f uart0.log
+```
 
 ## License
 
