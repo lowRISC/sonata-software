@@ -3,20 +3,20 @@
 
 #include <compartment.h>
 //#include <debug.hh>
-#include <thread.h>
 #include <platform-uart.hh>
+#include <thread.h>
 
 /// Expose debugging features unconditionally for this compartment.
-//using Debug = ConditionalDebug<true, "led walk compartment">;
+// using Debug = ConditionalDebug<true, "led walk compartment">;
 
 /// Thread entry point.
-[[noreturn]]
-void __cheri_compartment("echo") entry_point()
+[[noreturn]] void __cheri_compartment("echo") entry_point()
 {
 	auto uart = MMIO_CAPABILITY(OpenTitanUart<>, uart);
 
 	char ch = '\n';
-	while (true) {
+	while (true)
+	{
 		ch = uart->blocking_read();
 		uart->blocking_write(ch);
 	}
