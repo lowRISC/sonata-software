@@ -1,32 +1,38 @@
 // Copyright lowRISC Contributors.
 // SPDX-License-Identifier: Apache-2.0
 
-#include <ctype.h>
 #include <compartment.h>
+#include <ctype.h>
 #include <debug.hh>
-#include <thread.h>
 #include <platform-i2c.hh>
+#include <thread.h>
 
 /// Expose debugging features unconditionally for this compartment.
 using Debug = ConditionalDebug<true, "i2c example">;
 
-template<class T> using Mmio = volatile T*;
+template<class T>
+using Mmio = volatile T *;
 
 /// Read from the AS612 Temperature Sensor
-static void read_temperature_sensor_value(Mmio<OpenTitanI2c> i2c, const char* regName, const uint8_t RegIdx)
+static void read_temperature_sensor_value(Mmio<OpenTitanI2c> i2c,
+                                          const char        *regName,
+                                          const uint8_t      RegIdx)
 {
 	uint8_t buf[2] = {RegIdx, 0};
 	i2c->write(0x48, buf, 1, false);
-	if(i2c->read(0x48, buf, 2u)) {
+	if (i2c->read(0x48, buf, 2u))
+	{
 		uint16_t temp = (buf[0] << 8) | buf[1];
 		Debug::log("The {} readout is {}", regName, temp);
-	} else {
+	}
+	else
+	{
 		Debug::log("Could not read the {}", regName);
 	}
 }
 
-
-static void id_eeprom_report(Mmio<OpenTitanI2c> i2c, const uint8_t IdAddr) {
+static void id_eeprom_report(Mmio<OpenTitanI2c> i2c, const uint8_t IdAddr)
+{
 	uint8_t addr[2] = {0};
 	i2c->write(0x50u, addr, 2, true);
 
@@ -34,7 +40,8 @@ static void id_eeprom_report(Mmio<OpenTitanI2c> i2c, const uint8_t IdAddr) {
 	// Initialize the buffer to known contents in case of read issues.
 	memset(data, 0xddu, sizeof(data));
 
-	if (!i2c->read(IdAddr, data, sizeof(data))) {
+	if (!i2c->read(IdAddr, data, sizeof(data)))
+	{
 		Debug::log("Failed to read EEPROM ID of device at address {}", IdAddr);
 	}
 
@@ -44,17 +51,19 @@ static void id_eeprom_report(Mmio<OpenTitanI2c> i2c, const uint8_t IdAddr) {
 		auto asChar = [](uint8_t val) -> char {
 			return static_cast<char>(isprint(val) ? val : '.');
 		};
-		Debug::log(
-			"\t{}{}{}{} | {} {} {} {}",
-			asChar(data[idx + 0]), asChar(data[idx + 1]), asChar(data[idx + 2]), asChar(data[idx + 3]),
-			data[idx + 0], data[idx + 1], data[ idx + 2], data[idx + 3]
-		);
+		Debug::log("\t{}{}{}{} | {} {} {} {}",
+		           asChar(data[idx + 0]),
+		           asChar(data[idx + 1]),
+		           asChar(data[idx + 2]),
+		           asChar(data[idx + 3]),
+		           data[idx + 0],
+		           data[idx + 1],
+		           data[idx + 2],
+		           data[idx + 3]);
 	}
-
 }
 
-[[noreturn]]
-void __cheri_compartment("i2c_example") run()
+[[noreturn]] void __cheri_compartment("i2c_example") run()
 {
 	auto i2cSetup = [](Mmio<OpenTitanI2c> i2c) {
 		i2c->reset_fifos();
@@ -69,7 +78,8 @@ void __cheri_compartment("i2c_example") run()
 	id_eeprom_report(i2c0, 0x50);
 
 	read_temperature_sensor_value(i2c1, "temporature sensor configuration", 1);
-	while(true) {
+	while (true)
+	{
 		read_temperature_sensor_value(i2c1, "temporature", 0);
 		thread_millisecond_wait(4000);
 	}
