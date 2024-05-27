@@ -1,0 +1,35 @@
+# Copyright lowRISC contributors.
+#
+# SPDX-License-Identifier: MIT
+
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+# Cancel existing runs if a pull request is pushed.
+# For branch pushes, this will queue a new run and cancel the existing one. This allows the cache
+# of the run to be used by the new run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    name: Quality Check
+    runs-on: nixos-23.11
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v24
+
+      - name: Nix Format Check
+        run: nix fmt -- . --check
+
+      - name: Run Nix Checks
+        run: nix flake check -L
