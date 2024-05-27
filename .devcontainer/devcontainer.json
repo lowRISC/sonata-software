@@ -5,17 +5,21 @@
   "onCreateCommand": "git submodule init && git submodule update --init --recursive",
   "customizations": {
     "vscode": {
+      "extensions": [
+        "fabiospampinato.vscode-terminals"
+      ],
       "settings": {
         "terminal.integrated.profiles.linux": {
           "nix-devshell": {
             "path": "nix",
             "args": [
-               "develop",
-               "github:lowRISC/sonata-software"
+              "develop",
+              "github:lowRISC/sonata-software"
             ]
           }
         },
-        "terminal.integrated.defaultProfile.linux": "nix-devshell"
+        "terminal.integrated.defaultProfile.linux": "nix-devshell",
+        "terminals.configPath": "/workspaces/sonata-software/.devcontainer/terminals.json",
       }
     }
   }
