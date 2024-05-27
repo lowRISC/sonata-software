@@ -1,0 +1,14 @@
+{
+  "autorun": true,
+  "terminals": [
+    {
+      "name": "Sonata DevShell",
+      "description": "This is a description.",
+      "focus": true,
+      "commands": [
+        "cat /workspaces/sonata-software/.devcontainer/lowrisc.art",
+        "echo 'github:lowRISC/sonata-software development shell is ready.'",
+      ]
+    }
+  ]
+}
