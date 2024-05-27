@@ -36,6 +36,17 @@
           packages = default.nativeBuildInputs ++ [sonataSystemPkgs.sonata-simulator];
         };
       };
+      checks = {
+        clang-format = pkgs.stdenv.mkDerivation {
+          name = "clang-format-check";
+          src = ./.;
+          dontBuild = true;
+          doCheck = true;
+          nativeBuildInputs = with lrPkgs; [llvm_cheriot];
+          checkPhase = "clang-format --dry-run --Werror compartments/*.cc";
+          installPhase = "mkdir $out";
+        };
+      };
     };
   in
     flake-utils.lib.eachDefaultSystem system_outputs;
