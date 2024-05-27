@@ -2,3 +2,6 @@
 	path = cheriot-rtos
 	url = https://github.com/lowrisc/cheriot-rtos
 	branch = sonata
+[submodule "display_drivers"]
+	path = display_drivers
+	url = https://github.com/engdoreis/display_drivers.git
