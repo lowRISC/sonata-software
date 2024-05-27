@@ -26,13 +26,19 @@ compartment("led_walk")
 compartment("echo")
     add_files("compartments/echo.cc")
 
+compartment("lcd_test")
+    add_files("display_drivers/core/lcd_base.c")
+    add_files("display_drivers/core/m3x6_16pt.c")
+    add_files("display_drivers/st7735/lcd_st7735.c")
+    add_files("compartments/lcd_test.cc")
+
 compartment("i2c_example")
     add_deps("debug")
     add_files("compartments/i2c_example.cc")
 
 -- A simple demo using only devices on the Sonata board
 firmware("sonata_simple_demo")
-    add_deps("freestanding", "led_walk", "echo")
+    add_deps("freestanding", "led_walk", "echo", "lcd_test")
     on_load(function(target)
         target:values_set("board", "$(board)")
         target:values_set("threads", {
@@ -48,6 +54,13 @@ firmware("sonata_simple_demo")
                 priority = 1,
                 entry_point = "entry_point",
                 stack_size = 0x200,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "lcd_test",
+                priority = 2,
+                entry_point = "lcd_test",
+                stack_size = 0x1000,
                 trusted_stack_frames = 1
             }
         }, {expand = false})
@@ -56,7 +69,7 @@ firmware("sonata_simple_demo")
 
 -- A demo that expects additional devices such as I2C devices
 firmware("sonata_demo_everything")
-    add_deps("freestanding", "led_walk", "echo", "i2c_example")
+    add_deps("freestanding", "led_walk", "echo", "lcd_test", "i2c_example")
     on_load(function(target)
         target:values_set("board", "$(board)")
         target:values_set("threads", {
@@ -72,6 +85,13 @@ firmware("sonata_demo_everything")
                 priority = 1,
                 entry_point = "entry_point",
                 stack_size = 0x200,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "lcd_test",
+                priority = 2,
+                entry_point = "lcd_test",
+                stack_size = 0x1000,
                 trusted_stack_frames = 1
             },
             {
