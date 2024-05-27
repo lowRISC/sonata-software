@@ -35,7 +35,7 @@ RUN sudo bash -c 'echo "substituters = https://cache.nixos.org https://nix-cache
 
 # Download/build/install everything required for the nix devshell by starting it
 # to run 'true' and immediately exit
-RUN nix develop "github:lowRISC/sonata-software" -c "true"
+RUN nix develop "github:lowRISC/sonata-software#env-with-sim" -c "true"
 
 ENV SHELL /bin/bash
-CMD nix develop "github:lowRISC/sonata-software"
+CMD nix develop "github:lowRISC/sonata-software#env-with-sim"
