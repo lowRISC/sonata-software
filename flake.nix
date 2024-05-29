@@ -48,7 +48,7 @@
           dontBuild = true;
           doCheck = true;
           nativeBuildInputs = with lrPkgs; [llvm_cheriot];
-          checkPhase = "clang-format --dry-run --Werror compartments/*.cc";
+          checkPhase = "clang-format --dry-run --Werror {compartments,library}/*";
           installPhase = "mkdir $out";
         };
       };
