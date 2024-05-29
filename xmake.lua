@@ -19,9 +19,9 @@ function convert_to_uf2(target)
     os.execv("uf2conv", { binary_file, "-b0x00101000", "-co", firmware .. ".uf2" })
 end
 
-compartment("led_walk")
+compartment("led_walk_raw")
     add_deps("debug")
-    add_files("compartments/led_walk.cc")
+    add_files("compartments/led_walk_raw.cc")
 
 compartment("echo")
     add_files("compartments/echo.cc")
@@ -38,12 +38,12 @@ compartment("i2c_example")
 
 -- A simple demo using only devices on the Sonata board
 firmware("sonata_simple_demo")
-    add_deps("freestanding", "led_walk", "echo", "lcd_test")
+    add_deps("freestanding", "led_walk_raw", "echo", "lcd_test")
     on_load(function(target)
         target:values_set("board", "$(board)")
         target:values_set("threads", {
             {
-                compartment = "led_walk",
+                compartment = "led_walk_raw",
                 priority = 2,
                 entry_point = "start_walking",
                 stack_size = 0x200,
@@ -69,12 +69,12 @@ firmware("sonata_simple_demo")
 
 -- A demo that expects additional devices such as I2C devices
 firmware("sonata_demo_everything")
-    add_deps("freestanding", "led_walk", "echo", "lcd_test", "i2c_example")
+    add_deps("freestanding", "led_walk_raw", "echo", "lcd_test", "i2c_example")
     on_load(function(target)
         target:values_set("board", "$(board)")
         target:values_set("threads", {
             {
-                compartment = "led_walk",
+                compartment = "led_walk_raw",
                 priority = 2,
                 entry_point = "start_walking",
                 stack_size = 0x200,
