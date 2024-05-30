@@ -2,9 +2,35 @@
 
 This repository contains software, build flows and examples for the Sonata System (https://github.com/lowRISC/sonata-system).
 
+If you want to use the web-based environment start at [Use a web-based environment](#use-a-web-based-environment). For local setups only Windows requires specific instructions, Nix handles everything you need on Linux and OSX. So if you're not using Windows jump straight to [Installing Nix](#installing-nix).
+
+## Windows Specific Setup
+
+To obtain a Linux environment on Windows, you can choose to start a virtual machine or use Windows Subsystem for Linux (WSL).
+
+Microsoft provides a detailed guide on how to install WSL: https://learn.microsoft.com/en-us/windows/wsl/install. For latest systems this would just be a single command:
+```bat
+wsl --install
+```
+You might need to enable virtualisation in the BIOS if it's not enabled by default.
+
+If you are running the command without admin privileges, user account control (UAC) popups will appear a few times asking to allow changes to be made to the device.
+Click "yes" to approve.
+
+After the command's completion, it should say that Ubuntu is installed. Reboot your machine to make these changes effective.
+
+After rebooting, Ubuntu should be available in your start menu.
+Click it to start. For the first time, it would prompt you to select a Unix username and password.
+Follow the Linux (Ubuntu) steps for the rest of this guide.
+
+> ℹ️ If you have installed your WSL a long time ago, systemd may not have been enabled by default.
+> It is recommended to use enable systemd.
+> See https://learn.microsoft.com/en-us/windows/wsl/systemd.
+
 ## Installing Nix
 
 The Nix package manager is used to create reproducible builds and consistent development environments.
+Nix is required to follow the instructions below.
 We recommend installing Nix with the Determinate Systems' [`nix-installer`](https://github.com/DeterminateSystems/nix-installer):
 
 ```sh
@@ -21,6 +47,7 @@ For more indepth instructions, follow the guide on [the zero to nix site](https:
 
 ### Setup Cache
 
+Nix will build everything from source, which can take quite some time unless you have access to cached binaries.
 To make use of the lowRISC cache so you don't have to rebuild binaries yourself, you'll need to make sure you're a trusted user.
 To do this, you will need to add your user to the trusted users in `/etc/nix/nix.conf`, e.g. `trusted-users = root username`. *You can also add all users from a certain group instead of a single user by using an `@` symbol before the group name, e.g. `@sudo` or `@wheel`.*
 
@@ -33,6 +60,13 @@ To do this, you will need to add your user to the trusted users in `/etc/nix/nix
 > ```sh
 > sudo systemctl restart nix-daemon
 > ```
+
+> ℹ️ For OSX users, this means adding this line to the `/etc/nix/nix.conf`:
+> ```
+> trusted-users = root @admin
+> ```
+> 
+> You then need to restart your Mac for the changes to take effect.
 
 ## Enter the CHERIoT development environment
 
@@ -102,6 +136,10 @@ Wrote 74752 bytes to build/cheriot/cheriot/release/sonata_simple_demo.uf2
 ```
 
 *Note, the output size may differ.*
+
+## Next steps
+
+The [lab from the recent hackathon](hackathon.md) gives a good introduction to some CHERIoT RTOS features and how to develop CHERIoT RTOS applications for Sonata.
 
 ## Running with the simulator
 
