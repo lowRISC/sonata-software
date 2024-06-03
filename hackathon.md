@@ -36,7 +36,7 @@ For more information about these rules, see [`cheriot-rtos/README.md`](cheriot-r
 
 [`xmake.lua`]: ./xmake.lua
 
-The only thing this repository adds is a little post-link function, `convert_to_utf2`, that converts the ELF of the firmware image into a UF2 file which can be easily loaded onto the Sonata board.
+The only thing this repository adds is a little post-link function, `convert_to_uf2`, that converts the ELF of the firmware image into a UF2 file which can be easily loaded onto the Sonata board.
 To do this, just copy the built UF2 to the `SONATA` drive which should have mounted when you plugged the board in.
 After doing this, you should see some flashing LEDs!
 
@@ -113,12 +113,12 @@ It can be found at `compartments/gpiolib.cc`, with the functions available to ot
 `gpiolib` uses they sealing feature, outlined in the `cheriot-rtos/examples/05.sealing/` example we built earlier, to enable `gpiolib` to hand out opaque access to LEDs.
 These can be used by library users to prove ownership of an LED.
 The `led_walk` compartment is does the same thing as `led_walk`, but accesses the LEDs through `gpiolib`.
-To see this in action, load the `sonata_gpio_demo` onto your board.
+To see this in action, load the `sonata_led_demo` onto your board.
 
 
 ## Where to go from here...
 
-Have a play with the `sonata_gpio_demo`.
+Have a play with the `sonata_led_demo`.
 For example, remove the following line in the [`led_walk`](compartments/led_walk.cc) and you will see LED 3 no longer lights up.
 
 ```cpp
