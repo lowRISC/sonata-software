@@ -1,3 +1,10 @@
+# Copyright lowRISC contributors.
+# SPDX-License-Identifier: Apache-2.0
+
+# xmake artifacts
 build
 .xmake
+
+# clang tooling artifacts
 compile_commands.json
+.cache

@@ -1,0 +1,19 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+
+Files: *.lock
+       README.md
+       **/README.md
+       hackathon.md
+       .devcontainer/*.*
+       scripts/rp2040_uf2/pgrm.bin
+Copyright: lowRISC contributors
+License: Apache-2.0
+
+Files: .clang-tidy
+       compile_flags.txt
+Copyright: Copyright Microsoft and CHERIoT Contributors
+License: MIT
+
+Files: scripts/rp2040_uf2/uf2families.json
+Copyright: Microsoft Corporation
+License: MIT
