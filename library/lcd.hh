@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <algorithm>
+#include <cheri.hh>
 #include <platform-gpio.hh>
 #include <platform-spi.hh>
+#include <thread.h>
 #include <utility>
 
 namespace sonata::lcd
@@ -63,8 +65,8 @@ namespace sonata::lcd
 
 	namespace font
 	{
-		constexpr const Font &m3x6_16pt = m3x6_16ptFont;
-	}
+		constexpr const Font &m3x6 = m3x6_16ptFont;
+	} // namespace font
 
 	enum class Color : uint32_t
 	{
@@ -112,7 +114,7 @@ namespace sonata::lcd
 			gpio()->output = output;
 		}
 
-		LCD_Interface lcd_intf;
+		LCD_Interface lcdIntf;
 		St7735Context ctx;
 
 		public:
@@ -132,22 +134,22 @@ namespace sonata::lcd
 			set_gpio_output_bit(LcdRstPin, true);
 
 			// Initialise LCD driverr.
-			lcd_intf.handle = nullptr;
-			lcd_intf.spi_write =
+			lcdIntf.handle = nullptr;
+			lcdIntf.spi_write =
 			  [](void *handle, uint8_t *data, size_t len) -> uint32_t {
 				spi()->tx(data, len);
 				return len;
 			};
-			lcd_intf.gpio_write =
-			  [](void *handle, bool cs_high, bool dc_high) -> uint32_t {
-				set_gpio_output_bit(LcdCsPin, cs_high);
-				set_gpio_output_bit(LcdDcPin, dc_high);
+			lcdIntf.gpio_write =
+			  [](void *handle, bool csHigh, bool dcHigh) -> uint32_t {
+				set_gpio_output_bit(LcdCsPin, csHigh);
+				set_gpio_output_bit(LcdDcPin, dcHigh);
 				return 0;
 			};
-			lcd_intf.timer_delay = [](uint32_t ms) {
+			lcdIntf.timer_delay = [](uint32_t ms) {
 				thread_millisecond_wait(ms);
 			};
-			lcd_st7735_init(&ctx, &lcd_intf);
+			lcd_st7735_init(&ctx, &lcdIntf);
 
 			// Set the LCD orentiation.
 			lcd_st7735_set_orientation(&ctx, LCD_Rotate180);

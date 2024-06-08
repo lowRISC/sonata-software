@@ -68,12 +68,12 @@ auto aquire_led(uint8_t index) -> std::optional<LedHandle *>
  */
 static auto unseal_handle(LedHandle *handle) -> std::optional<LedHandle *>
 {
-	const auto unsealed = token_unseal(key(), Sealed<LedHandle>{handle});
-	if (nullptr == unsealed)
+	const auto Unsealed = token_unseal(key(), Sealed<LedHandle>{handle});
+	if (nullptr == Unsealed)
 	{
 		return {};
 	}
-	return unsealed;
+	return Unsealed;
 }
 
 /**
@@ -86,10 +86,8 @@ bool toggle_led(LedHandle *handle)
 		gpio()->led_toggle(unsealedHandle.value()->index);
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+
+	return false;
 };
 
 /**
