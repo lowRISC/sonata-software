@@ -30,5 +30,11 @@ jobs:
       - name: Nix Format Check
         run: nix fmt -- . --check
 
+      # This isn't part of the the nix flake checks
+      # because it can't ignore submodules
+      # when they are vendored in by Nix.
+      - name: Licence Check
+        run: nix run nixpkgs#reuse lint
+
       - name: Run Nix Checks
         run: nix flake check -L .?submodules=1
