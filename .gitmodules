@@ -4,4 +4,5 @@
 	branch = sonata
 [submodule "display_drivers"]
 	path = display_drivers
-	url = https://github.com/engdoreis/display_drivers.git
+	url = https://github.com/engdoreis/display_drivers
+	branch = main

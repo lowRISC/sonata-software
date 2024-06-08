@@ -1,3 +1,5 @@
+# Copyright lowRISC Contributors.
+# SPDX-License-Identifier: Apache-2.0
 {
   description = "Sonata Software";
   inputs = {
@@ -24,6 +26,32 @@
       lrPkgs = lowrisc-nix.outputs.packages.${system};
       sonataSystemPkgs = sonata-system.outputs.packages.${system};
       cheriotPkgs = lowrisc-nix.outputs.devShells.${system}.cheriot.nativeBuildInputs;
+
+      getExe = pkgs.lib.getExe;
+
+      clang-lint = let
+        srcGlob = "{compartments,library}/*";
+      in
+        pkgs.writeShellApplication {
+          name = "clang-lint";
+          runtimeInputs = with lrPkgs; [llvm_cheriot];
+          text = ''
+            set +u
+            case "$1" in
+              check)
+                clang-format --dry-run --Werror ${srcGlob}
+                clang-tidy -export-fixes=tidy_fixes -quiet ${srcGlob}
+                [ ! -f tidy_fixes ] # fail if the fixes file exists
+                echo "No warnings outside of dependancies."
+                ;;
+              fix)
+                clang-format -i ${srcGlob}
+                clang-tidy -fix ${srcGlob}
+                ;;
+              *) echo "Available subcommands are 'check' and 'fix'.";;
+            esac
+          '';
+        };
     in {
       formatter = pkgs.alejandra;
       devShells = rec {
@@ -41,14 +69,17 @@
           '';
         };
       };
+      apps.clang-lint = {
+        type = "app";
+        program = getExe clang-lint;
+      };
       checks = {
-        clang-format = pkgs.stdenv.mkDerivation {
-          name = "clang-format-check";
+        clang-checks = pkgs.stdenvNoCC.mkDerivation {
+          name = "clang-checks";
           src = ./.;
           dontBuild = true;
           doCheck = true;
-          nativeBuildInputs = with lrPkgs; [llvm_cheriot];
-          checkPhase = "clang-format --dry-run --Werror {compartments,library}/*";
+          checkPhase = "${getExe clang-lint} check";
           installPhase = "mkdir $out";
         };
       };
