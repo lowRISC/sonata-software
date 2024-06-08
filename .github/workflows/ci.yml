@@ -32,4 +32,4 @@ jobs:
         run: nix fmt -- . --check
 
       - name: Run Nix Checks
-        run: nix flake check -L
+        run: nix flake check -L .?submodules=1
