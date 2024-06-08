@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Copyright Microsoft Corporation
+# Copyright lowRISC Contributors.
+# SPDX-License-Identifier: Apache-2.0
+
 import sys
 import struct
 import subprocess

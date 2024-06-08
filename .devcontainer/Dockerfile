@@ -1,3 +1,6 @@
+# Copyright lowRISC Contributors.
+# SPDX-License-Identifier: Apache-2.0
+
 FROM ubuntu:22.04
 ARG USERNAME=sonata
 # Install nix, git and cmake (required to build sonata-system software,

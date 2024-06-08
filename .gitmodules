@@ -1,3 +1,6 @@
+# Copyright lowRISC Contributors.
+# SPDX-License-Identifier: Apache-2.0
+
 [submodule "cheriot-rtos"]
 	path = cheriot-rtos
 	url = https://github.com/lowrisc/cheriot-rtos
