@@ -52,6 +52,13 @@
             esac
           '';
         };
+      run-lints = pkgs.writeShellApplication {
+        name = "run-lints";
+        text = ''
+          ${getExe pkgs.reuse} lint
+          ${getExe clang-lint} check
+        '';
+      };
     in {
       formatter = pkgs.alejandra;
       devShells = rec {
@@ -69,9 +76,15 @@
           '';
         };
       };
-      apps.clang-lint = {
-        type = "app";
-        program = getExe clang-lint;
+      apps = {
+        run-lints = {
+          type = "app";
+          program = getExe run-lints;
+        };
+        clang-lint = {
+          type = "app";
+          program = getExe clang-lint;
+        };
       };
       checks = {
         clang-checks = pkgs.stdenvNoCC.mkDerivation {
