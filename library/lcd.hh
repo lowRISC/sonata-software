@@ -137,7 +137,7 @@ namespace sonata::lcd
 			lcdIntf.handle = nullptr;
 			lcdIntf.spi_write =
 			  [](void *handle, uint8_t *data, size_t len) -> uint32_t {
-				spi()->tx(data, len);
+				spi()->blocking_write(data, len);
 				return len;
 			};
 			lcdIntf.gpio_write =

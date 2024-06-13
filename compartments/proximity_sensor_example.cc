@@ -32,8 +32,8 @@ static void setup_proximity_sensor(Mmio<OpenTitanI2c> i2c, const uint8_t Addr)
 
 	buf[0] = ApdS9960Id;
 
-	i2c->write(ApdS9960I2cAddress, buf, 1, false);
-	bool success = i2c->read(ApdS9960I2cAddress, buf, 1);
+	i2c->blocking_write(ApdS9960I2cAddress, buf, 1, false);
+	bool success = i2c->blocking_read(ApdS9960I2cAddress, buf, 1);
 	Debug::Assert(success, "Failed to read proximity sensor ID");
 
 	Debug::log("Proximity sensor ID: {}", buf[0]);
@@ -46,27 +46,27 @@ static void setup_proximity_sensor(Mmio<OpenTitanI2c> i2c, const uint8_t Addr)
 	// Disable everything
 	buf[0] = ApdS9960Enable;
 	buf[1] = 0x0;
-	i2c->write(ApdS9960I2cAddress, buf, 2, true);
+	i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true);
 	// Wait for all engines to go idle
 	thread_millisecond_wait(25);
 
 	// Set PEN (proximity enable) and PON (power on)
 	buf[0] = ApdS9960Enable;
 	buf[1] = 0x5;
-	i2c->write(ApdS9960I2cAddress, buf, 2, true);
+	i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true);
 	// Wait for power on
 	thread_millisecond_wait(10);
 
 	// Set proximity gain to 8x
 	buf[0] = ApdS9960CR1;
 	buf[1] = 0x0c;
-	i2c->write(ApdS9960I2cAddress, buf, 2, true);
+	i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true);
 
 	// Set proximity pulse length to 4us and pulse count to 16us
 	// (experimentially determined, other values may work better!)
 	buf[0] = ApdS9960Ppc;
 	buf[1] = 0x04;
-	i2c->write(ApdS9960I2cAddress, buf, 2, true);
+	i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true);
 }
 
 static uint8_t read_proximity_sensor(Mmio<OpenTitanI2c> i2c)
@@ -74,8 +74,8 @@ static uint8_t read_proximity_sensor(Mmio<OpenTitanI2c> i2c)
 	uint8_t buf[1];
 
 	buf[0] = ApdS9960Pdata;
-	i2c->write(ApdS9960I2cAddress, buf, 1, false);
-	if (!i2c->read(ApdS9960I2cAddress, buf, 1))
+	i2c->blocking_write(ApdS9960I2cAddress, buf, 1, false);
+	if (!i2c->blocking_read(ApdS9960I2cAddress, buf, 1))
 	{
 		Debug::log("Failed to read proximity sensor value");
 		return 0;
@@ -88,15 +88,15 @@ static uint8_t read_proximity_sensor(Mmio<OpenTitanI2c> i2c)
 {
 	auto i2cSetup = [](Mmio<OpenTitanI2c> i2c) {
 		i2c->reset_fifos();
-		i2c->set_host_mode();
-		i2c->set_speed(1);
+		i2c->host_mode_set();
+		i2c->speed_set(1);
 	};
 
 	auto i2c0 = MMIO_CAPABILITY(OpenTitanI2c, i2c0);
 	i2cSetup(i2c0);
 	uint8_t addr;
 
-	auto rgbled = MMIO_CAPABILITY(SonataRGBLEDCtrl, rgbled);
+	auto rgbled = MMIO_CAPABILITY(SonataRgbLedController, rgbled);
 
 	setup_proximity_sensor(i2c0, ApdS9960I2cAddress);
 
@@ -104,8 +104,8 @@ static uint8_t read_proximity_sensor(Mmio<OpenTitanI2c> i2c)
 	{
 		uint8_t prox = read_proximity_sensor(i2c0);
 		Debug::log("Proximity is {}\r", prox);
-		rgbled->set_rgb(((prox) >> 3), 0, 0, 0);
-		rgbled->set_rgb(0, (255 - prox) >> 3, 0, 1);
+		rgbled->rgb(SonataRgbLed::Led0, ((prox) >> 3), 0, 0);
+		rgbled->rgb(SonataRgbLed::Led1, 0, (255 - prox) >> 3, 0);
 		rgbled->update();
 
 		thread_millisecond_wait(100);
