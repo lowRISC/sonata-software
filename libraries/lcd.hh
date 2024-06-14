@@ -10,12 +10,15 @@
 
 namespace sonata::lcd
 {
-
-	extern "C"
+	namespace internal
 	{
+		extern "C"
+		{
 #include "../third_party/display_drivers/core/m3x6_16pt.h"
 #include "../third_party/display_drivers/st7735/lcd_st7735.h"
-	}
+		}
+		void __cheri_libcall lcd_init(LCD_Interface *, St7735Context *);
+	} // namespace internal
 
 	struct Point
 	{
@@ -63,114 +66,22 @@ namespace sonata::lcd
 		}
 	};
 
-	namespace font
-	{
-		constexpr const Font &m3x6 = m3x6_16ptFont;
-	} // namespace font
-
 	enum class Color : uint32_t
 	{
 		Black = 0x000000,
 		White = 0xFFFFFF,
 	};
 
-	class SonataLCD
+	class SonataLcd
 	{
 		private:
-		static constexpr uint32_t LcdCsPin  = 0;
-		static constexpr uint32_t LcdRstPin = 1;
-		static constexpr uint32_t LcdDcPin  = 2;
-		static constexpr uint32_t LcdBlPin  = 3;
-
-		/**
-		 * Import the Capability helper from the CHERI namespace.
-		 */
-		template<typename T>
-		using Capability = CHERI::Capability<T>;
-
-		/**
-		 * Helper.  Returns a pointer to the SPI device.
-		 */
-		[[nodiscard, gnu::always_inline]] static Capability<volatile SonataSpi>
-		spi()
-		{
-			return MMIO_CAPABILITY(SonataSpi, spi1);
-		}
-
-		/**
-		 * Helper.  Returns a pointer to the GPIO device.
-		 */
-		[[nodiscard, gnu::always_inline]] static Capability<volatile SonataGPIO>
-		gpio()
-		{
-			return MMIO_CAPABILITY(SonataGPIO, gpio);
-		}
-
-		static inline void set_gpio_output_bit(uint32_t bit, bool value)
-		{
-			uint32_t output = gpio()->output;
-			output &= ~(1 << bit);
-			output |= value << bit;
-			gpio()->output = output;
-		}
-
-		LCD_Interface lcdIntf;
-		St7735Context ctx;
+		internal::LCD_Interface lcdIntf;
+		internal::St7735Context ctx;
 
 		public:
-		SonataLCD()
+		SonataLcd()
 		{
-			// Set the initial state of the LCD control pins.
-			set_gpio_output_bit(LcdDcPin, false);
-			set_gpio_output_bit(LcdBlPin, true);
-			set_gpio_output_bit(LcdCsPin, false);
-
-			// Initialise SPI driver.
-			spi()->init(false, false, true, false);
-
-			// Reset LCD.
-			set_gpio_output_bit(LcdRstPin, false);
-			thread_millisecond_wait(150);
-			set_gpio_output_bit(LcdRstPin, true);
-
-			// Initialise LCD driverr.
-			lcdIntf.handle = nullptr;
-			lcdIntf.spi_write =
-			  [](void *handle, uint8_t *data, size_t len) -> uint32_t {
-				spi()->blocking_write(data, len);
-				return len;
-			};
-			lcdIntf.gpio_write =
-			  [](void *handle, bool csHigh, bool dcHigh) -> uint32_t {
-				set_gpio_output_bit(LcdCsPin, csHigh);
-				set_gpio_output_bit(LcdDcPin, dcHigh);
-				return 0;
-			};
-			lcdIntf.timer_delay = [](uint32_t ms) {
-				thread_millisecond_wait(ms);
-			};
-			lcd_st7735_init(&ctx, &lcdIntf);
-
-			// Set the LCD orentiation.
-			lcd_st7735_set_orientation(&ctx, LCD_Rotate180);
-
-			clean();
-		}
-
-		~SonataLCD()
-		{
-			clean();
-
-			// Hold LCD in reset.
-			set_gpio_output_bit(LcdRstPin, false);
-			// Turn off backlight.
-			set_gpio_output_bit(LcdBlPin, false);
-		}
-
-		void clean()
-		{
-			// Clean the display with a white rectangle.
-			lcd_st7735_clean(&ctx);
+			internal::lcd_init(&lcdIntf, &ctx);
 		}
 
 		Size resolution()
@@ -178,74 +89,16 @@ namespace sonata::lcd
 			return {ctx.parent.width, ctx.parent.height};
 		}
 
-		void draw_pixel(Point point, Color color)
-		{
-			lcd_st7735_draw_pixel(
-			  &ctx, {point.x, point.y}, static_cast<uint32_t>(color));
-		}
-
-		void draw_line(Point a, Point b, Color color)
-		{
-			if (a.y == b.y)
-			{
-				uint32_t x1 = std::min(a.x, b.x);
-				uint32_t x2 = std::max(a.x, b.x);
-				lcd_st7735_draw_horizontal_line(
-				  &ctx, {{x1, a.y}, x2 - x1}, static_cast<uint32_t>(color));
-			}
-			else if (a.x == b.x)
-			{
-				uint32_t y1 = std::min(a.y, b.y);
-				uint32_t y2 = std::max(a.y, b.y);
-				lcd_st7735_draw_vertical_line(
-				  &ctx, {{a.x, y1}, y2 - y1}, static_cast<uint32_t>(color));
-			}
-			else
-			{
-				// We currently only support horizontal and vertical lines.
-				panic();
-			}
-		}
-
-		void draw_image_bgr(Rect rect, const uint8_t *data)
-		{
-			lcd_st7735_draw_bgr(&ctx,
-			                    {{rect.left, rect.top},
-			                     rect.right - rect.left,
-			                     rect.bottom - rect.top},
-			                    data);
-		}
-
-		void draw_image_rgb565(Rect rect, const uint8_t *data)
-		{
-			lcd_st7735_draw_rgb565(&ctx,
-			                       {{rect.left, rect.top},
-			                        rect.right - rect.left,
-			                        rect.bottom - rect.top},
-			                       data);
-		}
-
-		void fill_rect(Rect rect, Color color)
-		{
-			lcd_st7735_fill_rectangle(&ctx,
-			                          {{rect.left, rect.top},
-			                           rect.right - rect.left,
-			                           rect.bottom - rect.top},
-			                          static_cast<uint32_t>(color));
-		}
-
-		void draw_str(Point       point,
-		              const char *str,
-		              const Font &font,
-		              Color       background,
-		              Color       foreground)
-		{
-			lcd_st7735_set_font(&ctx, &font);
-			lcd_st7735_set_font_colors(&ctx,
-			                           static_cast<uint32_t>(background),
-			                           static_cast<uint32_t>(foreground));
-			lcd_st7735_puts(&ctx, {point.x, point.y}, str);
-		}
+		__cheri_libcall ~SonataLcd();
+		void __cheri_libcall clean();
+		void __cheri_libcall draw_pixel(Point point, Color color);
+		void __cheri_libcall draw_line(Point a, Point b, Color color);
+		void __cheri_libcall draw_image_bgr(Rect rect, const uint8_t *data);
+		void __cheri_libcall draw_image_rgb565(Rect rect, const uint8_t *data);
+		void __cheri_libcall fill_rect(Rect rect, Color color);
+		void __cheri_libcall draw_str(Point       point,
+		                              const char *str,
+		                              Color       background,
+		                              Color       foreground);
 	};
-
 } // namespace sonata::lcd
