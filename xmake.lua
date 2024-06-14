@@ -28,9 +28,9 @@ compartment("echo")
     add_files("compartments/echo.cc")
 
 compartment("lcd_test")
-    add_files("display_drivers/core/lcd_base.c")
-    add_files("display_drivers/core/m3x6_16pt.c")
-    add_files("display_drivers/st7735/lcd_st7735.c")
+    add_files("third_party/display_drivers/core/lcd_base.c")
+    add_files("third_party/display_drivers/core/m3x6_16pt.c")
+    add_files("third_party/display_drivers/st7735/lcd_st7735.c")
     add_files("compartments/lcd_test.cc")
 
 compartment("i2c_example")

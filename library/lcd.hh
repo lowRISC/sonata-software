@@ -13,8 +13,8 @@ namespace sonata::lcd
 
 	extern "C"
 	{
-#include "../display_drivers/core/m3x6_16pt.h"
-#include "../display_drivers/st7735/lcd_st7735.h"
+#include "../third_party/display_drivers/core/m3x6_16pt.h"
+#include "../third_party/display_drivers/st7735/lcd_st7735.h"
 	}
 
 	struct Point
