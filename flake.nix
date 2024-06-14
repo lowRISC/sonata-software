@@ -30,7 +30,7 @@
       getExe = pkgs.lib.getExe;
 
       clang-lint = let
-        srcGlob = "{compartments/*,libraries/*.{cc,hh}}";
+        srcGlob = "{examples/**/*.{h,hh,cc},libraries/*.{cc,hh}}";
       in
         pkgs.writeShellApplication {
           name = "clang-lint";
