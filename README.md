@@ -124,7 +124,7 @@ cd sonata-software
 Configure and run build:
 
 ```sh
-xmake
+xmake -P examples
 ```
 
 After running this you should see the build run to completion and report success, the critical lines indicating a successful build are:

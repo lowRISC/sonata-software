@@ -4,7 +4,7 @@
 #include <compartment.h>
 #include <thread.h>
 
-#include "../libraries/lcd.hh"
+#include "../../libraries/lcd.hh"
 #include "lowrisc_logo.h"
 
 /// Thread entry point.

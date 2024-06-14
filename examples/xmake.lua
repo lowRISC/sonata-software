@@ -2,12 +2,12 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 set_project("Sonata Software")
-sdkdir = "cheriot-rtos/sdk"
+sdkdir = "../cheriot-rtos/sdk"
 includes(sdkdir)
 set_toolchains("cheriot-clang")
 
 includes(path.join(sdkdir, "lib"))
-includes("libraries")
+includes("../libraries")
 
 option("board")
     set_default("sonata")
@@ -20,34 +20,7 @@ function convert_to_uf2(target)
     os.execv("uf2conv", { binary_file, "-b0x00101000", "-co", firmware .. ".uf2" })
 end
 
-
-compartment("led_walk_raw")
-    add_deps("debug")
-    add_files("compartments/led_walk_raw.cc")
-
-compartment("echo")
-    add_files("compartments/echo.cc")
-
-compartment("lcd_test")
-    add_deps("lcd")
-    add_files("compartments/lcd_test.cc")
-
-compartment("i2c_example")
-    add_deps("debug")
-    add_files("compartments/i2c_example.cc")
-
-compartment("gpiolib")
-    -- This compartment uses C++ thread-safe static initialisation and so
-    -- depends on the C++ runtime.
-    add_deps("cxxrt")
-    add_files("compartments/gpiolib.cc")
-
-compartment("led_walk")
-    add_files("compartments/led_walk.cc")
-
-compartment("proximity_sensor_example")
-    add_deps("debug")
-    add_files("compartments/proximity_sensor_example.cc")
+includes("all")
 
 -- A simple demo using only devices on the Sonata board
 firmware("sonata_simple_demo")
