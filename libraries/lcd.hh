@@ -71,6 +71,8 @@ namespace sonata::lcd
 	{
 		Black = 0x000000,
 		White = 0xFFFFFF,
+		Red   = 0x0000FF,
+		Green = 0x00FF00
 	};
 
 	class SonataLcd
@@ -90,10 +92,12 @@ namespace sonata::lcd
 			return {ctx.parent.width, ctx.parent.height};
 		}
 
-		~SonataLcd() {
+		~SonataLcd()
+		{
 			internal::lcd_destroy(&lcdIntf, &ctx);
 		}
 		void __cheri_libcall clean();
+		void __cheri_libcall clean(Color color);
 		void __cheri_libcall draw_pixel(Point point, Color color);
 		void __cheri_libcall draw_line(Point a, Point b, Color color);
 		void __cheri_libcall draw_image_bgr(Rect rect, const uint8_t *data);
