@@ -14,10 +14,8 @@ option("board")
 
 function convert_to_uf2(target)
     local firmware = target:targetfile()
-    local binary_file = firmware .. ".bin"
-    os.execv("llvm-objcopy", {"-Obinary", firmware, binary_file })
-    -- 0x00101000 is the sonata software entry address
-    os.execv("uf2conv", { binary_file, "-b0x00101000", "-co", firmware .. ".uf2" })
+    os.execv("llvm-strip", { firmware, "-o", firmware .. ".strip" })
+    os.execv("uf2conv", { firmware .. ".strip", "-f0x6CE29E60", "-co", firmware .. ".uf2" })
 end
 
 includes("all")
