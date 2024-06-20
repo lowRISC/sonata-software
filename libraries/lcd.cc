@@ -92,6 +92,17 @@ void __cheri_libcall SonataLcd::clean()
 	lcd_st7735_clean(&ctx);
 }
 
+void __cheri_libcall SonataLcd::clean(Color color)
+{
+	// Clean the display with a rectangle of the given colour
+	size_t w, h;
+	lcd_st7735_get_resolution(&ctx, &h, &w);
+	lcd_st7735_fill_rectangle(
+	  &ctx,
+	  {.origin = {.x = 0, .y = 0}, .width = w, .height = h},
+	  static_cast<uint32_t>(color));
+}
+
 void __cheri_libcall SonataLcd::draw_image_rgb565(Rect           rect,
                                                   const uint8_t *data)
 {
