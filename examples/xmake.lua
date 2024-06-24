@@ -20,7 +20,7 @@ function convert_to_uf2(target)
     os.execv("uf2conv", { binary_file, "-b0x00101000", "-co", firmware .. ".uf2" })
 end
 
-includes("all")
+includes("all", "snake")
 
 -- A simple demo using only devices on the Sonata board
 firmware("sonata_simple_demo")
@@ -120,6 +120,23 @@ firmware("proximity_test")
                 entry_point = "run",
                 stack_size = 0x200,
                 trusted_stack_frames = 1
+            }
+        }, {expand = false})
+    end)
+    after_link(convert_to_uf2)
+
+-- Snake demo
+firmware("snake_demo")
+    add_deps("freestanding", "snake")
+    on_load(function(target)
+        target:values_set("board", "$(board)")
+        target:values_set("threads", {
+            {
+                compartment = "snake",
+                priority = 2,
+                entry_point = "snake",
+                stack_size = 0x1000,
+                trusted_stack_frames = 2
             }
         }, {expand = false})
     end)

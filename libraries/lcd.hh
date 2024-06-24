@@ -18,6 +18,7 @@ namespace sonata::lcd
 #include "../third_party/display_drivers/st7735/lcd_st7735.h"
 		}
 		void __cheri_libcall lcd_init(LCD_Interface *, St7735Context *);
+		void __cheri_libcall lcd_destroy(LCD_Interface *, St7735Context *);
 	} // namespace internal
 
 	struct Point
@@ -70,6 +71,8 @@ namespace sonata::lcd
 	{
 		Black = 0x000000,
 		White = 0xFFFFFF,
+		Red   = 0x0000FF,
+		Green = 0x00FF00
 	};
 
 	class SonataLcd
@@ -89,8 +92,12 @@ namespace sonata::lcd
 			return {ctx.parent.width, ctx.parent.height};
 		}
 
-		__cheri_libcall ~SonataLcd();
+		~SonataLcd()
+		{
+			internal::lcd_destroy(&lcdIntf, &ctx);
+		}
 		void __cheri_libcall clean();
+		void __cheri_libcall clean(Color color);
 		void __cheri_libcall draw_pixel(Point point, Color color);
 		void __cheri_libcall draw_line(Point a, Point b, Color color);
 		void __cheri_libcall draw_image_bgr(Rect rect, const uint8_t *data);
