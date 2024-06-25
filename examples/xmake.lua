@@ -84,6 +84,44 @@ firmware("sonata_demo_everything")
     end)
     after_link(convert_to_uf2)
 
+-- Demo that does proximity test as well as LCD screen, etc for demos.
+firmware("sonata_proximity_demo")
+    add_deps("freestanding", "led_walk_raw", "echo", "lcd_test", "proximity_sensor_example")
+    on_load(function(target)
+        target:values_set("board", "$(board)")
+        target:values_set("threads", {
+            {
+                compartment = "led_walk_raw",
+                priority = 2,
+                entry_point = "start_walking",
+                stack_size = 0x200,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "echo",
+                priority = 1,
+                entry_point = "entry_point",
+                stack_size = 0x200,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "lcd_test",
+                priority = 2,
+                entry_point = "lcd_test",
+                stack_size = 0x1000,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "proximity_sensor_example",
+                priority = 2,
+                entry_point = "run",
+                stack_size = 0x200,
+                trusted_stack_frames = 1
+            }
+        }, {expand = false})
+    end)
+    after_link(convert_to_uf2)
+
 -- A firmware image that only walks LEDs
 firmware("sonata_led_demo")
     add_deps("freestanding", "debug")
