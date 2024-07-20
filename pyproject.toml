@@ -1,0 +1,21 @@
+# Copyright lowRISC Contributors.
+# SPDX-License-Identifier: Apache-2.0
+
+[tool.mypy]
+strict = true
+disable_error_code = ["import-untyped"]
+exclude = [
+  "^cheriot-rtos/",
+  "^scripts/rp2040_uf2/",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 79
+extend-exclude = [
+  "cheriot-rtos/*",
+  "scripts/rp2040_uf2/*",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "SIM", "PTH", "C4", "A", "RUF", "PERF"]
