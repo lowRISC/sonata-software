@@ -12,7 +12,7 @@
 /// Thread entry point.
 [[noreturn]] void __cheri_compartment("echo") entry_point()
 {
-	auto uart = MMIO_CAPABILITY(OpenTitanUart<>, uart);
+	auto uart = MMIO_CAPABILITY(OpenTitanUart, uart);
 
 	char ch = '\n';
 	while (true)
