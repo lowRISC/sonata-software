@@ -27,7 +27,57 @@
       sonataSystemPkgs = sonata-system.outputs.packages.${system};
       cheriotPkgs = lowrisc-nix.outputs.devShells.${system}.cheriot.nativeBuildInputs;
 
+      fs = pkgs.lib.fileset;
       getExe = pkgs.lib.getExe;
+
+      commonSoftwareBuildAttributes = {
+        buildInputs = cheriotPkgs ++ [lrPkgs.uf2conv];
+        installPhase = ''
+          mkdir -p $out/share/
+          cp build/cheriot/cheriot/release/* $out/share/
+        '';
+        dontFixup = true;
+      };
+
+      cheriot-rtos-tests = pkgs.stdenvNoCC.mkDerivation ({
+          name = "cheriot-rtos-tests";
+          src = fs.toSource {
+            root = ./.;
+            fileset = fs.unions [./cheriot-rtos ./scripts/elf2uf2.sh];
+          };
+          buildPhase = ''
+            xmake config -P cheriot-rtos/tests/ --board=sonata
+            xmake -P ./cheriot-rtos/tests/
+            ./scripts/elf2uf2.sh build/cheriot/cheriot/release/test-suite
+          '';
+        }
+        // commonSoftwareBuildAttributes);
+
+      sonata-tests = pkgs.stdenvNoCC.mkDerivation ({
+          name = "sonata-tests";
+          src = fs.toSource {
+            root = ./.;
+            fileset = fs.unions [./tests ./common.lua ./cheriot-rtos];
+          };
+          buildPhase = "xmake -P ./tests/";
+        }
+        // commonSoftwareBuildAttributes);
+
+      sonata-examples = pkgs.stdenvNoCC.mkDerivation ({
+          name = "sonata-examples";
+          src = fs.toSource {
+            root = ./.;
+            fileset = fs.unions [
+              ./common.lua
+              ./cheriot-rtos
+              ./libraries
+              ./third_party
+              ./examples
+            ];
+          };
+          buildPhase = "xmake -P ./examples/";
+        }
+        // commonSoftwareBuildAttributes);
 
       lint-python = pkgs.writeShellApplication {
         name = "lint-python";
@@ -97,6 +147,7 @@
           SONATA_SIM_BOOT_STUB = "${sonataSystemPkgs.sonata-sim-boot-stub.out}/share/sim_boot_stub";
         };
       };
+      packages = {inherit sonata-examples sonata-tests cheriot-rtos-tests;};
       apps = builtins.listToAttrs (map (program: {
         inherit (program) name;
         value = {

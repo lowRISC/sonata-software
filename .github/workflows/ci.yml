@@ -35,5 +35,11 @@ jobs:
       - name: Run Lints
         run: nix run .?submodules=1#lint-all
 
+      - name: Build Software
+        run: |
+          nix build -L .?submodules=1#sonata-examples
+          nix build -L .?submodules=1#sonata-tests
+          nix build -L .?submodules=1#cheriot-rtos-tests
+
       - name: Run Nix Checks
         run: nix flake check -L .?submodules=1
