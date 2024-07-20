@@ -79,6 +79,37 @@
         }
         // commonSoftwareBuildAttributes);
 
+      tests-runner =
+        pkgs.writers.writePython3Bin "tests-runner" {
+          libraries = [pkgs.python3Packages.pyserial];
+        }
+        ./scripts/test_runner.py;
+
+      tests-fpga-runner = pkgs.writers.writeBashBin "tests-fpga-runner" ''
+        set -e
+        if [ -z "$1" ]; then
+          echo "Please provide the tty device location (e.g. /dev/ttyUSB2)" \
+            "as the first argument."
+          exit 2
+        fi
+        ${getExe tests-runner} -t 30 fpga $1 --uf2-file ${sonata-tests}/share/sonata_test_suite.uf2
+        ${getExe tests-runner} -t 30 fpga $1 --uf2-file ${cheriot-rtos-tests}/share/test-suite.uf2
+      '';
+
+      tests-simulator = pkgs.stdenvNoCC.mkDerivation {
+        name = "tests-simulator";
+        src = ./.;
+        dontBuild = true;
+        doCheck = true;
+        buildInputs = [sonataSystemPkgs.sonata-simulator];
+        SONATA_SIM_BOOT_STUB = "${sonataSystemPkgs.sonata-sim-boot-stub.out}/share/sim_boot_stub";
+        checkPhase = ''
+          ${getExe tests-runner} -t 30 sim --elf-file ${sonata-tests}/share/sonata_test_suite
+          ${getExe tests-runner} -t 960 sim --elf-file ${cheriot-rtos-tests}/share/test-suite
+        '';
+        installPhase = "mkdir $out";
+      };
+
       lint-python = pkgs.writeShellApplication {
         name = "lint-python";
         runtimeInputs = with pkgs; [
@@ -148,13 +179,14 @@
         };
       };
       packages = {inherit sonata-examples sonata-tests cheriot-rtos-tests;};
+      checks = {inherit tests-simulator;};
       apps = builtins.listToAttrs (map (program: {
         inherit (program) name;
         value = {
           type = "app";
           program = getExe program;
         };
-      }) [lint-all lint-cpp lint-python]);
+      }) [lint-all lint-cpp lint-python tests-runner tests-fpga-runner]);
     };
   in
     flake-utils.lib.eachDefaultSystem system_outputs;
