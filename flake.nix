@@ -29,17 +29,41 @@
 
       getExe = pkgs.lib.getExe;
 
-      clang-lint = let
+      lint-python = pkgs.writeShellApplication {
+        name = "lint-python";
+        runtimeInputs = with pkgs; [
+          ruff
+          (python3.withPackages (pyPkg: with pyPkg; [mypy pyserial]))
+        ];
+        text = ''
+          set +u
+          case "$1" in
+            check)
+              ruff format --check .
+              ruff check .
+              mypy .
+              ;;
+            fix)
+              ruff format .
+              ruff check --fix .
+              ;;
+            *) echo "Available subcommands are 'check' and 'fix'.";;
+          esac
+        '';
+      };
+
+      lint-cpp = let
         srcGlob = "{examples/**/*.{h,hh,cc},{libraries,tests}/*.{cc,hh}}";
       in
         pkgs.writeShellApplication {
-          name = "clang-lint";
+          name = "lint-cpp";
           runtimeInputs = with lrPkgs; [llvm_cheriot];
           text = ''
             set +u
             case "$1" in
               check)
                 clang-format --dry-run --Werror ${srcGlob}
+                rm -f tidy_fixes
                 clang-tidy -export-fixes=tidy_fixes -quiet ${srcGlob}
                 [ ! -f tidy_fixes ] # fail if the fixes file exists
                 echo "No warnings outside of dependancies."
@@ -52,11 +76,12 @@
             esac
           '';
         };
-      run-lints = pkgs.writeShellApplication {
-        name = "run-lints";
+      lint-all = pkgs.writeShellApplication {
+        name = "lint-all";
         text = ''
           ${getExe pkgs.reuse} lint
-          ${getExe clang-lint} check
+          ${getExe lint-python} check
+          ${getExe lint-cpp} check
         '';
       };
     in {
@@ -64,38 +89,21 @@
       devShells = rec {
         default = pkgs.mkShell {
           name = "sonata-sw";
-          packages = cheriotPkgs ++ [lrPkgs.uf2conv];
+          packages = cheriotPkgs ++ [lrPkgs.uf2conv pkgs.python3Packages.pyserial];
         };
         env-with-sim = pkgs.mkShell {
           name = "sonata-sw-with-sim";
-          packages =
-            [sonataSystemPkgs.sonata-simulator]
-            ++ default.nativeBuildInputs;
-          shellHook = ''
-            export SONATA_SIM_BOOT_STUB=${sonataSystemPkgs.sonata-sim-boot-stub.out}/share/sim_boot_stub
-          '';
+          packages = [sonataSystemPkgs.sonata-simulator] ++ default.nativeBuildInputs;
+          SONATA_SIM_BOOT_STUB = "${sonataSystemPkgs.sonata-sim-boot-stub.out}/share/sim_boot_stub";
         };
       };
-      apps = {
-        run-lints = {
+      apps = builtins.listToAttrs (map (program: {
+        inherit (program) name;
+        value = {
           type = "app";
-          program = getExe run-lints;
+          program = getExe program;
         };
-        clang-lint = {
-          type = "app";
-          program = getExe clang-lint;
-        };
-      };
-      checks = {
-        clang-checks = pkgs.stdenvNoCC.mkDerivation {
-          name = "clang-checks";
-          src = ./.;
-          dontBuild = true;
-          doCheck = true;
-          checkPhase = "${getExe clang-lint} check";
-          installPhase = "mkdir $out";
-        };
-      };
+      }) [lint-all lint-cpp lint-python]);
     };
   in
     flake-utils.lib.eachDefaultSystem system_outputs;
