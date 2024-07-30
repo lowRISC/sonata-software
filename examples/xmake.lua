@@ -11,7 +11,7 @@ includes("../libraries")
 includes("../common.lua")
 
 option("board")
-    set_default("sonata")
+    set_default("sonata-prerelease")
 
 includes("all")
 
