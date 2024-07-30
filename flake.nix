@@ -46,7 +46,7 @@
             fileset = fs.unions [./cheriot-rtos ./scripts/elf2uf2.sh];
           };
           buildPhase = ''
-            xmake config -P cheriot-rtos/tests/ --board=sonata
+            xmake config -P cheriot-rtos/tests/ --board=sonata-prerelease
             xmake -P ./cheriot-rtos/tests/
             ./scripts/elf2uf2.sh build/cheriot/cheriot/release/test-suite
           '';
