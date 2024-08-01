@@ -92,17 +92,17 @@ static uint8_t read_proximity_sensor(Mmio<OpenTitanI2c> i2c)
 		i2c->speed_set(1);
 	};
 
-	auto i2c0 = MMIO_CAPABILITY(OpenTitanI2c, i2c0);
-	i2cSetup(i2c0);
+	auto i2c1 = MMIO_CAPABILITY(OpenTitanI2c, i2c1);
+	i2cSetup(i2c1);
 	uint8_t addr;
 
 	auto rgbled = MMIO_CAPABILITY(SonataRgbLedController, rgbled);
 
-	setup_proximity_sensor(i2c0, ApdS9960I2cAddress);
+	setup_proximity_sensor(i2c1, ApdS9960I2cAddress);
 
 	while (true)
 	{
-		uint8_t prox = read_proximity_sensor(i2c0);
+		uint8_t prox = read_proximity_sensor(i2c1);
 		Debug::log("Proximity is {}\r", prox);
 		rgbled->rgb(SonataRgbLed::Led0, ((prox) >> 3), 0, 0);
 		rgbled->rgb(SonataRgbLed::Led1, 0, (255 - prox) >> 3, 0);
