@@ -14,9 +14,9 @@ void __cheri_compartment("lcd_test") lcd_test()
 
 	auto lcd      = SonataLcd();
 	auto screen   = Rect::from_point_and_size(Point::ORIGIN, lcd.resolution());
-	auto logoRect = screen.centered_subrect({105, 80});
-	lcd.draw_image_rgb565(logoRect, lowriscLogo105x80);
-	lcd.draw_str({1, 1}, "Hello world!", Color::White, Color::Black);
+	auto logoRect = screen.centered_subrect({80, 105});
+	lcd.draw_image_rgb565(logoRect, lowriscLogo80x105);
+	//lcd.draw_str({1, 1}, "Hello world!", Color::White, Color::Black);
 
 	while (true)
 	{
