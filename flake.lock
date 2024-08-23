@@ -167,11 +167,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1721393014,
-        "narHash": "sha256-nd1iBVFEUcxWpIKvcIc/jAOIdUSz0zmudLGLOHkIHqA=",
+        "lastModified": 1724334807,
+        "narHash": "sha256-CTUS6pfs+9mesY1klrcwi6HEKTtj605BlAT9GpmIhII=",
         "owner": "lowRISC",
         "repo": "sonata-system",
-        "rev": "29bf454c7dcac6e48848485e89fa3b6364c9c33b",
+        "rev": "b016868dce1c68b6a6f3f801f6fa4e1a32cd573c",
         "type": "github"
       },
       "original": {

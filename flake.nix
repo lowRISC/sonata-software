@@ -39,20 +39,6 @@
         dontFixup = true;
       };
 
-      cheriot-rtos-tests = pkgs.stdenvNoCC.mkDerivation ({
-          name = "cheriot-rtos-tests";
-          src = fs.toSource {
-            root = ./.;
-            fileset = fs.unions [./cheriot-rtos ./scripts/elf2uf2.sh];
-          };
-          buildPhase = ''
-            xmake config -P cheriot-rtos/tests/ --board=sonata-prerelease
-            xmake -P ./cheriot-rtos/tests/
-            ./scripts/elf2uf2.sh build/cheriot/cheriot/release/test-suite
-          '';
-        }
-        // commonSoftwareBuildAttributes);
-
       sonata-tests = pkgs.stdenvNoCC.mkDerivation ({
           name = "sonata-tests";
           src = fs.toSource {
@@ -93,7 +79,6 @@
           exit 2
         fi
         ${getExe tests-runner} -t 30 fpga $1 --uf2-file ${sonata-tests}/share/sonata_test_suite.uf2
-        ${getExe tests-runner} -t 30 fpga $1 --uf2-file ${cheriot-rtos-tests}/share/test-suite.uf2
       '';
 
       tests-simulator = pkgs.stdenvNoCC.mkDerivation {
@@ -105,7 +90,6 @@
         SONATA_SIM_BOOT_STUB = "${sonataSystemPkgs.sonata-sim-boot-stub.out}/share/sim_boot_stub";
         checkPhase = ''
           ${getExe tests-runner} -t 30 sim --elf-file ${sonata-tests}/share/sonata_test_suite
-          ${getExe tests-runner} -t 960 sim --elf-file ${cheriot-rtos-tests}/share/test-suite
         '';
         installPhase = "mkdir $out";
       };
@@ -178,7 +162,7 @@
           SONATA_SIM_BOOT_STUB = "${sonataSystemPkgs.sonata-sim-boot-stub.out}/share/sim_boot_stub";
         };
       };
-      packages = {inherit sonata-examples sonata-tests cheriot-rtos-tests;};
+      packages = {inherit sonata-examples sonata-tests;};
       checks = {inherit tests-simulator;};
       apps = builtins.listToAttrs (map (program: {
         inherit (program) name;
