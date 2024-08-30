@@ -8,11 +8,12 @@
 
 using Debug = ConditionalDebug<true, "Led Walk Dynamic">;
 
-/// Thread entry point.
+static constexpr uint32_t NumLeds = 8;
+
 void __cheri_compartment("led_walk_dynamic") start_walking()
 {
 	std::vector<LedHandle *> leds;
-	for (uint8_t num = 0; num < 8; ++num)
+	for (uint8_t num = 0; num < NumLeds; ++num)
 	{
 		auto led = aquire_led(num);
 		Debug::Assert(led.has_value(), "LED {} couldn't be aquired", num);
