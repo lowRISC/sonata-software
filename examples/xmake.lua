@@ -122,24 +122,6 @@ firmware("sonata_proximity_demo")
     end)
     after_link(convert_to_uf2)
 
--- A firmware image that only walks LEDs
-firmware("sonata_led_demo")
-    add_deps("freestanding", "debug")
-    add_deps("led_walk", "gpiolib")
-    on_load(function(target)
-        target:values_set("board", "$(board)")
-        target:values_set("threads", {
-            {
-                compartment = "led_walk",
-                priority = 1,
-                entry_point = "start_walking",
-                stack_size = 0x400,
-                trusted_stack_frames = 3
-            }
-        }, {expand = false})
-    end)
-    after_link(convert_to_uf2)
-
 firmware("proximity_test")
     add_deps("freestanding", "proximity_sensor_example")
     on_load(function(target)

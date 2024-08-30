@@ -118,13 +118,14 @@
       };
 
       lint-cpp = let
-        srcGlob = "{examples/**/*.{h,hh,cc},{libraries,tests}/*.{cc,hh}}";
+        srcGlob = "{examples/**/*.{h,cc},exercises/**/*.{hh,cc},{libraries,tests}/*.{cc,hh}}";
       in
         pkgs.writeShellApplication {
           name = "lint-cpp";
           runtimeInputs = with lrPkgs; [llvm_cheriot];
           text = ''
             set +u
+            shopt -s globstar
             case "$1" in
               check)
                 clang-format --dry-run --Werror ${srcGlob}
