@@ -1,7 +1,7 @@
 // Copyright lowRISC Contributors.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "gpiolib.hh"
+#include "gpio_access.hh"
 #include <platform-gpio.hh>
 #include <timeout.hh>
 #include <token.h>

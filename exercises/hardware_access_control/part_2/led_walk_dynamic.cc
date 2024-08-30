@@ -1,15 +1,15 @@
 // Copyright lowRISC Contributors.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "gpiolib.hh"
+#include "gpio_access.hh"
 #include <debug.hh>
 #include <thread.h>
 #include <vector>
 
-using Debug = ConditionalDebug<true, "Led Walk">;
+using Debug = ConditionalDebug<true, "Led Walk Dynamic">;
 
 /// Thread entry point.
-void __cheri_compartment("led_walk") start_walking()
+void __cheri_compartment("led_walk_dynamic") start_walking()
 {
 	std::vector<LedHandle *> leds;
 	for (uint8_t num = 0; num < 8; ++num)
