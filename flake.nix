@@ -142,10 +142,12 @@
             esac
           '';
         };
+
       lint-all = pkgs.writeShellApplication {
         name = "lint-all";
         text = ''
           ${getExe pkgs.reuse} lint
+          ${getExe pkgs.lychee} --offline --no-progress .
           ${getExe lint-python} check
           ${getExe lint-cpp} check
         '';

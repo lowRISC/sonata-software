@@ -1,0 +1,9 @@
+# Copyright lowRISC Contributors.
+# SPDX-License-Identifier: Apache-2.0
+
+include_fragments = true
+exclude_path = [
+  "./cheriot-rtos",
+  "./vendor",
+  "./build",
+]
