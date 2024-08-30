@@ -2,11 +2,11 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 
 Files: *.lock
        README.md
-       **/README.md
-       hackathon.md
        .devcontainer/*.*
        scripts/rp2040_uf2/pgrm.bin
-       doc/*
+       doc/*.md
+       tests/*.md
+       scripts/**/*.md
 Copyright: lowRISC contributors
 License: Apache-2.0
 

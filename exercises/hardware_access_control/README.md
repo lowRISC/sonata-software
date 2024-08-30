@@ -1,4 +1,8 @@
-# Hackathon Structured Lab Part 1
+<!--
+Copyright lowRISC Contributors.
+SPDX-License-Identifier: Apache-2.0
+-->
+# Hardware Access Control Exercise
 
 ## Orientation
 
@@ -118,8 +122,10 @@ To see this in action, load the `sonata_led_demo` onto your board.
 
 ## Where to go from here...
 
+[`led_walk_dynamic`]: exercises/hardware_access_control/led_walk_dynamic.cc
+
 Have a play with the `sonata_led_demo`.
-For example, remove the following line in the [`led_walk`](compartments/led_walk.cc) and you will see LED 3 no longer lights up.
+For example, remove the following line in the [`led_walk_dynamic`][] and you will see LED 3 no longer lights up.
 
 ```cpp
 	leds[3] = aquire_led(3).value();
