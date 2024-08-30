@@ -4,150 +4,157 @@ SPDX-License-Identifier: Apache-2.0
 -->
 # Hardware Access Control Exercise
 
-## Orientation
+If you haven't already, pop yourself up to the '[building the exercises][]' section to see how the exercises are built.
 
-You are in the [`sonata-software`][] repository.
-This repository wraps the [`lowrisc/cheriot-rtos`][], adding some Sonata specific demonstration code on top of the CHERIoT stack.
-The [`lowrisc/cheriot-rtos`][], included in this repository as a submodule, is a fork of the upstream [`microsoft/cheriot-rtos`][].
-[`microsoft/cheriot-rtos`][] contains the CHERIoT software stack; it is well documented by the [CHERIoT Programmer's Guide][].
-*The [`lowrisc/cheriot-rtos`][] fork only exists to hold fresh patches that aren't quite ready to be upstreamed to [`microsoft/cheriot-rtos`][] but will be.*
+[Building the Exercises]: ../README.md#building-the-exercises
 
-Other repositories of note:
-- [`sonata-system`][]: holds the Sonata system RTL and bootloader which come together to generate the bitstream.
-- [`sonata-rp2040`][]: The firmware that is running on the Sonata's RP2040 microcontroller.
-- [`CHERIoT-Platform/llvm-project`][]: The CHERIoT toolchain.
-- [`cheriot-audit`][]: A tool to explore and verify the relationships between CHERIoT RTOS components.
+This exercise we utilise the compartmentalisation available in CHERIoT RTOS to control access to a hardware peripheral: the very security critical LEDs.
 
-For hardware documentation, see the [Sonata system book][].
+For this exercise, when the [`xmake.lua`][] build file is mentioned `exercises/hardware_access_control/xmake.lua` is being referred to.
 
-[`sonata-software`]: https://github.com/lowRISC/sonata-software
-[`lowrisc/cheriot-rtos`]: https://github.com/lowRISC/cheriot-rtos
-[`microsoft/cheriot-rtos`]: https://github.com/microsoft/cheriot-rtos
-[`sonata-system`]: https://github.com/lowRISC/sonata-system
-[`sonata-rp2040`]: https://github.com/newaetech/sonata-rp2040
-[`CHERIoT-Platform/llvm-project`]: https://github.com/CHERIoT-Platform/llvm-project
-[`cheriot-audit`]: https://github.com/CHERIoT-Platform/cheriot-audit
-[CHERIoT Programmer's Guide]: https://cheriot.org/book/
-[Sonata system book]: https://lowrisc.org/sonata-system/
+[`xmake.lua`]: ../../exercises/hardware_access_control/xmake.lua
 
+## Part 1
 
-## The First Build and Load
+Let's start with the firmware image called `hardware_access_part_1` in the [`xmake.lua`][] file.
+This image has two threads running two compartments: `blinky_raw` and `led_walk_raw`.
+`blinky_raw` simply toggles an LED and `led_walk_raw` walks through all the LEDs toggling them as it goes.
+The sources of these compartments can be found in [`exercises/hardware_access_control/part_1/`][].
 
-I'm going to assume you've run through the whole of the [`README.md`](README.md).
-In which case, you will have ran `xmake` and built the firmware images specified in [`xmake.lua`][], specifically by the *firmware* rules.
-Each of the firmware targets depends on *compartments*, declared with `add_deps`, and has a number of *threads*.
-For more information about these rules, see [`cheriot-rtos/README.md`](cheriot-rtos/README.md#building-firmware-images).
+[`exercises/hardware_access_control/part_1/`]: ../../exercises/hardware_access_control/part_1/
 
-[`xmake.lua`]: ./xmake.lua
+Let's look inside `blinky_raw`.
+It uses the RTOS' `MMIO_CAPABILITY` macro to get the capability that grants it access to the GPIO MMIO region.
+This magic macro will handle adding the MMIO region to the compartment's imports and mapping it to a type, in this case `SonataGPIO` (from [`platform-gpio.hh`][]).
+*For more information on this macro, see [the drivers section of CHERIoT programmers guide][].*
 
-The only thing this repository adds is a little post-link function, `convert_to_uf2`, that converts the ELF of the firmware image into a UF2 file which can be easily loaded onto the Sonata board.
-To do this, just copy the built UF2 to the `SONATA` drive which should have mounted when you plugged the board in.
-After doing this, you should see some flashing LEDs!
+[the drivers section of CHERIoT programmers guide]: https://cheriot.org/book/top-drivers-top.html#mmio_capabilities
+[`platform-gpio.hh`]: ../../cheriot-rtos/sdk/include/platform/sunburst/platform-gpio.hh
 
-```sh
-xmake
-cp build/cheriot/cheriot/release/sonata_simple_demo.uf2 /run/media/hugom/SONATA/
-sync
+This is great!
+If you build and [load][running on fpga] the `hardware_access_part_1` firmware on the FPGA, you have flashing LEDs!
+What more could one want?
+
+[running on fpga]: ../../doc/guide/running-software.md#running-on-the-sonata-fpga
+
+Well maybe some level of access control.
+Currently both `blinky_raw` and `led_walk_raw` have access to all of the GPIO ports, and neither can trust the other compartment isn't toggling the LED when they are not looking.
+The keen eyed among you will have noticed that this is already happening with both toggling user LED 7.
+
+## Part 2
+
+Let's introduce some access control for the LEDs.
+To do this, we can create a new compartment `gpio_access` with sole access to the GPIO MMIO region.
+This compartment will arbitrate access to the LED outputs by making use of CHERIoT's sealing mechanism.
+When a compartment seals a capability, it can no longer be dereferenced or modified until it is unsealed by a compartment with the capability to do so.
+`gpio_access` uses these sealing capabilities as LED *handles* that it can give to other compartments.
+These other compartments can't use the handles directly, but can only pass them to `gpio_access` which can unseal them and use them.
+In this case, they only point to a `LedHandle` structure that only holds the index of a LED.
+They are purely used as a proof of LED ownership.
+*For more information on sealing, see the [`cheriot-rtos/examples/05.sealing/`][].*
+
+[`cheriot-rtos/examples/05.sealing/`]: ../../cheriot-rtos/examples/05.sealing/
+
+`blinky_raw` and `led_walk_raw` have been adapted to use this new compartment and renamed `blinky_dynamic` and `led_walk_dynamic`.
+You'll notice these compartments use `add_deps` in the [`xmake.lua`][] file to declare that they depend on `gpio_access`.
+Take a moment to look at the sources for these compartments in [`exercises/hardware_access_control/part_2/`][].
+
+[`exercises/hardware_access_control/part_2/`]: ../../exercises/hardware_access_control/part_2/
+
+If you now run the `hardware_access_part_2` firmware on the FPGA, you'll notice only `blinky_dynamic` is toggling it's LED.
+Looking at the [UART console from the FPGA][running on fpga], the following message will pop up.
+
+```
+hardware_access_control/part_2/led_walk_dynamic.cc:19 Assertion failure in start_walking
+LED 0x7 couldn't be aquired
 ```
 
-*If this load doesn't work, have a look at the [Fallback Firmware Load](#fallback-firmware-load).*
+`led_walk_dynamic` was run after `blinky_dynamic` because it's thread was given a lower priority in the [`xmake.lua`][].
+So when it asked for access to user LED 7, it was denied by `gpio_access` because this LED had already been given to `blinky_dynamic`.
 
-To see the UART console logs, attach to `/dev/ttyUSB2` at a Baud of 115200 with your favourite terminal.
+Now change `NumLeds` in [`led_walk_dynamic.cc`][] from 8 to 7, then rebuild.
+Both compartments should run happily again.
+Not only will both compartments run happily, but `led_walk_dynamic` will output the following over the console.
 
-```sh
-picocom /dev/ttyUSB2 -b 115200 --imap lfcrlf
+[`led_walk_dynamic.cc`]: ../../exercises/hardware_access_control/part_2/led_walk_dynamic.cc
+
+```
+Led Walk Dynamic:           LED 3 Handle: 0x1087d0 (v:1 0x1087d0-0x1087e0 l:0x10 o:0xc p: G RWcgm- -- ---)
+Led Walk Dynamic: Destroyed LED 3 Handle: 0x1087d0 (v:1 0x1087d0-0x1087e0 l:0x10 o:0xc p: G RWcgm- -- ---)
+Led Walk Dynamic:       New LED 3 Handle: 0x108878 (v:1 0x108878-0x108888 l:0x10 o:0xc p: G RWcgm- -- ---)
 ```
 
-You should see:
-
-```
-bootloader: Loading software from flash...
-bootloader: Booting into program, hopefully.
-Led Walk Raw: Look pretty LEDs!
-```
-
-If you'd like get debug messages from the RTOS Core compartments, you can enable them with the following configuration flags.
-
-```sh
-xmake config --board=sonata --debug-scheduler=y \
-    --debug-locks=y --debug-cxxrt=y \
-    --debug-token_library=y --debug-allocator=y
-xmake build
-```
-
-You may need to run `rm -rf build/ .xmake/` to remove the debug messages from the configuration.
-
-
-
-## Learning about the CHERIoT RTOS
-
-The [CHERIoT Programmer's Guide] contains most of what a programmer would need to know to use the RTOS.
-It's rendered from [`cheriot-rtos/docs/`](cheriot-rtos/docs).
-
-The different boards supported can be found in [`cheriot-rtos/sdk/boards/`](cheriot-rtos/sdk/boards), of particular interest will be the Sonata's description in `sonata.json`.
-More on board descriptions can be found in [`cheriot-rtos/docs/BoardDescriptions.md`](cheriot-rtos/docs/BoardDescriptions.md).
-The structures the map onto the peripherals' memory and add functionality can be found in [`cheriot-rtos/sdk/include/platform/`](cheriot-rtos/sdk/include/platform/); the Sonata/Sunburst specific peripherals can be found in `sunburst/`.
-
-The examples in [`cheriot-rtos/examples`](cheriot-rtos/examples) provide a nice tour of the different ways compartments can interact.
-The following is shows how one can build an example to a UF2 file that can be loaded onto the board.
-
-```sh
-pushd cheriot-rtos/examples/05.sealing/
-xmake -P .
-llvm-objcopy -Obinary build/cheriot/cheriot/release/sealing /tmp/sealing.bin
-uf2conv /tmp/sealing.bin -b0x00101000 -co /tmp/sealing.uf2
-popd
-```
-
-To explore the various utility libraries available, look through [`cheriot-rtos/sdk/include/`](cheriot-rtos/sdk/include/).
-When starting first starting to explore capabilities, the [`CHERI::Capability`](cheriot-rtos/sdk/include/cheri.hh) class is useful for pointer introspection.
-
-## An Exercise Compartmentalisation
-
-The `sonata_simple_demo` target in [`xmake.lua`][] has three threads,
-from three different compartments: `led_walk_raw`, `echo`, and `lcd_test`.
-The sources of these can be found in `compartments/`.
-
-The `led_walk_raw` uses `MMIO_CAPABILITY` to get direct access the `gpio`'s MMIO region, but the `led_walk_raw` compartment now has access to all of the GPIO ports.
-We may want to limit access to a select number of devices.
-
-To do this, we can create a 'library' compartment with access to the MMIO region and which controls access to the ports. The `gpiolib` compartment is one I made earlier.
-It can be found at `compartments/gpiolib.cc`, with the functions available to other compartments declared in `compartments/gpiolib.hh`.
-
-`gpiolib` uses they sealing feature, outlined in the `cheriot-rtos/examples/05.sealing/` example we built earlier, to enable `gpiolib` to hand out opaque access to LEDs.
-These can be used by library users to prove ownership of an LED.
-The `led_walk` compartment is does the same thing as `led_walk`, but accesses the LEDs through `gpiolib`.
-To see this in action, load the `sonata_led_demo` onto your board.
-
-
-## Where to go from here...
-
-[`led_walk_dynamic`]: exercises/hardware_access_control/led_walk_dynamic.cc
-
-Have a play with the `sonata_led_demo`.
-For example, remove the following line in the [`led_walk_dynamic`][] and you will see LED 3 no longer lights up.
+These come from some superfluous lines in [`led_walk_dynamic.cc`][], that releases ownership of user LED 3 only to later reacquire ownership.
+You can comment out the line that reacquires the LED:
 
 ```cpp
 	leds[3] = aquire_led(3).value();
 ```
 
-There are input devices available through `SonataGPIO`. You could have a go at adding these to `gpiolib`.
+When run `led_walk_dynamic` will now fail to toggle user LED 3 because it has relinquished ownership of the LED.
 
-The interactions with `ledTaken` in [`gpiolib`](compartments/gpiolib.cc) aren't thread safe.
-You could take a look at `cheriot-rtos/examples/06.producer-consumer/` to learn how to use a futex to make it thread safe.
-
-
-## Appendix
-### Fallback Firmware Load
-
-We have been experiencing some reliability issues with copying firmware UF2 files to the SONATA virtual USB drive. You may find repeating the copy is sufficient to get things working but if you are having trouble we have a temporary backup load feature in the RP2040 firmware that uses the RP2040 USB boot/flash loader (for this to work you must have the `tmp_rpi_rp2_part1_v0.2.uf2` RP2040 firmware from the v0.2 Sonata release: https://github.com/lowRISC/sonata-system/releases/tag/v0.2)
-You will need to create a new UF2 from your firmware UF2 with the script in [`scripts/rp2040_uf2/`](scripts/rp2040_uf2/)
-
-```sh
-# Script must be executed from the directory it lives in
-cd scripts/rp2040_uf2
-# Creates a file build/cheriot/cheriot/release/sonata_simple_demo_rp2040.uf2
-./make_rp2040_uf2.sh ../../build/cheriot/cheriot/release/sonata_simple_demo.uf2
+```
+hardware_access_control/part_2/led_walk_dynamic.cc:34 Assertion failure in start_walking
+Failed to toggle an LED
 ```
 
-To use the new UF2 restart your board in RP2040 USB mode (hold the 'RP2040 boot' button whilst power cycling the board). Copy the new UF2 (build/cheriot/cheriot/release/sonata_simple_demo_rp2040.uf2 in the example above) to the RP2040 drive and this will load the Sonata firmware.
+
+## Part 3
+
+This is great and all, but how do we stop a compartment bypassing `gpio_access` and using `MMIO_CAPABILITY` directly?
+In other words, how do we ensure that only `gpio_access` has access to the GPIOs?
+
+Luckily the linker has all the information needed to check which compartments can access the GPIO MMIOs.
+It outputs this information in a JSON report with the rest of the build artefacts.
+To automate checking this report, we can use `cheriot-audit` which should already be in your path.
+
+`cheriot-audit` allows you to query the JSON report and assert certain rules are followed.
+You do this with a language called [Rego][], but don't worry you won't have to learn it for this exercise.
+There are some pre-written rules in the [`gpio_access.rego`] module.
+Let's first look at `only_gpio_access_has_access`.
+It uses `mmio_allow_list` from `cheriot-audit`'s included compartment package to check only the `gpio_access` compartment has access to the GPIO MMIOs.
+If we run this on the part 2 firmware image's JSON report, it will return true.
+However, when run against the part 1 firmware image's report it will return false, because the `blinky_raw` and `led_walk_raw` are not in the allow list.
+
+[Rego]: https://www.openpolicyagent.org/docs/latest/policy-language/
+[`gpio_access.rego`]: ../../exercises/hardware_access_control/part_3/gpio_access.rego
+
+```sh
+# A convenience function
+check_gpio_access() {
+    cheriot-audit \
+        --board cheriot-rtos/sdk/boards/sonata-prerelease.json \
+        --module exercises/hardware_access_control/part_3/gpio_access.rego \
+        --query "data.gpio_access.$1" \
+        --firmware-report "$2"
+}
+# This should return true
+check_gpio_access only_gpio_access_has_access \
+    build/cheriot/cheriot/release/hardware_access_part_2.json
+# This should return false
+check_gpio_access only_gpio_access_has_access \
+    build/cheriot/cheriot/release/hardware_access_part_1.json
+```
+
+There's a second rule, `whitelisted_compartments_only`, which adds an addition condition that only `led_walk_dynamic` and `blinky_dynamic` can use `gpio_access`.
+We can use this to restrict which compartments have access to the GPIO via `gpio_access`.
+
+```sh
+check_gpio_access whitelisted_compartments_only \
+    build/cheriot/cheriot/release/hardware_access_part_2.json
+```
+
+The above should return true as both compartments are in the allow list.
+Try removing one of the compartments from the allow list given to `compartment_allow_list` in [`gpio_access.rego`][] and check the result of the above command is no longer true.
+
+One can browse the other functions available as part of the `cheriot-audit`'s included compartment package in [`cheriot-audit`'s readme][compartment package].
+
+[compartment package]: https://github.com/CHERIoT-Platform/cheriot-audit/blob/main/README.md#the-compartment-package
+
+## Part ∞
+
+Where to go from here...
+- There are input devices available through `SonataGPIO`.
+    You could have a go at adding these to the `gpio_access` compartment.
+- The interactions with `ledTaken` global in the `gpio_access` compartment aren't thread safe.
+    You could take a look at `cheriot-rtos/examples/06.producer-consumer/` to learn how to use a futex to make it thread safe.

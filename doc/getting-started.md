@@ -91,7 +91,7 @@ do you want to permanently mark this value as trusted (y/N)? y
 warning: ignoring untrusted substituter 'https://nix-cache.lowrisc.org/public/', you are not a trusted user.
 ```
 
-If you see the warning that substituter is ignored, cancel the process with Ctrl+C and check to see that [trusted-users is setup properly](#Setup-Cache). Nix can and will build everything from source if it can't find a cached version, so letting it continue will cause LLVM-Cheriot to be built from scratch on your machine.
+If you see the warning that substituter is ignored, cancel the process with Ctrl+C and check to see that [trusted-users is setup properly](#setup-cache). Nix can and will build everything from source if it can't find a cached version, so letting it continue will cause LLVM-Cheriot to be built from scratch on your machine.
 
 
 ## Your first build
