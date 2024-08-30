@@ -6,6 +6,7 @@ Files: *.lock
        hackathon.md
        .devcontainer/*.*
        scripts/rp2040_uf2/pgrm.bin
+       doc/*
 Copyright: lowRISC contributors
 License: Apache-2.0
 
