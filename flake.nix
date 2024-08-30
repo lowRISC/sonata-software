@@ -22,13 +22,15 @@
     sonata-system,
   }: let
     system_outputs = system: let
+      version = "0.0.1";
+
       pkgs = import nixpkgs {inherit system;};
       lrPkgs = lowrisc-nix.outputs.packages.${system};
+      lrDoc = lowrisc-nix.lib.doc {inherit pkgs;};
       sonataSystemPkgs = sonata-system.outputs.packages.${system};
       cheriotPkgs = lowrisc-nix.outputs.devShells.${system}.cheriot.nativeBuildInputs;
 
-      fs = pkgs.lib.fileset;
-      getExe = pkgs.lib.getExe;
+      inherit (pkgs.lib) fileset getExe;
 
       commonSoftwareBuildAttributes = {
         buildInputs = cheriotPkgs ++ [lrPkgs.uf2conv];
@@ -39,11 +41,20 @@
         dontFixup = true;
       };
 
+      sonata-software-documentation = lrDoc.buildMdbookSite {
+        inherit version;
+        pname = "sonata-software-documentation";
+        src = fileset.toSource {
+          root = ./.;
+          fileset = lrDoc.standardMdbookFileset ./.;
+        };
+      };
+
       sonata-tests = pkgs.stdenvNoCC.mkDerivation ({
           name = "sonata-tests";
-          src = fs.toSource {
+          src = fileset.toSource {
             root = ./.;
-            fileset = fs.unions [./tests ./common.lua ./cheriot-rtos];
+            fileset = fileset.unions [./tests ./common.lua ./cheriot-rtos];
           };
           buildPhase = "xmake -P ./tests/";
         }
@@ -51,9 +62,9 @@
 
       sonata-examples = pkgs.stdenvNoCC.mkDerivation ({
           name = "sonata-examples";
-          src = fs.toSource {
+          src = fileset.toSource {
             root = ./.;
-            fileset = fs.unions [
+            fileset = fileset.unions [
               ./common.lua
               ./cheriot-rtos
               ./libraries
@@ -165,7 +176,7 @@
           SONATA_SIM_BOOT_STUB = "${sonataSystemPkgs.sonata-sim-boot-stub.out}/share/sim_boot_stub";
         };
       };
-      packages = {inherit sonata-examples sonata-tests;};
+      packages = {inherit sonata-examples sonata-tests sonata-software-documentation;};
       checks = {inherit tests-simulator;};
       apps = builtins.listToAttrs (map (program: {
         inherit (program) name;

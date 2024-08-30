@@ -1,0 +1,12 @@
+# Copyright lowRISC Contributors.
+# SPDX-License-Identifier: Apache-2.0
+
+[book]
+language = "en"
+multilingual = false
+src = "."
+title = "Sonata Software"
+
+[output.html]
+git-repository-url = "https://github.com/lowRISC/sonata-software"
+edit-url-template = "https://github.com/lowRISC/sonata-software/edit/main/{path}"
