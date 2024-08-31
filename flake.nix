@@ -122,19 +122,9 @@
           (python3.withPackages (pyPkg: with pyPkg; [mypy pyserial]))
         ];
         text = ''
-          set +u
-          case "$1" in
-            check)
-              ruff format --check .
-              ruff check .
-              mypy .
-              ;;
-            fix)
-              ruff format .
-              ruff check --fix .
-              ;;
-            *) echo "Available subcommands are 'check' and 'fix'.";;
-          esac
+          ruff format --check .
+          ruff check .
+          mypy .
         '';
       };
 
@@ -145,22 +135,10 @@
           name = "lint-cpp";
           runtimeInputs = with lrPkgs; [llvm_cheriot];
           text = ''
-            set +u
             shopt -s globstar
-            case "$1" in
-              check)
-                clang-format --dry-run --Werror ${srcGlob}
-                rm -f tidy_fixes
-                clang-tidy -export-fixes=tidy_fixes -quiet ${srcGlob}
-                [ ! -f tidy_fixes ] # fail if the fixes file exists
-                echo "No warnings outside of dependancies."
-                ;;
-              fix)
-                clang-format -i ${srcGlob}
-                clang-tidy -fix ${srcGlob}
-                ;;
-              *) echo "Available subcommands are 'check' and 'fix'.";;
-            esac
+            clang-format --dry-run --Werror ${srcGlob}
+            clang-tidy ${srcGlob}
+            echo "No warnings outside of dependancies."
           '';
         };
 
@@ -169,8 +147,8 @@
         text = ''
           ${getExe pkgs.reuse} lint
           ${getExe pkgs.lychee} --offline --no-progress .
-          ${getExe lint-python} check
-          ${getExe lint-cpp} check
+          ${getExe lint-python}
+          ${getExe lint-cpp}
         '';
       };
     in {
