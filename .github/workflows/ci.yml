@@ -37,6 +37,7 @@ jobs:
 
       - name: Build Software
         run: |
+          nix build -L .?submodules=1#sonata-exercises
           nix build -L .?submodules=1#sonata-examples
           nix build -L .?submodules=1#sonata-tests
 
