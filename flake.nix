@@ -76,6 +76,16 @@
         }
         // commonSoftwareBuildAttributes);
 
+      sonata-exercises = pkgs.stdenvNoCC.mkDerivation ({
+          name = "sonata-exercises";
+          src = fileset.toSource {
+            root = ./.;
+            fileset = fileset.unions [./exercises ./common.lua ./cheriot-rtos];
+          };
+          buildPhase = "xmake -P ./exercises/";
+        }
+        // commonSoftwareBuildAttributes);
+
       tests-runner =
         pkgs.writers.writePython3Bin "tests-runner" {
           libraries = [pkgs.python3Packages.pyserial];
@@ -176,7 +186,7 @@
           SONATA_SIM_BOOT_STUB = "${sonataSystemPkgs.sonata-sim-boot-stub.out}/share/sim_boot_stub";
         };
       };
-      packages = {inherit sonata-examples sonata-tests sonata-software-documentation;};
+      packages = {inherit sonata-exercises sonata-examples sonata-tests sonata-software-documentation;};
       checks = {inherit tests-simulator;};
       apps = builtins.listToAttrs (map (program: {
         inherit (program) name;
