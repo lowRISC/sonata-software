@@ -2,17 +2,17 @@
 
 In advance of the CHES Affiliated Sunburst Workshop, it's essential you prepare your environment so any issues can be sorted in advance of the day. If you have any issues in following this guide please contact the Sunburst Team on [ches-2024@lowrisc.org](mailto:ches-2024@lowrisc.org).
 
-The Sonata software build environment can be setup under Windows, OSX and Linux.
+The Sonata software build environment can be setup under Windows, macOS and Linux.
 
 We use a tool called [Nix](https://nixos.org/) to manage the build environment on all platforms. You will install it but don't need to know anything about it to follow these instructions.
 
-Only Windows requires specific instructions, Nix handles everything you need on Linux and OSX. So if you're not using Windows jump straight to 'Installing Nix'.
+Only Windows requires specific instructions, Nix handles everything you need on Linux and macOS. So if you're not using Windows jump straight to [Installing Nix](#installing-nix).
 
 ## Windows Specific Setup
 
 To obtain a Linux environment on Windows, you can choose to start a virtual machine or use Windows Subsystem for Linux (WSL).
 
-Microsoft provides a detailed guide on how to install WSL: https://learn.microsoft.com/en-us/windows/wsl/install. For latest systems this would just be a single command:
+Microsoft provides [a detailed guide on how to install WSL](https://learn.microsoft.com/en-us/windows/wsl/install). For latest systems this would just be a single command:
 ```bat
 wsl --install
 ```
@@ -21,14 +21,14 @@ You might need to enable virtualisation in the BIOS if it's not enabled by defau
 If you are running the command without admin privileges, user account control (UAC) popups will appear a few times asking to allow changes to be made to the device.
 Click "yes" to approve.
 
-After the command's completion, it should say that Ubuntu is installed. Reboot your machine to make these changes effective.
+After the command's completion, it should say that Ubuntu is installed. Reboot your machine for the changes to take effect.
 
 After rebooting, Ubuntu should be available in your start menu.
-Click it to start. For the first time, it would prompt you to select a Unix username and password.
+Click it to start. For the first time, it prompts you to select a Unix username and password.
 Follow the Linux (Ubuntu) steps for the rest of this guide.
 
 > ℹ️ If you have installed your WSL a long time ago, systemd may not have been enabled by default.
-> It is recommended to use enable systemd.
+> It is recommended to enable systemd.
 > See https://learn.microsoft.com/en-us/windows/wsl/systemd.
 
 ## Installing Nix
@@ -40,37 +40,35 @@ We recommend installing Nix with the Determinate Systems' [`nix-installer`](http
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
-For more indepth instructions, follow the guide on [the zero to nix site](https://zero-to-nix.com/start/install).
+For more in-depth instructions, follow the guide on [the zero to nix site](https://zero-to-nix.com/start/install).
 
-*If you've downloaded nix through another method, make sure the experimental features ["flakes"](https://nixos.wiki/wiki/Flakes) and ["nix-command"](https://nixos.wiki/wiki/Nix_command) are enabled.*
+*If you've downloaded Nix through another method, make sure the experimental features ["flakes"](https://nixos.wiki/wiki/Flakes) and ["nix-command"](https://nixos.wiki/wiki/Nix_command) are enabled.*
 
 *To use Nix from the terminal you'll need to open up a new terminal for it to be added to your path.*
 
 ### Setup Cache
 
-To make use of the lowRISC cache so you don't have to rebuild binaries yourself, you'll need to make sure you're a trusted user.
+To make use of the lowRISC Nix cache, so you don't have to rebuild binaries yourself, you'll need to make sure you're a trusted user.
 To do this, you will need to add your user to the trusted users in `/etc/nix/nix.conf`, e.g. `trusted-users = root username`. *You can also add all users from a certain group instead of a single user by using an `@` symbol before the group name, e.g. `@sudo` or `@wheel`.*
 
 > ℹ️ For Ubuntu users (including WSL users), this means adding this line to the `/etc/nix/nix.conf`:
 > ```
 > trusted-users = root @sudo
 > ```
-> 
+>
 > You'll need to restart the nix-daemon afterwards for the change to be picked up.
 > ```sh
 > sudo systemctl restart nix-daemon
 > ```
 
-
-> ℹ️ For OSX users, this means adding this line to the `/etc/nix/nix.conf`:
+> ℹ️ For macOS users, this means adding this line to the `/etc/nix/nix.conf`:
 > ```
 > trusted-users = root @admin
 > ```
-> 
+>
 > You then need to restart your Mac for the changes to take effect.
 
 ## Enter the CHERIoT development environment
-
 
 Running the following will put you in a shell environment with all the applications needed to build the CHERIoT RTOS.
 
@@ -92,7 +90,6 @@ warning: ignoring untrusted substituter 'https://nix-cache.lowrisc.org/public/',
 ```
 
 If you see the warning that substituter is ignored, cancel the process with Ctrl+C and check to see that [trusted-users is setup properly](#setup-cache). Nix can and will build everything from source if it can't find a cached version, so letting it continue will cause LLVM-Cheriot to be built from scratch on your machine.
-
 
 ## Your first build
 
@@ -125,7 +122,7 @@ Wrote 147968 bytes to build/cheriot/cheriot/release/sonata_simple_demo.uf2
 
 (Note output size may differ)
 
-If you have got a successful build, congratulations! Your environment is ready to go for Sonata software development. Get in touch with Greg Chadwick on [ches-2024@lowrisc.org](mailto:ches-2024@lowrisc.org) if you have any issues.
+If you have got a successful build, congratulations! Your environment is ready to go for Sonata software development. Get in touch with lowRISC on [ches-2024@lowrisc.org](mailto:ches-2024@lowrisc.org) if you have any issues.
 
 For reference the full output (from a build run on a Linux machine) looks like:
 
