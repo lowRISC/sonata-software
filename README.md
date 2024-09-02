@@ -20,8 +20,8 @@ The [`lowrisc/cheriot-rtos`][], included in this repository as a submodule, is a
 
 Other repositories of note:
 - [`sonata-system`][]: holds the Sonata system RTL and bootloader which come together to generate the bitstream.
-- [`sonata-rp2040`][]: The firmware that is running on the Sonata's RP2040 microcontroller.
-- [`CHERIoT-Platform/llvm-project`][]: The CHERIoT toolchain.
+- [`sonata-rp2040`][]: The firmware that is running on the Sonata's RP2040 microcontroller and emulates the 'SONATA' drive when you plug it into your computer.
+- [`CHERIoT-Platform/llvm-project`][]: The CHERIoT compiler toolchain.
 - [`cheriot-audit`][]: A tool to explore and verify the relationships between CHERIoT RTOS components.
 - [`CHERIoT-Platform/book`][]: The source of the [CHERIoT Programmer's Guide][].
 
@@ -41,4 +41,5 @@ For hardware documentation, see the [Sonata system book][].
 
 ## License
 
-Unless otherwise noted, everything in the repository is covered by the [Apache License](https://www.apache.org/licenses/LICENSE-2.0.html), Version 2.0. See the [LICENSE](https://github.com/lowRISC/sonata-software/blob/main/LICENSE) file for more information on licensing.
+Unless otherwise noted, everything in the repository is covered by the [Apache License](https://www.apache.org/licenses/LICENSE-2.0.html), Version 2.0.
+See the [LICENSE](https://github.com/lowRISC/sonata-software/blob/main/LICENSE) file for more information on licensing.
