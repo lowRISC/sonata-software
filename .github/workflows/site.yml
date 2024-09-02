@@ -1,0 +1,53 @@
+# Copyright lowRISC contributors.
+# SPDX-License-Identifier: Apache-2.0
+
+name: Deploy to GitHub Pages
+
+# Deploy on pushes to the main branch
+on:
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: nixos-24.05
+    steps:
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            substituters = https://nix-cache.lowrisc.org/public/ https://cache.nixos.org/
+            trusted-public-keys = nix-cache.lowrisc.org-public-1:O6JLD0yXzaJDPiQW1meVu32JIDViuaPtGDfjlOopU7o= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Documentation
+        run: |
+          nix build .#sonata-software-documentation
+          # copy out of /nix/store with all symlinks dereferenced and with default permissions
+          cp -LR --no-preserve=mode result book
+      - name: configure
+        uses: actions/configure-pages@v5
+      - name: upload
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./book/
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
