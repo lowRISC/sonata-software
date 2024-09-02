@@ -8,7 +8,7 @@ If you haven't already, pop yourself up to the '[building the exercises][]' sect
 
 [Building the Exercises]: ../README.md#building-the-exercises
 
-This exercise we utilise the compartmentalisation available in CHERIoT RTOS to control access to a hardware peripheral: the very security critical LEDs.
+In this exercise we utilise the compartmentalisation available in CHERIoT RTOS to control access to a hardware peripheral: the LEDs.
 
 For this exercise, when the [`xmake.lua`][] build file is mentioned `exercises/hardware_access_control/xmake.lua` is being referred to.
 
@@ -98,7 +98,6 @@ hardware_access_control/part_2/led_walk_dynamic.cc:34 Assertion failure in start
 Failed to toggle an LED
 ```
 
-
 ## Part 3
 
 This is great and all, but how do we stop a compartment bypassing `gpio_access` and using `MMIO_CAPABILITY` directly?
@@ -112,7 +111,7 @@ To automate checking this report, we can use `cheriot-audit` which should alread
 You do this with a language called [Rego][], but don't worry you won't have to learn it for this exercise.
 There are some pre-written rules in the [`gpio_access.rego`] module.
 Let's first look at `only_gpio_access_has_access`.
-It uses `mmio_allow_list` from `cheriot-audit`'s included compartment package to check only the `gpio_access` compartment has access to the GPIO MMIOs.
+It uses `mmio_allow_list` from the compartment package included in `cheriot-audit` to check that only the `gpio_access` compartment has access to the GPIO MMIOs.
 If we run this on the part 2 firmware image's JSON report, it will return true.
 However, when run against the part 1 firmware image's report it will return false, because the `blinky_raw` and `led_walk_raw` are not in the allow list.
 
@@ -147,7 +146,7 @@ check_gpio_access whitelisted_compartments_only \
 The above should return true as both compartments are in the allow list.
 Try removing one of the compartments from the allow list given to `compartment_allow_list` in [`gpio_access.rego`][] and check the result of the above command is no longer true.
 
-One can browse the other functions available as part of the `cheriot-audit`'s included compartment package in [`cheriot-audit`'s readme][compartment package].
+One can browse the other functions available as part of the compartment package in [`cheriot-audit`'s readme][compartment package].
 
 [compartment package]: https://github.com/CHERIoT-Platform/cheriot-audit/blob/main/README.md#the-compartment-package
 
