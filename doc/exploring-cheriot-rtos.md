@@ -1,6 +1,6 @@
 # Exploring CHERIoT RTOS
 ## CHERIoT RTOS Orientation
-All the software in this repository runs on the CHERIoT RTOS, which is pulled into this repository as a submodule at [`cheriot-rtos`].
+All the software in this repository runs on the CHERIoT RTOS, which is pulled in at the root of this repository as a submodule named [`cheriot-rtos`].
 The [CHERIoT Programmer's Guide] contains most of what a programmer would need to know to use the RTOS.
 
 [`cheriot-rtos`]: ../cheriot-rtos
@@ -29,14 +29,14 @@ For examples of using these rules, look at a root `xmake.lua` file, such as [`ex
 ## Building an upstream CHERIoT RTOS example
 
 The examples in [`cheriot-rtos/examples`](../cheriot-rtos/examples) provide a nice tour of the different ways compartments can interact.
-These can be built by pointing xmake to the example one wants to build, as shown below.
+These can be built by pointing xmake to the example one wants to build, as shown below:
 
 ```sh
 # Run from the root of the sonata-software repository
 xmake -P cheriot-rtos/examples/05.sealing/
 ```
 
-### Where's my UF2
+### Where's my UF2?
 
 If you've followed the '[running software on the FPGA]' guide, you'll expect UF2 files as part of the build artefacts but these aren't automatically created in the [`cheriot-rtos`][] repository.
 Thankfully, this repository includes a `./scripts/elf-to-uf2.sh` script that converts an ELF into a firmware a UF2 file.
