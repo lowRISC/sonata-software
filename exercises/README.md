@@ -16,4 +16,4 @@ xmake -P exercises
 
 ## Exercises
 
-Currently, there is one exercise: [Hardware Access Control](./hardware_access_control/README.md)
+Currently, there is one exercise: [Hardware Access Control](./hardware_access_control/)
