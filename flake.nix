@@ -7,6 +7,10 @@
     lowrisc-nix.follows = "sonata-system/lowrisc-nix";
     nixpkgs.follows = "lowrisc-nix/nixpkgs";
     flake-utils.follows = "lowrisc-nix/flake-utils";
+    mdutils = {
+      url = "git+https://codeberg.org/HU90m/mdutils.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = {
@@ -20,12 +24,14 @@
     flake-utils,
     lowrisc-nix,
     sonata-system,
+    mdutils,
   }: let
     system_outputs = system: let
       version = "0.0.1";
 
       pkgs = import nixpkgs {inherit system;};
       lrPkgs = lowrisc-nix.outputs.packages.${system};
+      mdutilsPkgs = mdutils.outputs.packages.${system};
       lrDoc = lowrisc-nix.lib.doc {inherit pkgs;};
       sonataSystemPkgs = sonata-system.outputs.packages.${system};
       cheriotPkgs = lowrisc-nix.outputs.devShells.${system}.cheriot.nativeBuildInputs;
@@ -48,6 +54,7 @@
           root = ./.;
           fileset = lrDoc.standardMdbookFileset ./.;
         };
+        buildInputs = [mdutilsPkgs.default];
       };
 
       sonata-tests = pkgs.stdenvNoCC.mkDerivation ({
@@ -156,7 +163,7 @@
       devShells = rec {
         default = pkgs.mkShell {
           name = "sonata-sw";
-          packages = cheriotPkgs ++ [lrPkgs.uf2conv pkgs.python3Packages.pyserial];
+          packages = cheriotPkgs ++ [lrPkgs.uf2conv pkgs.python3Packages.pyserial mdutilsPkgs.default];
         };
         env-with-sim = pkgs.mkShell {
           name = "sonata-sw-with-sim";

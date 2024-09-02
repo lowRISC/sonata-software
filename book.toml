@@ -10,3 +10,24 @@ title = "Sonata Software"
 [output.html]
 git-repository-url = "https://github.com/lowRISC/sonata-software"
 edit-url-template = "https://github.com/lowRISC/sonata-software/edit/main/{path}"
+
+[preprocessor.replace]
+after = ["links"]
+
+# Replace all links to a README.md to an index.md
+link_replacements = [
+    {regex = '^(?P<path>[^:#\?]*)README\.md(?P<suffix>[?#].*)?', replacement = '${path}index.md${suffix}'},
+]
+
+[[preprocessor.replace.local_link_replacements]]
+# Replace all paths pointing to something in the cheriot-rtos
+# to a link pointing to them in github.
+regex = '^cheriot-rtos/*(?P<path>.*)?'
+replacement = 'https://github.com/CHERIoT-Platform/cheriot-rtos/tree/main/${path}'
+
+[[preprocessor.replace.local_link_replacements]]
+# Replace all paths pointing to something in this repository,
+# that is not a markdown file or image,
+# to a link pointing to them in github.
+regex = '[^:#\?]*[^(\.(md|svg|png))]([?#].*)?'
+replacement = 'https://github.com/lowRISC/sonata-software/tree/main/${0}'
