@@ -163,7 +163,14 @@
       devShells = rec {
         default = pkgs.mkShell {
           name = "sonata-sw";
-          packages = cheriotPkgs ++ [lrPkgs.uf2conv pkgs.python3Packages.pyserial mdutilsPkgs.default];
+          packages =
+            cheriotPkgs
+            ++ [
+              lrPkgs.uf2conv
+              lrPkgs.cheriot-audit
+              pkgs.python3Packages.pyserial
+              mdutilsPkgs.default
+            ];
         };
         env-with-sim = pkgs.mkShell {
           name = "sonata-sw-with-sim";
