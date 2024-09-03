@@ -44,11 +44,18 @@ cp build/cheriot/cheriot/release/sonata_simple_demo.uf2 "/run/media/$USER/SONATA
 sync # This `sync` command is rarely necessary.
 ```
 
+*On Windows it's likely easier to use the file explorer to copy the UF2 to the `SONATA` drive.*
+*Look for the Linux section below `This PC`.*
+
 To see the UART console logs, attach to `/dev/ttyUSB2` at a Baud rate of 921,600 with your favourite terminal.
 
 ```sh
 picocom /dev/ttyUSB2 -b 921600 --imap lfcrlf
 ```
+
+*On Windows, we recommend to use [PuTTY](https://www.putty.org/) to connect to serial ports.*
+*Select "Serial" as "Connection type", put the COM port in the "Serial line" text field, and set "Speed" to 921600.*
+*To find out what serial ports are available, you can open Device Manager and all connected serial ports are listed under "Ports (COM & LPT)" section.*
 
 When running the `sonata_simple_demo.uf2`, you should see the following console output as well as some flashing LEDs and LCD activity.
 This UART output only gets printed once, so you may need to press the reset button (SW5) to see the output if you attach your console after programming.
