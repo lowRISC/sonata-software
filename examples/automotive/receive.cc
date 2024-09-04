@@ -249,6 +249,109 @@ void update_speed_estimate(CarInfo *carInfo)
 	}
 }
 
+// Stores information about a given segment in a Seven Segment display.
+struct Segment
+{
+	Point pos;
+	bool  vertical;
+};
+
+// Defines the seven segments of a seven-segment display, with a hardcoded size
+// where each segment is 5x15.
+static const Segment SevenSegments[7] = {
+  {{5, 0}, false},  // A         ## <-- A
+  {{0, 5}, true},   // B    B-> #  #
+  {{20, 5}, true},  // C        #  # <- C
+  {{5, 20}, false}, // D         ## <-- D
+  {{0, 25}, true},  // E    E-> #  #
+  {{20, 25}, true}, // F        #  # <- F
+  {{5, 40}, false}, // G         ## <-- G
+};
+
+// Defines the seven-segment representation of all digits 0 through 9 as
+// bytes with each bit corresponding to a segment in sequence.
+static const uint8_t NumberSevenSegments[10] = {
+  0b01110111, // 0 = A,B,C,E,F,G
+  0b00100100, // 1 = C,F
+  0b01011101, // 2 = A,C,D,E,G
+  0b01101101, // 3 = A,C,D,F,G
+  0b00101110, // 4 = B,C,D,F
+  0b01101011, // 5 = A,B,D,F,G
+  0b01111011, // 6 = A,B,D,E,F,G
+  0b00100101, // 7 = A,C,F
+  0b01111111, // 8 = A,B,C,D,E,F,G
+  0b01101111, // 9 = A,B,C,D,F,G
+};
+
+/**
+ * Displays a seven segment number on the LCD display.
+ *
+ * `pos` is the top-left corner of the seven segment number to draw.
+ * `colour` is the colour to draw the enabled segments in.
+ * `background_colour` is the colour to draw the disabled segments in.
+ * `segments` is a byte, where each bit being set to 1 corresponds to one of
+ * the corresponding 7 segments being enabled. The MSB does nothing. Segment
+ * definitions are based on positions in the `SevenSEgments` array.
+ */
+void display_seven_segment_digit(Point   pos,
+                                 Color   colour,
+                                 Color   backgroundColour,
+                                 uint8_t segments)
+{
+	for (uint8_t segmentNum = 0; segmentNum < 7; ++segmentNum)
+	{
+		const Segment Info     = SevenSegments[segmentNum];
+		const Point   Position = {pos.x + Info.pos.x, pos.y + Info.pos.y};
+		const Size    RectSize = {(Info.vertical) ? 5u : 15u,
+                               (Info.vertical) ? 15u : 5u};
+		Color rectColour = backgroundColour;
+		if (segments & (1u << segmentNum))
+		{
+			rectColour = colour;
+		}
+		Rect segmentRect = Rect::from_point_and_size(Position, RectSize);
+		lcd->fill_rect(segmentRect, rectColour);
+	}
+}
+
+/**
+ * Displays a speedometer as a 3-digit seven segment number on the LCD display.
+ *
+ * `pos` is the top-left corner of the speedometer to draw.
+ * `colour` is the colour to draw the speedometer in.
+ * `inactiveColour` is the colour to draw inactive speedometer segments in.
+ * `carSpeed` is the current speed information to display on the speedometer.
+ */
+void display_speedometer(Point    pos,
+                         Color    colour,
+                         Color    inactiveColour,
+                         uint64_t carSpeed)
+{
+	const uint32_t Speed     = MIN(carSpeed, 999);
+	const uint32_t Digits[3] = {
+	  Speed % 10, (Speed / 10) % 10, (Speed / 100) % 10};
+
+	// Find the first (leading) non-zero number for formatting.
+	size_t firstNonZero = 0;
+	for (size_t i = 3; i > 0; --i)
+	{
+		if (Digits[i - 1] != 0)
+		{
+			firstNonZero = i - 1;
+			break;
+		}
+	}
+
+	bool drawEmptyNum = false;
+	for (size_t i = 0; i < 3; i++)
+	{
+		Point   numPos   = {pos.x + 70 - 35 * i, pos.y};
+		uint8_t segments = drawEmptyNum ? 0 : NumberSevenSegments[Digits[i]];
+		display_seven_segment_digit(numPos, colour, inactiveColour, segments);
+		drawEmptyNum |= (i >= firstNonZero); // Remove leading 0s
+	}
+}
+
 /**
  * Updates the state of the demo for a single frame, performing actions specific
  * to when the demo is operating in passthrough mode. This involves directly
@@ -270,6 +373,11 @@ void update_demo_passthrough(CarInfo *carInfo, Point centre)
 	              BACKGROUND_COLOUR,
 	              TEXT_BRIGHT_COLOUR,
 	              Font::LucidaConsole_10pt);
+	const Color SpeedColor = (carInfo->speed >= 50) ? Color::Red : Color::White;
+	display_speedometer({centre.x - 48, centre.y - 30},
+	                    SpeedColor,
+	                    SEGMENT_OFF_COLOUR,
+	                    carInfo->speed);
 }
 
 /**
@@ -296,6 +404,16 @@ void update_demo_simulation(CarInfo *carInfo, Point centre)
 	  (carInfo->acceleration > 100) ? Color::Red : TEXT_DIMMED_COLOUR;
 	const Point AccelerationLabelPos = {centre.x - 70, centre.y - 56};
 	const Point SpeedLabelPos        = {centre.x - 20, centre.y - 36};
+	const Point SpeedometerPos       = {centre.x - 48, centre.y - 18};
+	Color       speedColor           = TEXT_BRIGHT_COLOUR;
+	if (65 < carInfo->speed & carInfo->speed < 75)
+	{
+		speedColor = Color::Green;
+	}
+	else if (carInfo->speed >= 75)
+	{
+		speedColor = Color::Red;
+	}
 	lcd->draw_str(AccelerationLabelPos,
 	              accelerationStr,
 	              BACKGROUND_COLOUR,
@@ -306,6 +424,8 @@ void update_demo_simulation(CarInfo *carInfo, Point centre)
 	              BACKGROUND_COLOUR,
 	              TEXT_BRIGHT_COLOUR,
 	              Font::LucidaConsole_10pt);
+	display_speedometer(
+	  SpeedometerPos, speedColor, SEGMENT_OFF_COLOUR, carInfo->speed);
 }
 
 /**
