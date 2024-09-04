@@ -9,3 +9,7 @@
 	path = third_party/display_drivers
 	url = https://github.com/engdoreis/display_drivers
 	branch = main
+[submodule "sonata-system"]
+	path = third_party/sonata-system
+	url = https://github.com/lowRISC/sonata-system
+	branch = main
