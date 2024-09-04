@@ -21,7 +21,7 @@ This image has two threads running two compartments: `blinky_raw` and `led_walk_
 `blinky_raw` simply toggles an LED and `led_walk_raw` walks through all the LEDs toggling them as it goes.
 The sources of these compartments can be found in [`exercises/hardware_access_control/part_1/`][].
 
-[`exercises/hardware_access_control/part_1/`]: ../../exercises/hardware_access_control/part_1/
+[`exercises/hardware_access_control/part_1/`]: https://github.com/lowRISC/sonata-software/tree/main/exercises/hardware_access_control/part_1
 
 Let's look inside `blinky_raw`.
 It uses the RTOS' `MMIO_CAPABILITY` macro to get the capability that grants it access to the GPIO MMIO region.
@@ -59,7 +59,7 @@ They are purely used as a proof of LED ownership.
 You'll notice these compartments use `add_deps` in the [`xmake.lua`][] file to declare that they depend on `gpio_access`.
 Take a moment to look at the sources for these compartments in [`exercises/hardware_access_control/part_2/`][].
 
-[`exercises/hardware_access_control/part_2/`]: ../../exercises/hardware_access_control/part_2/
+[`exercises/hardware_access_control/part_2/`]: https://github.com/lowRISC/sonata-software/tree/main/exercises/hardware_access_control/part_2
 
 If you now run the `hardware_access_part_2` firmware on the FPGA, you'll notice only `blinky_dynamic` is toggling it's LED.
 Looking at the [UART console from the FPGA][running on fpga], the following message will pop up.
