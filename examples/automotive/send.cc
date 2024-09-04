@@ -3,6 +3,7 @@
 
 #include <compartment.h>
 #include <debug.hh>
+#include <platform-adc.hh>
 #include <platform-ethernet.hh>
 #include <thread.h>
 
@@ -20,8 +21,16 @@
 #include "common.hh"
 
 using Debug     = ConditionalDebug<true, "Automotive-Send">;
+using SonataAdc = SonataAnalogueDigitalConverter;
 using namespace CHERI;
 using namespace sonata::lcd;
+
+// When using our model pedal, these are the maximum and minimum values that
+// are measured through the ADC from the pedal's full range of motion. We
+// hard-code these so that we can linearly transform from this range of ADC
+// measurements to acceleration values.
+#define PEDAL_MIN_ANALOGUE 310
+#define PEDAL_MAX_ANALOGUE 1700
 
 #define BACKGROUND_COLOR Color::Black
 #define TEXT_COLOUR Color::White
@@ -40,6 +49,7 @@ static bool errorMessageShown = false;
 
 // Global driver objects for use in callback functionality
 EthernetDevice *ethernet;
+SonataAdc      *adc;
 SonataLcd      *lcd;
 
 /**
@@ -289,9 +299,50 @@ bool read_pedal_digital()
 	return (gpio->input & (1 << 13)) > 0;
 }
 
+/**
+ * A callback function used to read the pedal input as an analogue value via the
+ * ADC driver. Reads the highest analogue value from all analogue inputs to the
+ * board, and then uses known measured analogue ranges to linearly transform the
+ * measurement into the acceleration range defined for the demo.
+ *
+ * Returns a value between DEMO_ACCELERATION_PEDAL_MIN and
+ * DEMO_ACCELERATION_PEDAL_MAX, corresponding to the analogue pedal input.
+ */
 uint32_t read_pedal_analogue()
 {
+	uint32_t maxPedalValue = 0;
+	// To allow the user to connect the pedal to any of the analogue Arduino
+	// pins read all measurements and take the max.
+	const SonataAdc::MeasurementRegister Pins[6] = {
+	  SonataAdc::MeasurementRegister::ArduinoA0,
+	  SonataAdc::MeasurementRegister::ArduinoA1,
+	  SonataAdc::MeasurementRegister::ArduinoA2,
+	  SonataAdc::MeasurementRegister::ArduinoA3,
+	  SonataAdc::MeasurementRegister::ArduinoA4,
+	  SonataAdc::MeasurementRegister::ArduinoA5};
+	for (auto pin : Pins)
+	{
+		maxPedalValue = MAX(maxPedalValue, adc->read_last_measurement(pin));
+	}
+	Debug::log("Measured Analogue Value: {}", static_cast<int>(maxPedalValue));
+
+	// Clamp the measured analogue values between the known minimum and maximum,
+	// and then linearly transform the analogue range for our pedal to the
+	// range needed for the demo.
+	// Linearly transform the analogue range for our pedal to the range needed
+	// for the demo. Clamp values between min and max analogue.
 	uint32_t pedal = 0;
+	if (maxPedalValue > PEDAL_MAX_ANALOGUE)
+	{
+		pedal = PEDAL_MAX_ANALOGUE - PEDAL_MIN_ANALOGUE;
+	}
+	else if (maxPedalValue > PEDAL_MIN_ANALOGUE)
+	{
+		pedal = maxPedalValue - PEDAL_MIN_ANALOGUE;
+	}
+	pedal *= (DEMO_ACCELERATION_PEDAL_MAX - DEMO_ACCELERATION_PEDAL_MIN);
+	pedal /= (PEDAL_MAX_ANALOGUE - PEDAL_MIN_ANALOGUE);
+	pedal += DEMO_ACCELERATION_PEDAL_MIN;
 	return pedal;
 }
 
@@ -418,6 +469,11 @@ __attribute__((
 				run_digital_pedal_demo(rdcycle64());
 				break;
 			case DemoAnaloguePedal:
+				// Run demo using an actual physical pedal, taking an
+				// analogue signal via an ADC, with passthrough.
+				init_analogue_pedal_demo_mem(&memAnalogueTaskOne,
+				                             &memAnalogueTaskTwo);
+				run_analogue_pedal_demo(rdcycle64());
 				break;
 		}
 	}
@@ -464,6 +520,11 @@ void __cheri_compartment("automotive_send") entry()
 	// Wait an additional 0.25 s to give the receiving board time to setup.
 	thread_millisecond_wait(250);
 
+	// Initialise the ADC driver for use via callback
+	SonataAdc::ClockDivider adcClockDivider =
+	  (CPU_TIMER_HZ / SonataAdc::MinClockFrequencyHz) / 2;
+	adc = new SonataAdc(adcClockDivider, SonataAdc::PowerDownMode::None);
+
 	// Adapt the common automotive library for CHERIoT drivers
 	constexpr uint32_t CyclesPerMillisecond = CPU_TIMER_HZ / 1000;
 	init_lcd(displaySize.width, displaySize.height);
@@ -493,4 +554,5 @@ void __cheri_compartment("automotive_send") entry()
 	// Driver cleanup
 	delete lcd;
 	delete ethernet;
+	delete adc;
 }
