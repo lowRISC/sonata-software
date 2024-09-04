@@ -4,6 +4,7 @@
 #include <compartment.h>
 #include <debug.hh>
 #include <platform-ethernet.hh>
+#include <platform-pwm.hh>
 #include <thread.h>
 
 #include "../../libraries/lcd.hh"
@@ -13,8 +14,15 @@
 #include "common.hh"
 
 using Debug     = ConditionalDebug<true, "Automotive-Receive">;
+using SonataPwm = SonataPulseWidthModulation;
 using namespace CHERI;
 using namespace sonata::lcd;
+
+#define PWM_MAX_DUTY_CYCLE 255 // Max is 100%.
+
+// For our car, at least 25/255 duty cycle is needed to overcome
+// inertia and drive the motor, so we set "zero" to be 20.
+#define PWM_MIN_DUTY_CYCLE 20
 
 // How often the main loop is updated. This includes the simulated speed
 // when applicable, writing to the display and polling for Ethernet packets.
@@ -150,6 +158,32 @@ void receive_ethernet_frame(CarInfo *carInfo)
 			Debug::log("Error: Unknown frame type!");
 			return;
 	}
+}
+
+/**
+ * Signals the car with a speed value corresponding to the current value of
+ * `carInfo->speed`. This speed is compared with the defined speed ranges
+ * and mapped to a corresponding PWM output, and this PWM is then
+ * signalled to drive the car motor by the corresponding amount.
+ *
+ * `carInfo` is the current car information, to use to signal the car.
+ */
+void pwm_signal_car(CarInfo *carInfo)
+{
+	// Clamp the car speed between its min and max values.
+	uint32_t carSpeed = MIN(carInfo->speed, MODEL_CAR_MAX_SPEED);
+	carSpeed          = MAX(carSpeed, MODEL_CAR_MIN_SPEED);
+
+	// Linearly transform the car's speed to the proportionally equivalent
+	// duty cycle representation in the valid duty cycle range.
+	constexpr uint32_t DutyRange   = PWM_MAX_DUTY_CYCLE - PWM_MIN_DUTY_CYCLE;
+	constexpr uint32_t SpeedRange  = MODEL_CAR_MAX_SPEED - MODEL_CAR_MIN_SPEED;
+	const uint32_t     SpeedOffset = carSpeed - MODEL_CAR_MIN_SPEED;
+	// We must * DUTY_RANGE before we / SPEED_RANGE as we don't have floats
+	const uint32_t PwmDutyCycle =
+	  (SpeedOffset * DutyRange) / SpeedRange + PWM_MIN_DUTY_CYCLE;
+	auto pwm = MMIO_CAPABILITY(SonataPwm, pwm);
+	pwm->output_set(0, PWM_MAX_DUTY_CYCLE, PwmDutyCycle);
 }
 
 /**
@@ -300,6 +334,7 @@ void update_demo_simulation(CarInfo *carInfo, Point centre)
 	while (true)
 	{
 		receive_ethernet_frame(&carInfo);
+		pwm_signal_car(&carInfo);
 		lcd->draw_str(ResetLabelPos,
 		              "Press the joystick to reset!",
 		              BACKGROUND_COLOUR,
