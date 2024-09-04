@@ -117,7 +117,28 @@ void __cheri_libcall SonataLcd::draw_str(Point       point,
                                          Color       background,
                                          Color       foreground)
 {
-	lcd_st7735_set_font(&ctx, &internal::m3x6_16ptFont);
+	SonataLcd::draw_str(point, str, background, foreground, Font::M3x6_16pt);
+}
+
+void __cheri_libcall SonataLcd::draw_str(Point       point,
+                                         const char *str,
+                                         Color       background,
+                                         Color       foreground,
+                                         Font        font)
+{
+	const internal::Font *internalFont;
+	switch (font)
+	{
+		case Font::LucidaConsole_10pt:
+			internalFont = &internal::lucidaConsole_10ptFont;
+			break;
+		case Font::LucidaConsole_12pt:
+			internalFont = &internal::lucidaConsole_12ptFont;
+			break;
+		default:
+			internalFont = &internal::m3x6_16ptFont;
+	}
+	lcd_st7735_set_font(&ctx, internalFont);
 	lcd_st7735_set_font_colors(&ctx,
 	                           static_cast<uint32_t>(background),
 	                           static_cast<uint32_t>(foreground));

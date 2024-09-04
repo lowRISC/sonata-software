@@ -14,6 +14,8 @@ namespace sonata::lcd
 	{
 		extern "C"
 		{
+#include "../third_party/display_drivers/core/lucida_console_10pt.h"
+#include "../third_party/display_drivers/core/lucida_console_12pt.h"
 #include "../third_party/display_drivers/core/m3x6_16pt.h"
 #include "../third_party/display_drivers/st7735/lcd_st7735.h"
 		}
@@ -75,6 +77,13 @@ namespace sonata::lcd
 		Green = 0x00FF00
 	};
 
+	enum class Font
+	{
+		M3x6_16pt,          // NOLINT  Removing _ from these names can make them
+		LucidaConsole_10pt, // NOLINT  harder to read as they end and start with
+		LucidaConsole_12pt, // NOLINT  numbers (e.g. M3x616pt).
+	};
+
 	class SonataLcd
 	{
 		private:
@@ -107,5 +116,10 @@ namespace sonata::lcd
 		                              const char *str,
 		                              Color       background,
 		                              Color       foreground);
+		void __cheri_libcall draw_str(Point       point,
+		                              const char *str,
+		                              Color       background,
+		                              Color       foreground,
+		                              Font        font);
 	};
 } // namespace sonata::lcd
