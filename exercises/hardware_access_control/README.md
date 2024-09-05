@@ -66,7 +66,7 @@ Looking at the [UART console from the FPGA][running on fpga], the following mess
 
 ```
 hardware_access_control/part_2/led_walk_dynamic.cc:19 Assertion failure in start_walking
-LED 0x7 couldn't be aquired
+LED 0x7 couldn't be acquired
 ```
 
 `led_walk_dynamic` was run after `blinky_dynamic` because it's thread was given a lower priority in the [`xmake.lua`][].
@@ -88,7 +88,7 @@ These come from some superfluous lines in [`led_walk_dynamic.cc`][], that releas
 You can comment out the line that reacquires the LED:
 
 ```cpp
-	leds[3] = aquire_led(3).value();
+	leds[3] = acquire_led(3).value();
 ```
 
 When run `led_walk_dynamic` will now fail to toggle user LED 3 because it has relinquished ownership of the LED.
