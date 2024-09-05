@@ -8,7 +8,7 @@
 
 /// The number of LEDs available.
 static constexpr uint8_t NumLeds = 8;
-/// A mask of the LEDs that have been aquired.
+/// A mask of the LEDs that have been acquired.
 static uint8_t ledTaken = 0x0;
 
 /**
@@ -38,9 +38,9 @@ static auto gpio()
 }
 
 /**
- * Aquire a handle to the LED at the given index.
+ * Acquire a handle to the LED at the given index.
  */
-auto aquire_led(uint8_t index) -> std::optional<LedHandle *>
+auto acquire_led(uint8_t index) -> std::optional<LedHandle *>
 {
 	if (NumLeds <= index)
 		return {};
@@ -91,7 +91,7 @@ bool toggle_led(LedHandle *handle)
 };
 
 /**
- * Reliquish ownership of the LED of the given handle.
+ * Relinquish ownership of the LED of the given handle.
  */
 void release_led(LedHandle *handle)
 {

@@ -12,8 +12,8 @@ static constexpr uint32_t LedIdx = 7;
 
 void __cheri_compartment("blinky_dynamic") start_blinking()
 {
-	auto ledOpt = aquire_led(LedIdx);
-	Debug::Assert(ledOpt.has_value(), "LED {} couldn't be aquired", LedIdx);
+	auto ledOpt = acquire_led(LedIdx);
+	Debug::Assert(ledOpt.has_value(), "LED {} couldn't be acquired", LedIdx);
 	auto led = ledOpt.value();
 
 	while (true)

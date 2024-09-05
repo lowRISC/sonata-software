@@ -15,15 +15,15 @@ void __cheri_compartment("led_walk_dynamic") start_walking()
 	std::vector<LedHandle *> leds;
 	for (uint8_t num = 0; num < NumLeds; ++num)
 	{
-		auto led = aquire_led(num);
-		Debug::Assert(led.has_value(), "LED {} couldn't be aquired", num);
+		auto led = acquire_led(num);
+		Debug::Assert(led.has_value(), "LED {} couldn't be acquired", num);
 		leds.push_back(led.value());
 	};
 
 	Debug::log("          LED 3 Handle: {}", leds[3]);
 	release_led(leds[3]);
 	Debug::log("Destroyed LED 3 Handle: {}", leds[3]);
-	leds[3] = aquire_led(3).value();
+	leds[3] = acquire_led(3).value();
 	Debug::log("      New LED 3 Handle: {}", leds[3]);
 
 	while (true)

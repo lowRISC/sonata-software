@@ -6,7 +6,7 @@
 
 struct LedHandle;
 
-__cheri_compartment("gpio_access") auto aquire_led(uint8_t value)
+__cheri_compartment("gpio_access") auto acquire_led(uint8_t value)
   -> std::optional<LedHandle *>;
 __cheri_compartment("gpio_access") void release_led(LedHandle *);
 __cheri_compartment("gpio_access") bool toggle_led(LedHandle *);
