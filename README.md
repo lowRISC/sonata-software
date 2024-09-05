@@ -1,8 +1,9 @@
 # Sonata Software
 
-This repository contains software, build flows and examples for the [Sonata System][].
+This repository contains software, build flows and examples for the [Sonata System][] running on the [Sonata PCB][].
 
 [sonata system]: https://github.com/lowRISC/sonata-system
+[sonata pcb]: https://github.com/newaetech/sonata-pcb
 
 For a guide on how to get up and running on building software for the sonata board see the [getting started guide][].
 After you are all set up, take a look at the [hardware access control exercise][].

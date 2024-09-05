@@ -8,10 +8,10 @@ The [CHERIoT Programmer's Guide] contains most of what a programmer would need t
 
 The different boards supported can be found in [`cheriot-rtos/sdk/boards/`](../cheriot-rtos/sdk/boards), of particular interest will be the Sonata's description in `sonata.json`.
 More on board descriptions can be found in [`cheriot-rtos/docs/BoardDescriptions.md`](../cheriot-rtos/docs/BoardDescriptions.md).
-The drivers (structures that map onto a peripherals' MMIO) and add functionality can be found in [`cheriot-rtos/sdk/include/platform/`](../cheriot-rtos/sdk/include/platform/); the Sonata/Sunburst specific peripherals can be found in `sunburst/` within the aforementioned directory.
+The drivers (structures that map onto a peripherals' MMIO) add functionality can be found in [`cheriot-rtos/sdk/include/platform/`](../cheriot-rtos/sdk/include/platform/); the Sonata/Sunburst specific peripherals can be found in `sunburst/` within the aforementioned directory.
 
 To explore the various utility libraries available, look through [`cheriot-rtos/sdk/include/`](../cheriot-rtos/sdk/include/).
-When starting first starting to explore capabilities, the [`CHERI::Capability`](../cheriot-rtos/sdk/include/cheri.hh) class is useful for pointer introspection.
+When first starting to explore capabilities, the [`CHERI::Capability`](../cheriot-rtos/sdk/include/cheri.hh) class is useful for pointer introspection.
 
 ## Build System
 
