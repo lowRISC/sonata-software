@@ -4,7 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 # Hardware Access Control Exercise
 
-If you haven't already, pop yourself up to the '[building the exercises][]' section to see how the exercises are built.
+If you haven't already, please go to the '[building the exercises][]' section to see how the exercises are built.
 
 [Building the Exercises]: ../README.md#building-the-exercises
 
@@ -39,7 +39,7 @@ What more could one want?
 
 Well maybe some level of access control.
 Currently both `blinky_raw` and `led_walk_raw` have access to all of the GPIO ports, and neither can trust the other compartment isn't toggling the LED when they are not looking.
-The keen eyed among you will have noticed that this is already happening with both toggling user LED 7.
+The keen-eyed among you will have noticed that this is already happening with both toggling user LED 7.
 
 ## Part 2
 
@@ -47,7 +47,7 @@ Let's introduce some access control for the LEDs.
 To do this, we can create a new compartment `gpio_access` with sole access to the GPIO MMIO region.
 This compartment will arbitrate access to the LED outputs by making use of CHERIoT's sealing mechanism.
 When a compartment seals a capability, it can no longer be dereferenced or modified until it is unsealed by a compartment with the capability to do so.
-`gpio_access` uses these sealing capabilities as LED *handles* that it can give to other compartments.
+The `gpio_access` compartment creates these sealing capabilities as LED *handles* that it can give to other compartments.
 These other compartments can't use the handles directly, but can only pass them to `gpio_access` which can unseal them and use them.
 In this case, they only point to a `LedHandle` structure that only holds the index of a LED.
 They are purely used as a proof of LED ownership.
@@ -70,7 +70,7 @@ LED 0x7 couldn't be acquired
 ```
 
 `led_walk_dynamic` was run after `blinky_dynamic` because it's thread was given a lower priority in the [`xmake.lua`][].
-So when it asked for access to user LED 7, it was denied by `gpio_access` because this LED had already been given to `blinky_dynamic`.
+So when it asked for access to user LED 7, it was denied by `gpio_access` because this LED had already been allocated to `blinky_dynamic`.
 
 Now change `NumLeds` in [`led_walk_dynamic.cc`][] from 8 to 7, then rebuild.
 Both compartments should run happily again.
@@ -84,7 +84,7 @@ Led Walk Dynamic: Destroyed LED 3 Handle: 0x1087d0 (v:1 0x1087d0-0x1087e0 l:0x10
 Led Walk Dynamic:       New LED 3 Handle: 0x108878 (v:1 0x108878-0x108888 l:0x10 o:0xc p: G RWcgm- -- ---)
 ```
 
-These come from some superfluous lines in [`led_walk_dynamic.cc`][], that releases ownership of user LED 3 only to later reacquire ownership.
+These come from some superfluous lines in [`led_walk_dynamic.cc`][], which release ownership of user LED 3 only to later reacquire ownership.
 You can comment out the line that reacquires the LED:
 
 ```cpp
@@ -133,7 +133,7 @@ cheriot-audit \
     --firmware-report "build/cheriot/cheriot/release/hardware_access_part_1.json"
 ```
 
-There's a second rule, `whitelisted_compartments_only`, which adds an addition condition that only `led_walk_dynamic` and `blinky_dynamic` can use `gpio_access`.
+There's a second rule, `whitelisted_compartments_only`, which adds an additional condition that only `led_walk_dynamic` and `blinky_dynamic` can use `gpio_access`.
 We can use this to restrict which compartments have access to the GPIO via `gpio_access`.
 
 ```sh
@@ -158,3 +158,5 @@ Where to go from here...
     You could have a go at adding these to the `gpio_access` compartment.
 - The interactions with `ledTaken` global in the `gpio_access` compartment aren't thread safe.
     You could take a look at `cheriot-rtos/examples/06.producer-consumer/` to learn how to use a futex to make it thread safe.
+- There is a technical interest group for Sunburst and a technology access programme run by UKRI that lowRISC is helping to adjudicate.
+    If you are interested in either of these please reach out to [info@lowrisc.org](mailto:info@lowrisc.org).
