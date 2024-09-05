@@ -34,6 +34,10 @@ tail -f uart0.log
 
 ## Running on the Sonata FPGA
 
+Before running the FPGA, you may need to put the latest RP2040 firmware and bitstream on your board, which you can do by following the instructions on the [sonata-system release page][].
+
+[sonata-system release page]: https://github.com/lowRISC/sonata-system/releases
+
 Any builds of software in this repository will also produce a UF2 file containing the built firmware.
 When the Sonata FPGA is plugged into the computer, it should show up as a drive called 'SONATA'.
 On my computer, it can be found at `/run/media/$USER/SONATA`.
