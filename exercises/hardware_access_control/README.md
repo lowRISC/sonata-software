@@ -119,28 +119,29 @@ However, when run against the part 1 firmware image's report it will return fals
 [`gpio_access.rego`]: ../../exercises/hardware_access_control/part_3/gpio_access.rego
 
 ```sh
-# A convenience function
-check_gpio_access() {
-    cheriot-audit \
-        --board cheriot-rtos/sdk/boards/sonata-prerelease.json \
-        --module exercises/hardware_access_control/part_3/gpio_access.rego \
-        --query "data.gpio_access.$1" \
-        --firmware-report "$2"
-}
 # This should return true
-check_gpio_access only_gpio_access_has_access \
-    build/cheriot/cheriot/release/hardware_access_part_2.json
+cheriot-audit \
+    --board cheriot-rtos/sdk/boards/sonata-prerelease.json \
+    --module exercises/hardware_access_control/part_3/gpio_access.rego \
+    --query "data.gpio_access.only_gpio_access_has_access" \
+    --firmware-report "build/cheriot/cheriot/release/hardware_access_part_2.json"
 # This should return false
-check_gpio_access only_gpio_access_has_access \
-    build/cheriot/cheriot/release/hardware_access_part_1.json
+cheriot-audit \
+    --board cheriot-rtos/sdk/boards/sonata-prerelease.json \
+    --module exercises/hardware_access_control/part_3/gpio_access.rego \
+    --query "data.gpio_access.only_gpio_access_has_access" \
+    --firmware-report "build/cheriot/cheriot/release/hardware_access_part_1.json"
 ```
 
 There's a second rule, `whitelisted_compartments_only`, which adds an addition condition that only `led_walk_dynamic` and `blinky_dynamic` can use `gpio_access`.
 We can use this to restrict which compartments have access to the GPIO via `gpio_access`.
 
 ```sh
-check_gpio_access whitelisted_compartments_only \
-    build/cheriot/cheriot/release/hardware_access_part_2.json
+cheriot-audit \
+    --board cheriot-rtos/sdk/boards/sonata-prerelease.json \
+    --module exercises/hardware_access_control/part_3/gpio_access.rego \
+    --query "data.gpio_access.whitelisted_compartments_only" \
+    --firmware-report "build/cheriot/cheriot/release/hardware_access_part_2.json"
 ```
 
 The above should return true as both compartments are in the allow list.
