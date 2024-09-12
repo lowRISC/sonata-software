@@ -4,6 +4,6 @@
 include_fragments = true
 exclude_path = [
   "./cheriot-rtos",
-  "./vendor",
+  "./third_party",
   "./build",
 ]
