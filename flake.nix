@@ -39,7 +39,12 @@
       inherit (pkgs.lib) fileset getExe;
 
       commonSoftwareBuildAttributes = {
-        buildInputs = cheriotPkgs ++ [lrPkgs.uf2conv];
+        buildInputs =
+          cheriotPkgs
+          ++ [
+            lrPkgs.uf2conv
+            lrPkgs.lowrisc-toolchain-gcc-rv32imcb
+          ];
         installPhase = ''
           mkdir -p $out/share/
           cp build/cheriot/cheriot/release/* $out/share/
@@ -168,6 +173,7 @@
             ++ [
               lrPkgs.uf2conv
               lrPkgs.cheriot-audit
+              lrPkgs.lowrisc-toolchain-gcc-rv32imcb
               pkgs.python3Packages.pyserial
               mdutilsPkgs.default
             ];
