@@ -7,9 +7,9 @@
 #include <platform-pwm.hh>
 #include <thread.h>
 
-#include "../../libraries/lcd.hh"
+#include "../../../libraries/lcd.hh"
 
-#include "../../third_party/automotive_demo/automotive_common.h"
+#include "../lib/automotive_common.h"
 
 #include "common.hh"
 

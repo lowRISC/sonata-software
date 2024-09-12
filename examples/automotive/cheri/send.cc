@@ -7,16 +7,15 @@
 #include <platform-ethernet.hh>
 #include <thread.h>
 
-#include "../../libraries/lcd.hh"
-#include "../snake/cherry_bitmap.h"
+#include "../../../libraries/lcd.hh"
+#include "../../snake/cherry_bitmap.h"
 
-#include "../../third_party/automotive_demo/analogue_pedal.h"
-#include "../../third_party/automotive_demo/analogue_pedal.h"
-#include "../../third_party/automotive_demo/automotive_common.h"
-#include "../../third_party/automotive_demo/automotive_menu.h"
-#include "../../third_party/automotive_demo/digital_pedal.h"
-#include "../../third_party/automotive_demo/joystick_pedal.h"
-#include "../../third_party/automotive_demo/no_pedal.h"
+#include "../lib/analogue_pedal.h"
+#include "../lib/automotive_common.h"
+#include "../lib/automotive_menu.h"
+#include "../lib/digital_pedal.h"
+#include "../lib/joystick_pedal.h"
+#include "../lib/no_pedal.h"
 
 #include "common.hh"
 
