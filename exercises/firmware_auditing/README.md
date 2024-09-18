@@ -84,3 +84,82 @@ This tells us where the sealed capabilty in our firmware originates - a static s
 Try experimenting by adding more functionality to this toy example!
 For example, try creating your own sealed capabilities and check the result.
 You might also try investigating the values of the different rules that we've made, and filtering or auditing other properties of the capabilities.
+
+## Part 2 - check only permitted functions have interrupts disabled
+
+The policy for this exercise can be found in the [`interrupt_disables.rego`] file.
+You can either follow along as this exercise explains how the policy works, or try writing your own policy with the same behaviour.
+The firmware we are auditing is `firmware_auditing_part_2`, defined in [`xmake.lua`][], which contains two compartments based on the C++ files [`disable_interrupts.cc`][] and [`bad_disable_interrupts.cc`][].
+
+[`interrupt_disables.rego`]: ../../exercises/firmware_auditing/part_2/interrupt_disables.rego
+[`xmake.lua`]: ../../exercises/firmware_auditing/xmake.lua
+[`disable_interrupts.cc`]: ../../exercises/firmware_auditing/part_2/disable_interrupts.cc
+[`bad_disable_interrupts.cc`]: ../../exercises/firmware_auditing/part_2/bad_disable_interrupts.cc
+
+As in the last exercise, we first declare an `interrupts` package, to allow us to use `data.interrupts` in our queries.
+We then start by defining which functions in which compartments are allowed to run with interrupts disabled.
+We do this by using a list, with each item in this list containing the name of the compartment, and a list of the function signatures that can run with interrupts disabled.
+
+We allow two specific functions to run without interrupts in the `disable_interrupts` compartment, and allow none to run in the `bad_disable_interrupts` compartment.
+Despite this, if you check the the source files, `not_allowed` is actually running with interrupts disabled.
+In a practical scenario, `disable_interrupts` might be a trusted library, where `bad_disable_interrupts` is only allowed to call functions from `disable_interrupts`, and not disable interrupts itself.
+
+We can then use this list to construct a smaller set containing just the compartments we expect to be present, which will be useful as the first condition that we want to check is that all (and only) the required compartments are present.
+We make a rule `all_required_compartments_present` which checks for this, by comparing the set of all present compartments and the set of required compartments.
+Because we are comparing two sets, `==` does not work as expected, and so we take the set intersection (using `&`) and then check its equality.
+
+We then define a helper rule to allow us to retrieve information about all exported symbols, storing the compartment with each export.
+This information will be useful for demangling the names of export symbols.
+We then define `exports_with_interrupt_status(status)`, which uses a list comprehension to filter for exports with a given interrupt status.
+The three possible status values are `enabled`, `disabled` and `inherit`. See section 3.4 of the [CHERIoT Programmer's Guide][] for further information.
+
+[CHERIoT Programmer's Guide]: https://cheriot.org/book/language_extensions.html#_interrupt_state_control
+
+At this stage, we can try and query the names of exports with disabled interrupts, by using the following query:
+
+```
+'[x.export.export_symbol | x = data.interrupts.exports_with_interrupt_status("disabled")[_]]'
+```
+
+You should see that we get a lot of symbols that look something like `__library_export_disable_interrupts__Z22run_without_interruptsi`.
+This function name has been **mangled** during the compilation process, and can no longer be easily checked against our list.
+It is not always trivial to manually demangle these symbols.
+
+Luckily for us, the libstdc++ cross-vendor C++ ABI defines a function `abi::__cxa_demangle` to help demangle these names, and `cheriot-audit` wraps and exposes this through the built-in `export_entry_demangle` function.
+This function takes the compartment name and export symbol as its two arguments.
+
+> ℹ️ The next rule `patched_export_entry_demangle` is not relevant to this example.
+> It simply manually adds support for an additional library export name mangling prefix that is not currently checked for.
+> However, it is a useful example of string operations in Rego, as well as another case of rules with multiple definitions.
+> We have one rule for export symbols that start with `__library_export_`, converting this to an `__export_` prefix, and otherwise we simply pass the symbol to `export_entry_demangle`.
+
+Now that we have a method to filter for exported symbols with disabled interrupts, and the means to demangle names, we can create a rule to check that a compartment only has the specified disabled interrupts.
+When given a compartment, we search for exports with interrupts disabled that have an `"owner"` which corresponds to that compartment.
+We then map this through our export entry demangling function, to retrieve the original signatures.
+We compare this to the list of required signatures for the compartment - if it matches, then we assign `true`.
+
+We can now easily express our final condition - for every compartment we have provided, it must contain exactly the list of functions with disabled interrupts that we specified.
+This uses the `every` keyword from the `futures.keyword` import to perform universal quantification.
+
+Finally, we create a simple Boolean `valid` rule which combines our two condition rules `all_required_compartments_present` and `only_required_disabled_interrupts_present`, and which is defined to output `false` by default if either fail to match.
+
+Now, we can audit the firmware for this exercise by using the following command:
+```sh
+cheriot-audit --board=cheriot-rtos/sdk/boards/sonata.json \
+              --firmware-report=build/cheriot/cheriot/release/firmware_auditing_part_2.json \
+              --module=exercises/firmware_auditing/part_2/interrupt_disables.rego \
+              --query='data.interrupts.valid'
+```
+
+You can see that this returns `false`, because our current firmware does not conform to our policy. You can try changing any of the following:
+
+1. Add `not_allowed()` to the list of allowed functions in `bad_disabled_interrupts` in the Rego policy.
+2. Change the `[[cheri::interrupt_state(disabled)]]` tag on the `not_allowed()` function to `enabled` and rebuild.
+3. Remove the `[[cheri::interrupt_state(disabled)]]` tag on the `not_allowed()` function entirely and rebuild.
+This works because interrupts default to being `enabled`.
+
+Doing any of these three changes above and auditing should now output `true`, as the policy now matches the firmware image.
+
+You can now try individually querying some of the helper rules that we have made, and using them to build your own rules.
+For this exercise, we consider both **sufficiency** and **necessity** - there is no way to *allow* a function to have interrupts disabled but not *require* it.
+You can try incorporating this addition to extend the exercise further, making an even more powerful and expressive policy.
