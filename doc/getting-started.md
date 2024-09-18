@@ -1,7 +1,8 @@
-# CHES CHERIoT Workshop Preparation
+# Getting started guide
 
-In advance of the CHES Affiliated Sunburst Workshop, it's essential you prepare your environment so any issues can be sorted in advance of the day.
-If you have any issues in following this guide please contact the Sunburst Team on [ches-2024@lowrisc.org](mailto:ches-2024@lowrisc.org).
+This guide tells you how to prepare your environment before working with Sonata.
+The guide is especially useful to follow in advance of organized workshops or events so any issues can be sorted in advance of the day.
+If you have any issues in following this guide please contact the Sunburst Team at [info@lowrisc.org](mailto:info@lowrisc.org).
 
 The Sonata software build environment can be setup under Windows, macOS and Linux.
 
@@ -132,7 +133,7 @@ Wrote 147968 bytes to build/cheriot/cheriot/release/sonata_simple_demo.uf2
 (Note output size may differ)
 
 If you have got a successful build, congratulations! Your environment is ready to go for Sonata software development.
-Get in touch with lowRISC on [ches-2024@lowrisc.org](mailto:ches-2024@lowrisc.org) if you have any issues.
+Get in touch with lowRISC on [info@lowrisc.org](mailto:info@lowrisc.org) if you have any issues.
 
 For reference the full output (from a build run on a Linux machine) looks like:
 
