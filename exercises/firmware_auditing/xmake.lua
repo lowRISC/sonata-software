@@ -49,3 +49,50 @@ firmware("firmware_auditing_part_2")
         }, {expand = false})
     end)
     after_link(convert_to_uf2)
+
+-- Part 3
+compartment("malloc1024")
+    add_files("part_3/malloc1024.cc")
+
+compartment("malloc2048")
+    add_files("part_3/malloc2048.cc")
+
+compartment("malloc4096")
+    add_files("part_3/malloc4096.cc")
+
+compartment("malloc_many")
+    add_files("part_3/malloc_many.cc")
+
+firmware("firmware_auditing_part_3")
+    add_deps("freestanding", "malloc1024", "malloc2048", "malloc4096", "malloc_many")
+    on_load(function(target)
+        target:values_set("board", "$(board)")
+        target:values_set("threads", {
+            {
+                compartment = "malloc1024",
+                priority = 4,
+                entry_point = "entry_point",
+                stack_size = 0x200,
+                trusted_stack_frames = 2
+            }, {
+                compartment = "malloc2048",
+                priority = 3,
+                entry_point = "entry_point",
+                stack_size = 0x200,
+                trusted_stack_frames = 2
+            }, {
+                compartment = "malloc4096",
+                priority = 2,
+                entry_point = "entry_point",
+                stack_size = 0x200,
+                trusted_stack_frames = 2
+            }, {
+                compartment = "malloc_many",
+                priority = 1,
+                entry_point = "entry_point",
+                stack_size = 0x200,
+                trusted_stack_frames = 2
+            }
+        }, {expand = false})
+    end)
+    after_link(convert_to_uf2)
