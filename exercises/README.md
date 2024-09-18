@@ -16,4 +16,6 @@ xmake -P exercises
 
 ## Exercises
 
-Currently, there is one exercise: [Hardware Access Control](./hardware_access_control/)
+Currently, there are two exercises:
+ - [Hardware Access Control](./hardware_access_control/)
+ - [Firmware Auditing](./firmware_auditing/)
