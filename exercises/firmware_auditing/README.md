@@ -163,3 +163,87 @@ Doing any of these three changes above and auditing should now output `true`, as
 You can now try individually querying some of the helper rules that we have made, and using them to build your own rules.
 For this exercise, we consider both **sufficiency** and **necessity** - there is no way to *allow* a function to have interrupts disabled but not *require* it.
 You can try incorporating this addition to extend the exercise further, making an even more powerful and expressive policy.
+
+## Part 3 - audit maximum allocation limits
+
+The policy for this exercise can be found in the [`malloc_check.rego`] file.
+You can either follow along as this exercise explains how the policy works, or try writing your own policy with the same behaviour.
+The firmware we are auditing is `firmware_auditing_part_3`, defined in [`xmake.lua`][], which contains four compartments based on the C++ files [`malloc1024.cc`][], [`malloc2048.cc`][], [`malloc4096.cc`][] and [`malloc_many.cc`][].
+The first 3 files allocate 1024, 2048 and 4096 bytes respectively.
+The fourth defines a variety of heap allocation functions with varying quotas to emulate more complex firmware.
+
+[`malloc_check.rego`]: ../../exercises/firmware_auditing/part_3/malloc_check.rego
+[`xmake.lua`]: ../../exercises/firmware_auditing/xmake.lua
+[`malloc1024.cc`]: ../../exercises/firmware_auditing/part_3/malloc1024.cc
+[`malloc2048.cc`]: ../../exercises/firmware_auditing/part_3/malloc2048.cc
+[`malloc4096.cc`]: ../../exercises/firmware_auditing/part_3/malloc4096.cc
+[`malloc_many.cc`]: ../../exercises/firmware_auditing/part_3/malloc_many.cc
+
+As in the last exercises, we first declare a `malloc_check` package, to allow us to use `data.malloc_check` in our queries.
+
+For the purpose of this exercise, we need a way to check whether a given capability is an *allocator capability* (i.e. a sealed object, sealed by the compartment `alloc`, with the key `MallocKey`).
+We also need a way to decode such allocator capabilities, mapping their contents to an allocation quota.
+
+Fortunately, `cheriot-audit` defines two functions that do exactly this! `data.rtos.is_allocator_capability(capability)` and `data.rtos.decode_allocator_capability(capability)` perform this functionality as described.
+There is also a helpful built-in rule `data.rtos.all_sealed_capabilities_are_valid` which decodes all allocator capabilities to ensure that they are all valid for auditing.
+
+Using these built-in functions, we define a rule `allocator_capabilities` which filters through the input for allocator capabilities, and augments each with information about their compartment.
+This lets us define our first condition `all_allocations_less_than(limit)` as a parameterised function.
+This rule ensures that no individual allocator capability is greater than a given limit, ensuring that only a certain amount of memory can be allocated in a single `malloc`.
+
+Next, we can create a rule to extract the list of unique compartments that allocate on the heap.
+We can do this using Rego's `contains` keyword and some term-matching syntax to extract the `"owner"` field.
+Using this, we now have a construct which we can use to sum all quotas within a given compartment.
+By using the built-in `sum` function, `allocator_capabilities`, and `unique_allocator_compartments`, we can define an object that maps from a given compartment to its total allocation quota.
+
+Following from this, we can define our second allocation limiting rule: `all_compartments_allocate_leq(limit)`.
+This function checks that no individual compartment can allocate memory greater than a given limit at one time, across all of its allocator capabilities.
+This hence ensures that only a certain amount of memory can be used by one compartment at any given time.
+
+For our final allocation limiting rule, we first define a helper rule `total_quota` which sums up the quota of every allocator capability in the firmware.
+We use this to construct the final check `total_allocation_leq(limit)`, which ensures that only a certain amount of memory can be used by firmware at any one time.
+This can be useful information for auditing firmware running on systems with limited memory resources, or with multiple processes running simultaneously.
+
+As in our other examples, we finish by making a `valid` rule which evaluates to a Boolean, which audits whether our firmware image is valid.
+Using our 3 functions, we can easily set custom allocation limits.
+For this exercise, we decide that all sealed allocator capabilities must be valid, all individual allocations must be at most 20 KiB, no compartment must allocate more than 40 KiB at once, and the entire firmware must not allocate more than 100 KiB at once.
+
+We can audit our firmware using the following command:
+```sh
+cheriot-audit --board=cheriot-rtos/sdk/boards/sonata.json \
+              --firmware-report=build/cheriot/cheriot/release/firmware_auditing_part_3.json \
+              --module=exercises/firmware_auditing/part_3/malloc_check.rego \
+              --query='data.malloc_check.valid'
+```
+
+In this instance, the output of this test should be `true`, as our defined firmware meets these properties.
+You can check this yourself by looking at the source files and the values of the intermediary rules.
+To test that the policy is working, you can either change the amount of memory allocated by the firmware (making sure to rebuild), or change the policy itself to enforce lower limits.
+For example, changing the line
+```
+all_allocations_leq(20480)  # 20 KiB
+```
+to the new line
+```
+all_allocations_leq(10240)  # 10 KiB
+```
+should cause the `valid` rule of the policy to evaluate to `false`, because the `malloc_many` compartment contains a capability that permits the allocation of 16 KiB at once, which is greater than our specified limits.
+
+Try playing around with these values to convince yourself that the policy is working as we expect it to.
+
+## Beyond these exercises
+
+There are other pieces of information that the linker exposes, which we do not use in this exercise. For example:
+ - You could check that only certain compartments access certain MMIO capabilities.
+   This is covered in the third part of the [hardware access control][] exercise.
+ - You could check that only specific compartments call permitted exported functions.
+ - You could verify that only certain expected functions are being exported from a library.
+ - You could integrate this policy into [SBOM](https://en.wikipedia.org/wiki/Software_supply_chain) verification, checking that:
+   - Specific files are included.
+   - The hash and size of these files matches.
+   - The hash of linked third-party libraries matches known values.
+   - Verify the switcher/scheduler/allocator, so that we know that the CHERIoT RTOS used is secure.
+
+[hardware access control]: ../hardware_access_control/README.md#part-3
+
+Other ideas might include writing a policy that combines the above exercises, or integrating it into the `xmake` build system so that a given policy is automatically run when building your firmware image.
