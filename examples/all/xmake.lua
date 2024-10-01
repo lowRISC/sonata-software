@@ -16,6 +16,9 @@ compartment("i2c_example")
     add_deps("debug")
     add_files("i2c_example.cc")
 
+compartment("rgbled_lerp")
+    add_files("rgbled_lerp.cc")
+
 compartment("proximity_sensor_example")
     add_deps("debug")
     add_files("proximity_sensor_example.cc")
