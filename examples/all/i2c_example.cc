@@ -77,10 +77,10 @@ static void id_eeprom_report(Mmio<OpenTitanI2c> i2c, const uint8_t IdAddr)
 
 	id_eeprom_report(i2c0, 0x50);
 
-	read_temperature_sensor_value(i2c1, "temporature sensor configuration", 1);
+	read_temperature_sensor_value(i2c1, "temperature sensor configuration", 1);
 	while (true)
 	{
-		read_temperature_sensor_value(i2c1, "temporature", 0);
+		read_temperature_sensor_value(i2c1, "temperature", 0);
 		thread_millisecond_wait(4000);
 	}
 }
