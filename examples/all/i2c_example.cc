@@ -24,7 +24,7 @@ static void read_temperature_sensor_value(Mmio<OpenTitanI2c> i2c,
 	{
 		int16_t regValue = (buf[0] << 8) | buf[1];
 		int64_t temp     = regValue * 1000000LL / 128;
-		Debug::log("The {} readout is {}", regName, temp);
+		Debug::log("The {} readout is {} microdegrees Celcius", regName, temp);
 	}
 	else
 	{
