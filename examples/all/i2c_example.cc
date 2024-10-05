@@ -22,8 +22,8 @@ static void read_temperature_sensor_value(Mmio<OpenTitanI2c> i2c,
 	i2c->blocking_write(0x48, buf, 1, false);
 	if (i2c->blocking_read(0x48, buf, 2u))
 	{
-		uint16_t temp = (buf[0] << 8) | buf[1];
-		Debug::log("The {} readout is {}", regName, temp);
+		int64_t temp = ((buf[0] << 8) | buf[1]) * 1000000LL / 128;
+		Debug::log("The {} readout is {} microdegrees", regName, temp);
 	}
 	else
 	{
