@@ -1,36 +1,7 @@
 # Running Sonata Software
 
-You can either run software [on the sonata FPGA board](#running-on-the-sonata-fpga)
-or [in the sonata simulator](#running-in-the-simulator).
-
-## Running in the simulator
-
-In the [getting started guide][], you entered the default environment with `nix develop`.
-Because you now want to use the simulator, you need to enter the environment that includes the simulator:
-
-```sh
-nix develop .#env-with-sim
-```
-
-[getting started guide]: ../getting-started.md
-
-This will pull the simulator into your path as `sonata-simulator`.
-There's a convenience script, `scripts/run_sim.sh`, for calling the simulator.
-You simply point the script to a built ELF file and it will run the firmware in the simulator.
-*The ELF file is the build artefact with the same name as the firmware image and no extension.*
-Note, the simulator will never terminate, so you will have to <kbd>Ctrl</kbd>+<kbd>C</kbd> to terminate the simulator.
-
-```sh
-./scripts/run_sim.sh build/cheriot/cheriot/release/sonata_simple_demo
-```
-
-UART output can be seen in the `uart0.log` file, which should appear in the directory the simulator was run from.
-This can be observed using `tail -f` which will monitor the file and output as soon as something is written to the UART.
-Note with the simulator running in the foreground this will need to be run in another terminal:
-
-```sh
-tail -f uart0.log
-```
+You can either run software [on the sonata FPGA board](#running-on-the-sonata-fpga) or [in the sonata simulator](#running-in-the-simulator).
+We recommend you focus on the FPGA as you get started and return to the simulator if you think you would find it useful later.
 
 ## Running on the Sonata FPGA
 
@@ -69,4 +40,33 @@ This UART output only gets printed once, so you may need to press the reset butt
 bootloader: Loading software from flash...
 bootloader: Booting into program, hopefully.
 Led Walk Raw: Look pretty LEDs!
+```
+
+## Running in the simulator
+
+In the [getting started guide][], you entered the default environment with `nix develop`.
+Because you now want to use the simulator, you need to enter the environment that includes the simulator:
+
+```sh
+nix develop .#env-with-sim
+```
+
+[getting started guide]: ../getting-started.md
+
+This will pull the simulator into your path as `sonata-simulator`.
+There's a convenience script, `scripts/run_sim.sh`, for calling the simulator.
+You simply point the script to a built ELF file and it will run the firmware in the simulator.
+*The ELF file is the build artefact with the same name as the firmware image and no extension.*
+Note, the simulator will never terminate, so you will have to <kbd>Ctrl</kbd>+<kbd>C</kbd> to terminate the simulator.
+
+```sh
+./scripts/run_sim.sh build/cheriot/cheriot/release/sonata_simple_demo
+```
+
+UART output can be seen in the `uart0.log` file, which should appear in the directory the simulator was run from.
+This can be observed using `tail -f` which will monitor the file and output as soon as something is written to the UART.
+Note with the simulator running in the foreground this will need to be run in another terminal:
+
+```sh
+tail -f uart0.log
 ```

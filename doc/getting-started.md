@@ -1,13 +1,17 @@
 # Getting started guide
 
-This guide tells you how to prepare your environment before working with Sonata.
-The guide is especially useful to follow in advance of organized workshops or events so any issues can be sorted in advance of the day.
+This guide tells you how to get started with the Sonata board.
 If you have any issues in following this guide please contact the Sunburst Team at [info@lowrisc.org](mailto:info@lowrisc.org).
 
 The Sonata software build environment can be setup under Windows, macOS and Linux.
 
 We use a tool called [Nix](https://nixos.org/) to manage the build environment on all platforms.
 You will install it but don't need to know anything about it to follow these instructions.
+
+You will also need to setup the Sonata board itself with the latest release.
+Read the [updating the sonata system guide](https://lowrisc.github.io/sonata-system/doc/guide/updating-system.html) for instructions on how to do this.
+You only need to follow the first two steps listed there.
+The 'Building examples' step requires the environment setup detailed below.
 
 Only Windows requires specific instructions, Nix handles everything you need on Linux and macOS.
 So if you're not using Windows jump straight to [Installing Nix](#installing-nix).
@@ -105,10 +109,13 @@ Nix can and will build everything from source if it can't find a cached version,
 
 Clone the sonata software repository, *making sure to recursively clone submodules as well*, then navigate into it.
 ```sh
-git clone --recurse-submodule \
+git clone --branch v0.4 \
+	 --recurse-submodule \
     https://github.com/lowRISC/sonata-software.git
 cd sonata-software
 ```
+
+Note a particular branch is specified, this must match your release, the release notes will tell you which branch you should use.
 
 Enter the nix development development environment if you haven't already.
 *Note that because we are in the repository we don't need to provide any arguments to `nix develop`.*
@@ -242,6 +249,8 @@ Wrote 147968 bytes to ../build/cheriot/cheriot/release/sonata_simple_demo.uf2
 warning: ./cheriot-rtos/sdk/xmake.lua:116: unknown language value 'c2x', it may be 'c89'
 warning: add -v for getting more warnings ..
 ```
+
+With a successful software build you can now try [running software](./guide/running-software.md)
 
 ### Debug logs
 
