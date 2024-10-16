@@ -64,7 +64,15 @@ namespace sonata::lcd::internal
 		};
 		lcdIntf->gpio_write =
 		  [](void *handle, bool csHigh, bool dcHigh) -> uint32_t {
-			set_gpio_output_bit(LcdCsPin, csHigh);
+			if (csHigh)
+			{
+				spi()->cs = 1;
+			}
+			else
+			{
+				spi()->cs = 0;
+			}
+
 			set_gpio_output_bit(LcdDcPin, dcHigh);
 			return 0;
 		};
