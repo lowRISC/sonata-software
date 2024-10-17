@@ -27,8 +27,6 @@
     mdutils,
   }: let
     system_outputs = system: let
-      version = "0.0.1";
-
       pkgs = import nixpkgs {inherit system;};
       lrPkgs = lowrisc-nix.outputs.packages.${system};
       mdutilsPkgs = mdutils.outputs.packages.${system};
@@ -63,7 +61,7 @@
       };
 
       sonata-software-documentation = lrDoc.buildMdbookSite {
-        inherit version;
+        version = "";
         pname = "sonata-software-documentation";
         src = fileset.toSource {
           root = ./.;
