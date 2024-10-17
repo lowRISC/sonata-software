@@ -39,9 +39,16 @@ Ethernet cable.
 ## Building
 
 The cheriot componenents of this demo are built along with the rest of the examples.
-However, the legacy component needs to be build seperately.
+However, the legacy component needs to be built seperately. The legacy component
+requires the legacy RISC-V toolchain that is available on Linux systems in the
+`build-legacy-software` Nix environment. So, to build the full demo, you can run:
 
 ```sh
+# In the normal `nix develop` environment.
 xmake -P examples
+# Enter an environment with the legacy toolchain, and build the legacy component.
+nix develop .#build-legacy-software
 xmake -P examples/automotive/legacy/
+# Exit the overlaid legacy environment
+exit
 ```
