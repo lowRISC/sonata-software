@@ -39,12 +39,7 @@
       inherit (pkgs.lib) fileset getExe;
 
       commonSoftwareBuildAttributes = {
-        buildInputs =
-          cheriotPkgs
-          ++ [
-            lrPkgs.uf2conv
-            lrPkgs.lowrisc-toolchain-gcc-rv32imcb
-          ];
+        buildInputs = cheriotPkgs ++ [lrPkgs.uf2conv];
         installPhase = ''
           mkdir -p $out/share/
           cp build/cheriot/cheriot/release/* $out/share/
