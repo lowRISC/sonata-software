@@ -190,9 +190,9 @@
           packages = [sonataSystemPkgs.sonata-simulator] ++ default.nativeBuildInputs;
           SONATA_SIM_BOOT_STUB = "${sonataSystemPkgs.sonata-sim-boot-stub.out}/share/sim_boot_stub";
         };
-        env-with-everything = pkgs.mkShell {
-          name = "sonata-sw-with-everything";
-          packages = env-with-sim.nativeBuildInputs ++ [lrPkgs.lowrisc-toolchain-gcc-rv32imcb];
+        build-legacy-software = pkgs.mkShell {
+          name = "sonata-sw-legacy";
+          packages = [lrPkgs.lowrisc-toolchain-gcc-rv32imcb];
         };
       };
       packages = {
