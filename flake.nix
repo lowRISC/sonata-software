@@ -47,6 +47,21 @@
         dontFixup = true;
       };
 
+      sonata-automotive-demo-legacy-component = pkgs.stdenvNoCC.mkDerivation {
+        name = "sonata-automotive-demo-legacy-component";
+        src = fileset.toSource {
+          root = ./.;
+          fileset = fileset.unions [./examples/automotive ./third_party];
+        };
+        buildInputs = with lrPkgs; [xmake lowrisc-toolchain-gcc-rv32imcb];
+        buildPhase = "xmake -P ./examples/automotive/legacy/";
+        installPhase = ''
+          mkdir -p $out/share/
+          cp build/ilp32/rv32imc/release/automotive_demo_send_legacy $out/share
+        '';
+        dontFixup = true;
+      };
+
       sonata-software-documentation = lrDoc.buildMdbookSite {
         inherit version;
         pname = "sonata-software-documentation";
@@ -182,7 +197,15 @@
           packages = env-with-sim.nativeBuildInputs ++ [lrPkgs.lowrisc-toolchain-gcc-rv32imcb];
         };
       };
-      packages = {inherit sonata-exercises sonata-examples sonata-tests sonata-software-documentation;};
+      packages = {
+        inherit
+          sonata-exercises
+          sonata-examples
+          sonata-tests
+          sonata-software-documentation
+          sonata-automotive-demo-legacy-component
+          ;
+      };
       checks = {inherit tests-simulator;};
       apps = builtins.listToAttrs (map (program: {
         inherit (program) name;
