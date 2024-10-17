@@ -32,3 +32,13 @@ The demo does feature different applications which can run with varying
 amounts of hardware availability, as detailed in the library documentation,
 but the minimum requirement is at least the two boards and the connecting
 Ethernet cable.
+
+## Building
+
+The cheriot componenents of this demo are built along with the rest of the examples.
+However, the legacy component needs to be build seperately.
+
+```sh
+xmake -P examples
+xmake -P examples/automotive/legacy/
+```
