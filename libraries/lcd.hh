@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <cheri.hh>
-#include <platform-gpio.hh>
+#include <platform-pwm.hh>
 #include <platform-spi.hh>
 #include <thread.h>
 #include <utility>
