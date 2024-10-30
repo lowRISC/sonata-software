@@ -10,50 +10,51 @@ using Cap = CHERI::Capability<T>;
 using namespace sonata::lcd;
 
 /**
- * Helper.  Returns a pointer to the SPI device.
+ * Helper. Returns a pointer to the SPI device.
  */
 [[nodiscard, gnu::always_inline]] static Cap<volatile SonataSpi> spi()
 {
-	return MMIO_CAPABILITY(SonataSpi, spi1);
+	return MMIO_CAPABILITY(SonataSpi, spi_lcd);
 }
 
 /**
- * Helper.  Returns a pointer to the GPIO device.
+ * Helper. Returns a pointer to the LCD's backlight PWM device.
  */
-[[nodiscard, gnu::always_inline]] static Cap<volatile SonataGPIO> gpio()
+[[nodiscard, gnu::always_inline]] static Cap<volatile SonataLcdPwm> pwm_bl()
 {
-	return MMIO_CAPABILITY(SonataGPIO, gpio);
+	return MMIO_CAPABILITY(SonataLcdPwm, pwm_lcd);
 }
 
-static constexpr uint32_t LcdCsPin  = 0;
-static constexpr uint32_t LcdRstPin = 1;
-static constexpr uint32_t LcdDcPin  = 2;
-static constexpr uint32_t LcdBlPin  = 3;
+static constexpr uint8_t LcdCsPin  = 0;
+static constexpr uint8_t LcdDcPin  = 1;
+static constexpr uint8_t LcdRstPin = 2;
 
-static inline void set_gpio_output_bit(uint32_t bit, bool value)
+/**
+ * Sets the value of a specific Chip Select of SPI1. These Chip Select
+ * lines are used to control the LCD's Chip Select, Reset, DC, and
+ * Backlight, in place of e.g. GPIO pins.
+ */
+void set_chip_select(uint8_t chipSelect, bool value)
 {
-	uint32_t output = gpio()->output;
-	output &= ~(1 << bit);
-	output |= value << bit;
-	gpio()->output = output;
+	const uint32_t CsBit = (1u << chipSelect);
+	spi()->cs            = value ? (spi()->cs | CsBit) : (spi()->cs & ~CsBit);
 }
-
 namespace sonata::lcd::internal
 {
 	void __cheri_libcall lcd_init(LCD_Interface *lcdIntf, St7735Context *ctx)
 	{
 		// Set the initial state of the LCD control pins.
-		set_gpio_output_bit(LcdDcPin, false);
-		set_gpio_output_bit(LcdBlPin, true);
-		set_gpio_output_bit(LcdCsPin, false);
+		set_chip_select(LcdDcPin, false);
+		pwm_bl()->output_set(/*index =*/0, /*period=*/1, /*duty_cycle=*/255);
+		set_chip_select(LcdCsPin, false);
 
 		// Initialise SPI driver.
 		spi()->init(false, false, true, false);
 
 		// Reset LCD.
-		set_gpio_output_bit(LcdRstPin, false);
+		set_chip_select(LcdRstPin, false);
 		thread_millisecond_wait(150);
-		set_gpio_output_bit(LcdRstPin, true);
+		set_chip_select(LcdRstPin, true);
 
 		// Initialise LCD driverr.
 		lcdIntf->handle = nullptr;
@@ -64,16 +65,8 @@ namespace sonata::lcd::internal
 		};
 		lcdIntf->gpio_write =
 		  [](void *handle, bool csHigh, bool dcHigh) -> uint32_t {
-			if (csHigh)
-			{
-				spi()->cs = 1;
-			}
-			else
-			{
-				spi()->cs = 0;
-			}
-
-			set_gpio_output_bit(LcdDcPin, dcHigh);
+			set_chip_select(LcdCsPin, csHigh);
+			set_chip_select(LcdDcPin, dcHigh);
 			return 0;
 		};
 		lcdIntf->timer_delay = [](uint32_t ms) { thread_millisecond_wait(ms); };
@@ -88,9 +81,9 @@ namespace sonata::lcd::internal
 	{
 		lcd_st7735_clean(ctx);
 		// Hold LCD in reset.
-		set_gpio_output_bit(LcdRstPin, false);
+		set_chip_select(LcdRstPin, false);
 		// Turn off backlight.
-		set_gpio_output_bit(LcdBlPin, false);
+		pwm_bl()->output_set(/*index =*/0, /*period=*/0, /*duty_cycle=*/0);
 	}
 } // namespace sonata::lcd::internal
 
