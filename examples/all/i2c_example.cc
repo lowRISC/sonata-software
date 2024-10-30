@@ -19,7 +19,11 @@ static void read_temperature_sensor_value(Mmio<OpenTitanI2c> i2c,
                                           const uint8_t      RegIdx)
 {
 	uint8_t buf[2] = {RegIdx, 0};
-	i2c->blocking_write(0x48, buf, 1, false);
+	if (!i2c->blocking_write(0x48, buf, 1, false))
+	{
+		Debug::log("Could not write the {} address", regName);
+		return;
+	}
 	if (i2c->blocking_read(0x48, buf, 2u))
 	{
 		int16_t regValue = static_cast<int16_t>((buf[0] << 8) | buf[1]);
@@ -35,7 +39,11 @@ static void read_temperature_sensor_value(Mmio<OpenTitanI2c> i2c,
 static void id_eeprom_report(Mmio<OpenTitanI2c> i2c, const uint8_t IdAddr)
 {
 	uint8_t addr[2] = {0};
-	i2c->blocking_write(0x50u, addr, 2, true);
+	if (!i2c->blocking_write(0x50u, addr, 2, true))
+	{
+		Debug::log("Could not write the ID EEPROM address");
+		return;
+	}
 
 	static uint8_t data[0x80];
 	// Initialize the buffer to known contents in case of read issues.

@@ -32,7 +32,11 @@ static void setup_proximity_sensor(Mmio<OpenTitanI2c> i2c, const uint8_t Addr)
 
 	buf[0] = ApdS9960Id;
 
-	i2c->blocking_write(ApdS9960I2cAddress, buf, 1, false);
+	if (!i2c->blocking_write(ApdS9960I2cAddress, buf, 1, false))
+	{
+		Debug::log("Failed to write proximity sensor address");
+		return;
+	}
 	bool success = i2c->blocking_read(ApdS9960I2cAddress, buf, 1);
 	Debug::Assert(success, "Failed to read proximity sensor ID");
 
@@ -46,27 +50,42 @@ static void setup_proximity_sensor(Mmio<OpenTitanI2c> i2c, const uint8_t Addr)
 	// Disable everything
 	buf[0] = ApdS9960Enable;
 	buf[1] = 0x0;
-	i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true);
+	if (!i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true))
+	{
+		Debug::log("Failed to write proximity sensor address");
+		return;
+	}
 	// Wait for all engines to go idle
 	thread_millisecond_wait(25);
 
 	// Set PEN (proximity enable) and PON (power on)
 	buf[0] = ApdS9960Enable;
 	buf[1] = 0x5;
-	i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true);
+	if (!i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true))
+	{
+		Debug::log("Failed to write proximity sensor address");
+		return;
+	}
 	// Wait for power on
 	thread_millisecond_wait(10);
 
 	// Set proximity gain to 8x
 	buf[0] = ApdS9960CR1;
 	buf[1] = 0x0c;
-	i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true);
+	if (!i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true))
+	{
+		Debug::log("Failed to write proximity sensor address");
+		return;
+	}
 
 	// Set proximity pulse length to 4us and pulse count to 16us
 	// (experimentially determined, other values may work better!)
 	buf[0] = ApdS9960Ppc;
 	buf[1] = 0x04;
-	i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true);
+	if (!i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true))
+	{
+		Debug::log("Failed to write proximity sensor address");
+	}
 }
 
 static uint8_t read_proximity_sensor(Mmio<OpenTitanI2c> i2c)
@@ -74,7 +93,11 @@ static uint8_t read_proximity_sensor(Mmio<OpenTitanI2c> i2c)
 	uint8_t buf[1];
 
 	buf[0] = ApdS9960Pdata;
-	i2c->blocking_write(ApdS9960I2cAddress, buf, 1, false);
+	if (!i2c->blocking_write(ApdS9960I2cAddress, buf, 1, false))
+	{
+		Debug::log("Failed to write proximity sensor address");
+		return 0;
+	}
 	if (!i2c->blocking_read(ApdS9960I2cAddress, buf, 1))
 	{
 		Debug::log("Failed to read proximity sensor value");
