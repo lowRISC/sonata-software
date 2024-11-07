@@ -6,6 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Description
 
+**Note: this demo is currently not updated for the latest 1.0 hardware changes,
+and as such will not work.**
+
 The Sonata automotive demo is a demo designed around an automotive context,
 which is run in two different environments - one on the Sonata board running
 CHERIoT RTOS with CHERIoT enabled, and another running baremetal on Sonata
