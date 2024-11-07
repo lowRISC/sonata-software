@@ -148,7 +148,7 @@ class SnakeGame
 	 * @param gpio The Sonata GPIO driver to use for I/O operations.
 	 * @param lcd The LCD that will be drawn to.
 	 */
-	void wait_for_start(volatile SonataGPIO *gpio, SonataLcd *lcd)
+	void wait_for_start(volatile SonataGpioBoard *gpio, SonataLcd *lcd)
 	{
 		Size  displaySize = lcd->resolution();
 		Point centre      = {displaySize.width / 2, displaySize.height / 2};
@@ -224,8 +224,8 @@ class SnakeGame
 	bool joystick_in_direction(SonataJoystick joystick,
 	                           SonataJoystick direction)
 	{
-		return (static_cast<uint8_t>(joystick) &
-		        static_cast<uint8_t>(direction)) > 0;
+		return (static_cast<uint16_t>(joystick) &
+		        static_cast<uint16_t>(direction)) > 0;
 	};
 
 	/**
@@ -235,7 +235,7 @@ class SnakeGame
 	 *
 	 * @param gpio The Sonata GPIO driver to use for I/O operations.
 	 */
-	Direction read_joystick(volatile SonataGPIO *gpio)
+	Direction read_joystick(volatile SonataGpioBoard *gpio)
 	{
 		SonataJoystick joystickState = gpio->read_joystick();
 		// The joystick can be in many possible directions - we check directions
@@ -282,7 +282,7 @@ class SnakeGame
 	 * @param milliseconds The time to wait for in milliseconds.
 	 * @param gpio The Sonata GPIO driver to use for I/O operations.
 	 */
-	void wait_with_input(uint32_t milliseconds, volatile SonataGPIO *gpio)
+	void wait_with_input(uint32_t milliseconds, volatile SonataGpioBoard *gpio)
 	{
 		const uint32_t CyclesPerMillisecond = CPU_TIMER_HZ / 1000;
 		const uint32_t Cycles  = milliseconds * CyclesPerMillisecond;
@@ -461,7 +461,7 @@ class SnakeGame
 	 * @param position The integer tile position (x, y) to draw at.
 	 * @return true if the game is still active, false if the game is over.
 	 */
-	bool update_game_state(volatile SonataGPIO *gpio, SonataLcd *lcd)
+	bool update_game_state(volatile SonataGpioBoard *gpio, SonataLcd *lcd)
 	{
 		currentDirection = read_joystick(gpio);
 
@@ -525,7 +525,7 @@ class SnakeGame
 	 * @param gpio The Sonata GPIO driver to use for I/O operations
 	 * @param lcd The LCD that will be drawn to.
 	 */
-	void main_game_loop(volatile SonataGPIO *gpio, SonataLcd *lcd)
+	void main_game_loop(volatile SonataGpioBoard *gpio, SonataLcd *lcd)
 	{
 		const uint32_t CyclesPerMillisecond = CPU_TIMER_HZ / 1000;
 		uint64_t       currentTime          = rdcycle64();
@@ -581,7 +581,7 @@ class SnakeGame
 	 * @param gpio The Sonata GPIO driver to use for I/O operations.
 	 * @param lcd The LCD that will be drawn to.
 	 */
-	void run_game(volatile SonataGPIO *gpio, SonataLcd *lcd)
+	void run_game(volatile SonataGpioBoard *gpio, SonataLcd *lcd)
 	{
 		wait_for_start(gpio, lcd);
 		initialise_game();
@@ -650,7 +650,7 @@ compartment_error_handler(ErrorState *frame, size_t mcause, size_t mtval)
 // Thread entry point.
 void __cheri_compartment("snake") snake()
 {
-	auto gpio = MMIO_CAPABILITY(SonataGPIO, gpio);
+	auto gpio = MMIO_CAPABILITY(SonataGpioBoard, gpio_board);
 	auto lcd  = SonataLcd();
 	Debug::log("Detected display resolution: {} {}",
 	           static_cast<int>(lcd.resolution().width),

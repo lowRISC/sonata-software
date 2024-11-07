@@ -4,6 +4,7 @@
 #include <compartment.h>
 #include <debug.hh>
 #include <platform-ethernet.hh>
+#include <platform-gpio.hh>
 #include <platform-pwm.hh>
 #include <thread.h>
 
@@ -13,8 +14,7 @@
 
 #include "common.hh"
 
-using Debug     = ConditionalDebug<true, "Automotive-Receive">;
-using SonataPwm = SonataPulseWidthModulation;
+using Debug = ConditionalDebug<true, "Automotive-Receive">;
 using namespace CHERI;
 using namespace sonata::lcd;
 
@@ -63,9 +63,9 @@ struct CarInfo
 };
 
 // Driver structs/classes
-EthernetDevice      *ethernet;
-SonataLcd           *lcd;
-volatile SonataGPIO *gpio;
+EthernetDevice           *ethernet;
+SonataLcd                *lcd;
+volatile SonataGpioBoard *gpio;
 
 // Sets the operating mode that the demo is running in. Default is passthrough.
 DemoMode operatingMode = DemoModePassthrough;
@@ -505,7 +505,7 @@ void update_demo_simulation(CarInfo *carInfo, Point centre)
 	// Initialise the LCD & GPIO drivers
 	lcd = new SonataLcd();
 	lcd->clean(BACKGROUND_COLOUR);
-	gpio = MMIO_CAPABILITY(SonataGPIO, gpio);
+	gpio = MMIO_CAPABILITY(SonataGpioBoard, gpio_board);
 
 	// Start the main loop
 	main_demo_loop();

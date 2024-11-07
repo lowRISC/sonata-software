@@ -25,7 +25,7 @@ The sources of these compartments can be found in [`exercises/hardware_access_co
 
 Let's look inside `blinky_raw`.
 It uses the RTOS' `MMIO_CAPABILITY` macro to get the capability that grants it access to the GPIO MMIO region.
-This magic macro will handle adding the MMIO region to the compartment's imports and mapping it to a type, in this case `SonataGPIO` (from [`platform-gpio.hh`][]).
+This magic macro will handle adding the MMIO region to the compartment's imports and mapping it to a type, in this case `SonataGpioBoard` (from [`platform-gpio.hh`][]).
 *For more information on this macro, see [the drivers section of CHERIoT programmers guide][].*
 
 [the drivers section of CHERIoT programmers guide]: https://cheriot.org/book/top-drivers-top.html#mmio_capabilities
@@ -154,7 +154,7 @@ One can browse the other functions available as part of the compartment package 
 ## Part ∞
 
 Where to go from here...
-- There are input devices available through `SonataGPIO`.
+- There are input devices available through `SonataGpioBoard`.
     You could have a go at adding these to the `gpio_access` compartment.
 - The interactions with `ledTaken` global in the `gpio_access` compartment aren't thread safe.
     You could take a look at `cheriot-rtos/examples/06.producer-consumer/` to learn how to use a futex to make it thread safe.

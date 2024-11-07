@@ -10,7 +10,7 @@ static constexpr size_t   ArrSize = 32;
 
 void __cheri_compartment("sealed_capability") do_things()
 {
-	auto gpio = MMIO_CAPABILITY(SonataGPIO, gpio);
+	auto gpio = MMIO_CAPABILITY(SonataGpioBoard, gpio_board);
 
 	uint32_t arr[ArrSize];
 	// Comment the above line and uncomment the below line to allocate on the
