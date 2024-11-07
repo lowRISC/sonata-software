@@ -14,7 +14,7 @@ void __cheri_compartment("led_walk_raw") start_walking()
 {
 	Debug::log("Look walking LEDs!");
 
-	auto gpio = MMIO_CAPABILITY(SonataGPIO, gpio);
+	auto gpio = MMIO_CAPABILITY(SonataGpioBoard, gpio_board);
 
 	size_t ledIdx = NumLeds - 1;
 	while (true)

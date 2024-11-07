@@ -5,6 +5,7 @@
 #include <debug.hh>
 #include <platform-adc.hh>
 #include <platform-ethernet.hh>
+#include <platform-gpio.hh>
 #include <thread.h>
 
 #include "../../../libraries/lcd.hh"
@@ -282,7 +283,7 @@ void lcd_draw_img(uint32_t       x,
  */
 uint8_t read_joystick()
 {
-	auto gpio = MMIO_CAPABILITY(SonataGPIO, gpio);
+	auto gpio = MMIO_CAPABILITY(SonataGpioBoard, gpio_board);
 	return static_cast<uint8_t>(gpio->read_joystick());
 }
 
@@ -294,7 +295,7 @@ uint8_t read_joystick()
  */
 bool read_pedal_digital()
 {
-	auto gpio = MMIO_CAPABILITY(SonataGPIO, gpio);
+	auto gpio = MMIO_CAPABILITY(SonataGpioBoard, gpio_board);
 	return (gpio->input & (1 << 13)) > 0;
 }
 

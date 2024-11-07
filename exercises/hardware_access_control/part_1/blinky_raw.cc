@@ -14,7 +14,7 @@ void __cheri_compartment("blinky_raw") start_blinking()
 {
 	Debug::log("Look a blinking LED!");
 
-	auto gpio = MMIO_CAPABILITY(SonataGPIO, gpio);
+	auto gpio = MMIO_CAPABILITY(SonataGpioBoard, gpio_board);
 
 	while (true)
 	{
