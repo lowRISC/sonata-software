@@ -33,6 +33,7 @@ static void read_temperature_sensor_value(Mmio<OpenTitanI2c> i2c,
 	else
 	{
 		Debug::log("Could not read the {}", regName);
+		return;
 	}
 }
 
@@ -52,6 +53,7 @@ static void id_eeprom_report(Mmio<OpenTitanI2c> i2c, const uint8_t IdAddr)
 	if (!i2c->blocking_read(IdAddr, data, sizeof(data)))
 	{
 		Debug::log("Failed to read EEPROM ID of device at address {}", IdAddr);
+		return;
 	}
 
 	Debug::log("EEPROM ID of device at address {}:", IdAddr);

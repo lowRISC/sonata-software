@@ -85,6 +85,7 @@ static void setup_proximity_sensor(Mmio<OpenTitanI2c> i2c, const uint8_t Addr)
 	if (!i2c->blocking_write(ApdS9960I2cAddress, buf, 2, true))
 	{
 		Debug::log("Failed to write proximity sensor address");
+		return;
 	}
 }
 
