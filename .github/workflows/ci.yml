@@ -5,9 +5,9 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "staging"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "staging"]
 
 # Cancel existing runs if a pull request is pushed.
 # For branch pushes, this will queue a new run and cancel the existing one. This allows the cache
