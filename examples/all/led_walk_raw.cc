@@ -16,7 +16,7 @@ void __cheri_compartment("led_walk_raw") start_walking()
 {
 	Debug::log("Look pretty LEDs!");
 
-	auto gpio = MMIO_CAPABILITY(SonataGPIO, gpio);
+	auto gpio = MMIO_CAPABILITY(SonataGpioBoard, gpio_board);
 
 	int  count    = 0;
 	bool switchOn = true;

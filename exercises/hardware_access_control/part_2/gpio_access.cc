@@ -33,7 +33,7 @@ static auto key()
  */
 static auto gpio()
 {
-	static auto gpio = MMIO_CAPABILITY(SonataGPIO, gpio);
+	static auto gpio = MMIO_CAPABILITY(SonataGpioBoard, gpio_board);
 	return gpio;
 }
 
