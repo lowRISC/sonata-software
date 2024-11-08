@@ -109,7 +109,7 @@ Nix can and will build everything from source if it can't find a cached version,
 
 Clone the sonata software repository, *making sure to recursively clone submodules as well*, then navigate into it.
 ```sh
-git clone --branch v0.4 \
+git clone --branch v1.0 \
 	 --recurse-submodule \
     https://github.com/lowRISC/sonata-software.git
 cd sonata-software
