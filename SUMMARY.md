@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 
 - [Getting started](./doc/getting-started.md)
   - [Running Sonata Software](./doc/guide/running-software.md)
+  - [Using Sonata IO](./doc/guide/sonata-io.md)
 
 - [Exploring the CHERIoT RTOS](./doc/exploring-cheriot-rtos.md)
 - [Auditing Firmware](./doc/auditing-firmware.md)
