@@ -22,3 +22,7 @@ compartment("rgbled_lerp")
 compartment("proximity_sensor_example")
     add_deps("debug")
     add_files("proximity_sensor_example.cc")
+
+compartment("sense_hat_demo")
+    add_deps("debug", "sense_hat")
+    add_files("sense_hat_demo.cc", "../../third_party/display_drivers/core/m3x6_16pt.c")

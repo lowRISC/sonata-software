@@ -139,6 +139,44 @@ firmware("proximity_test")
     after_link(convert_to_uf2)
 
 
+-- Demo that uses a Sense HAT's LED Matrix
+firmware("sense_hat_leds")
+    add_deps("freestanding", "led_walk_raw", "lcd_test", "rgbled_lerp", "sense_hat_demo")
+    on_load(function(target)
+        target:values_set("board", "$(board)")
+        target:values_set("threads", {
+            {
+                compartment = "led_walk_raw",
+                priority = 2,
+                entry_point = "start_walking",
+                stack_size = 0x200,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "lcd_test",
+                priority = 2,
+                entry_point = "lcd_test",
+                stack_size = 0x1000,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "rgbled_lerp",
+                priority = 2,
+                entry_point = "lerp_rgbleds",
+                stack_size = 0x200,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "sense_hat_demo",
+                priority = 2,
+                entry_point = "test",
+                stack_size = 0x1000,
+                trusted_stack_frames = 1
+            }
+        }, {expand = false})
+    end)
+    after_link(convert_to_uf2)
+
 -- Demo that does proximity test as well as LCD screen, etc for demos.
 firmware("leds_and_lcd")
     add_deps("freestanding", "led_walk_raw", "lcd_test", "rgbled_lerp")
