@@ -115,7 +115,7 @@ firmware("sonata_proximity_demo")
                 compartment = "proximity_sensor_example",
                 priority = 2,
                 entry_point = "run",
-                stack_size = 0x200,
+                stack_size = 0x1000,
                 trusted_stack_frames = 1
             }
         }, {expand = false})
@@ -131,7 +131,7 @@ firmware("proximity_test")
                 compartment = "proximity_sensor_example",
                 priority = 2,
                 entry_point = "run",
-                stack_size = 0x200,
+                stack_size = 0x1000,
                 trusted_stack_frames = 1
             }
         }, {expand = false})

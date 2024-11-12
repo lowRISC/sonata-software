@@ -20,7 +20,7 @@ compartment("rgbled_lerp")
     add_files("rgbled_lerp.cc")
 
 compartment("proximity_sensor_example")
-    add_deps("debug")
+    add_deps("debug", "sense_hat")
     add_files("proximity_sensor_example.cc")
 
 compartment("sense_hat_demo")
