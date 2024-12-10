@@ -43,4 +43,4 @@ jobs:
           nix build -L .?submodules=1#sonata-tests
 
       - name: Run Nix Checks
-        run: nix flake check -L .?submodules=1
+        run: nix flake check -L .?submodules=1#
