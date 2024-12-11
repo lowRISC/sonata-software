@@ -17,6 +17,7 @@
 using Debug = ConditionalDebug<true, "Automotive-Receive">;
 using namespace CHERI;
 using namespace sonata::lcd;
+using SonataPwm = SonataPulseWidthModulation::General;
 
 #define PWM_MAX_DUTY_CYCLE 255 // Max is 100%.
 
@@ -183,7 +184,7 @@ void pwm_signal_car(CarInfo *carInfo)
 	const uint32_t PwmDutyCycle =
 	  (SpeedOffset * DutyRange) / SpeedRange + PWM_MIN_DUTY_CYCLE;
 	auto pwm = MMIO_CAPABILITY(SonataPwm, pwm);
-	pwm->output_set(0, PWM_MAX_DUTY_CYCLE, PwmDutyCycle);
+	pwm->get<0>()->output_set(PWM_MAX_DUTY_CYCLE, PwmDutyCycle);
 }
 
 /**
