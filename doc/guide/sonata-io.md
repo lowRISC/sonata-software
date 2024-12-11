@@ -35,18 +35,25 @@ For example say you wished to connect the PMOD0 SPI to SPI block 1; there are 4 
 - PMOD 0 CS (pin 1), COPI (pin 2) and SCK (pin 4) output selectors
 - SPI Block 1 CIPO input selector
 
-The code below shows how to use the pinmux driver to do this:
+The code below shows how you could use the pinmux driver to do this:
 
 ```c++
 #include <platform-pinmux.hh>
 
 ...
 
-auto pinmux = SonataPinmux();
-pinmux.output_pin_select(SonataPinmux::OutputPin::pmod0_1, 2);
-pinmux.block_input_select(SonataPinmux::BlockInput::spi_1_cipo, 3);
-pinmux.output_pin_select(SonataPinmux::OutputPin::pmod0_2, 2);
-pinmux.output_pin_select(SonataPinmux::OutputPin::pmod0_4, 2);
+auto pinmuxPinSinks = MMIO_CAPABILITY(SonataPinmux::PinSinks, pinmux_pins_sinks);
+auto pinmuxBlockSinks = MMIO_CAPABILITY(SonataPinmux::BlockSinks, pinmux_block_sinks);
+
+auto pmod0_1 = pinmuxPinSinks->get(SonataPinmux::PinSink::pmod0_1);
+auto spi_1_cipo = pinmuxBlockSinks->get(SonataPinmux::BlockSink::spi_1_cipo);
+auto pmod0_2 = pinmuxPinSinks->get(SonataPinmux::PinSink::pmod0_2);
+auto pmod0_4 = pinmuxPinSinks->get(SonataPinmux::PinSink::pmod0_4);
+
+pmod0_1.select(2);
+spi_1_cipo.select(3);
+pmod0_2.select(2);
+pmod0_4.select(2);
 ```
 
 Following this you can then use the `spi1` SPI instance to communicate with whatever SPI device is plugged into PMOD0.
