@@ -11,7 +11,6 @@ You will install it but don't need to know anything about it to follow these ins
 You will also need to setup the Sonata board itself with the latest release.
 Read the [updating the sonata system guide](https://lowrisc.github.io/sonata-system/doc/guide/updating-system.html) for instructions on how to do this.
 You only need to follow the first two steps listed there.
-The 'Building examples' step requires the environment setup detailed below.
 
 Only Windows requires specific instructions, Nix handles everything you need on Linux and macOS.
 So if you're not using Windows jump straight to [Installing Nix](#installing-nix).
@@ -103,11 +102,12 @@ warning: ignoring untrusted substituter 'https://nix-cache.lowrisc.org/public/',
 ```
 
 If you see the warning that substituter is ignored, cancel the process with Ctrl+C and check to see that [trusted-users is setup properly](#setup-cache).
-Nix can and will build everything from source if it can't find a cached version, so letting it continue will cause LLVM-Cheriot to be built from scratch on your machine.
+Nix can and will build everything from source if it can't find a cached version, so letting it continue will cause LLVM-CHERIoT to be built from scratch on your machine.
 
 ## Your first build
 
-Clone the sonata software repository, *making sure to recursively clone submodules as well*, then navigate into it.
+Clone the Sonata software repository, *making sure to recursively clone submodules as well*, then navigate into it.
+
 ```sh
 git clone --branch v1.0 \
 	 --recurse-submodule \
@@ -250,7 +250,8 @@ warning: ./cheriot-rtos/sdk/xmake.lua:116: unknown language value 'c2x', it may 
 warning: add -v for getting more warnings ..
 ```
 
-With a successful software build you can now try [running software](./guide/running-software.md)
+If you're following this guide as preparation for a workshop, you are now all set up and don't need to go any further.
+With a successful software build you can now try [running software](./guide/running-software.md).
 
 ### Debug logs
 
