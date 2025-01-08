@@ -314,18 +314,3 @@ warning: add -v for getting more warnings ..
 
 If you're following this guide as preparation for a workshop, you are now all set up and don't need to go any further.
 With a successful software build you can now try [running software](./guide/running-software.md).
-
-### Debug logs
-
-If you want debug logs from the RTOS, configure your build with the following additional options.
-
-```sh
-rm -rf build .xmake
-xmake config -P examples
-    --debug-scheduler=y --debug-locks=y \
-    --debug-cxxrt=y --debug-loader=y \
-    --debug-token_library=y --debug-allocator=y
-xmake -P examples
-```
-
-Reconfiguring doesn't always work reliably, so often you will want to delete the `build` and `.xmake` directories when changing the configuration.

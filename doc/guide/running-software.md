@@ -70,3 +70,18 @@ Note with the simulator running in the foreground this will need to be run in an
 ```sh
 tail -f uart0.log
 ```
+
+### Debug logs
+
+If you want debug logs from the RTOS, configure your build with the following additional options.
+
+```sh
+rm -rf build .xmake
+xmake config -P examples
+    --debug-scheduler=y --debug-locks=y \
+    --debug-cxxrt=y --debug-loader=y \
+    --debug-token_library=y --debug-allocator=y
+xmake -P examples
+```
+
+Reconfiguring doesn't always work reliably, so often you will want to delete the `build` and `.xmake` directories when changing the configuration.
