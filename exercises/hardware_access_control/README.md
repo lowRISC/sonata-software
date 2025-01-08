@@ -49,7 +49,7 @@ This compartment will arbitrate access to the LED outputs by making use of CHERI
 When a compartment seals a capability, it can no longer be dereferenced or modified until it is unsealed by a compartment with the capability to do so.
 The `gpio_access` compartment creates these sealing capabilities as LED *handles* that it can give to other compartments.
 These other compartments can't use the handles directly, but can only pass them to `gpio_access` which can unseal them and use them.
-In this case, they only point to a `LedHandle` structure that only holds the index of a LED.
+In this case, they only point to an `LedHandle` structure that holds the index of an LED.
 They are purely used as a proof of LED ownership.
 *For more information on sealing, see the [`cheriot-rtos/examples/05.sealing/`][].*
 
