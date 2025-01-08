@@ -1,7 +1,7 @@
 # Running Sonata Software
 
 You can either run software [on the sonata FPGA board](#running-on-the-sonata-fpga) or [in the sonata simulator](#running-in-the-simulator).
-We recommend you focus on the FPGA as you get started and return to the simulator if you think you would find it useful later.
+We recommend you focus on the FPGA as you get started and return to the simulator if you find it useful later.
 
 ## Running on the Sonata FPGA
 
@@ -53,18 +53,18 @@ nix develop .#env-with-sim
 
 [getting started guide]: ../getting-started.md
 
-This will pull the simulator into your path as `sonata-simulator`.
-There's a convenience script, `scripts/run_sim.sh`, for calling the simulator.
-You simply point the script to a built ELF file and it will run the firmware in the simulator.
-*The ELF file is the build artefact with the same name as the firmware image and no extension.*
+This puts the simulator into your path as `sonata-simulator`.
+To run the simulator you can use this script: `scripts/run_sim.sh`.
+You point the script to a built ELF file and it will run the firmware in the simulator.
+The ELF file is the build artefact with the same name as the firmware image and no extension.
 Note, the simulator will never terminate, so you will have to <kbd>Ctrl</kbd>+<kbd>C</kbd> to terminate the simulator.
 
 ```sh
-./scripts/run_sim.sh build/cheriot/cheriot/release/sonata_simple_demo
+scripts/run_sim.sh build/cheriot/cheriot/release/sonata_simple_demo
 ```
 
-UART output can be seen in the `uart0.log` file, which should appear in the directory the simulator was run from.
-This can be observed using `tail -f` which will monitor the file and output as soon as something is written to the UART.
+UART output can be seen in the `uart0.log` file, which should appear in the directory the simulator is run from.
+You can observe the log using `tail -f` which monitors the file and outputs as soon as something is written to the UART.
 Note with the simulator running in the foreground this will need to be run in another terminal:
 
 ```sh
