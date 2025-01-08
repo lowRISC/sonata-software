@@ -42,14 +42,18 @@ The code below shows how to use the pinmux driver to do this:
 
 ...
 
-auto pinmux = SonataPinmux();
-pinmux.output_pin_select(SonataPinmux::OutputPin::pmod0_1, 2);
-pinmux.block_input_select(SonataPinmux::BlockInput::spi_1_cipo, 3);
-pinmux.output_pin_select(SonataPinmux::OutputPin::pmod0_2, 2);
-pinmux.output_pin_select(SonataPinmux::OutputPin::pmod0_4, 2);
+auto pinSinks = SonataPinmux::PinSinks();
+auto blockSinks = SonataPinmux::BlockSinks();
+
+pinSinks->get(SonataPinmux::PinSink::pmod0_1).select(2); // cs_0
+blockSinks->get(SonataPinmux::BlockInput::spi_1_cipo).select(3); // cipo
+pinSinks->get(SonataPinmux::OutputPin::pmod0_2).select(2); // coi
+pinSinks->get(SonataPinmux::OutputPin::pmod0_4).select(2); // sclk
+pinSinks->get(SonataPinmux::OutputPin::pmod0_9).select(2); // cs_1
+pinSinks->get(SonataPinmux::OutputPin::pmod0_10).select(2); // cs_2
 ```
 
-Following this you can then use the `spi1` SPI instance to communicate with whatever SPI device is plugged into PMOD0.
+Following this you can then use the `spi_1` SPI instance to communicate with whatever SPI device is plugged into PMOD0.
 
 ## Driver Usage
 
