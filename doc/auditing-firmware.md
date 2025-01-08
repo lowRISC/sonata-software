@@ -101,7 +101,7 @@ In this fashion, you can define readable and maintainable policies, and easily a
 
 Rego is a policy language designed similarly to Datalog, which is a declarative logic inference programming language.
 As such, much of Rego's semantics will be familiar if you already know a logic programming language like Prolog, ASP or Datalog.
-Otherwise, it may be unfamiliar and unintuitive otherwise.
+Otherwise, it may be unfamiliar and unintuitive.
 If you have no such prior experience, it is highly recommended to read over the [Rego documentation][].
 
 [Rego documentation]: https://www.openpolicyagent.org/docs/latest/policy-language/
