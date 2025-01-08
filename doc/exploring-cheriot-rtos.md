@@ -45,5 +45,5 @@ Thankfully, this repository includes a `./scripts/elf-to-uf2.sh` script that con
 
 ```sh
 xmake -P cheriot-rtos/examples/05.sealing/
-./scripts/elf-to-uf2.sh build/cheriot/cheriot/release/sealing
+scripts/elf-to-uf2.sh build/cheriot/cheriot/release/sealing
 ```
