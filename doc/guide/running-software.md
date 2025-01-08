@@ -15,28 +15,37 @@ On my computer, it can be found at `/run/media/$USER/SONATA`.
 You can copy the built UF2 file into this drive for the firmware to be loaded and run.
 
 ```sh
-cp build/cheriot/cheriot/release/sonata_simple_demo.uf2 "/run/media/$USER/SONATA/"
+cp build/cheriot/cheriot/release/sonata_simple_demo.slot1.uf2 "/media/$USER/SONATA/"
 sync # This `sync` command is rarely necessary.
 ```
 
-*On Windows it's likely easier to use the file explorer to copy the UF2 to the `SONATA` drive.*
-*Look for the Linux section below `This PC`.*
+> ℹ️  Some other common mount points include:
+> - `/Volumes/SONATA`
+> - `/run/media/$USER/SONATA`
+> - `/run/media/SONATA`
+> - `/mnt/SONATA`
+
+> ℹ️  On Windows it's likely easier to use the file explorer to copy the UF2 to the `SONATA` drive.
+> Look for the Linux section below `This PC`.
 
 To see the UART console logs, attach to `/dev/ttyUSB2` at a Baud rate of 921,600 with your favourite terminal.
+Make sure you set the 'SW App' switch to position 1.
 
 ```sh
 picocom /dev/ttyUSB2 -b 921600 --imap lfcrlf
 ```
 
-*On Windows, we recommend to use [PuTTY](https://www.putty.org/) to connect to serial ports.*
-*Select "Serial" as "Connection type", put the COM port in the "Serial line" text field, and set "Speed" to 921600.*
-*To find out what serial ports are available, you can open Device Manager and all connected serial ports are listed under "Ports (COM & LPT)" section.*
-*To fix the line feeds you may want to go into configuration and under "Terminal" select "implicit CR in every LF".*
+> ℹ️  On Windows, we recommend to use [PuTTY](https://www.putty.org/) to connect to serial ports.
+> Select "Serial" as "Connection type", put the COM port in the "Serial line" text field, and set "Speed" to 921600.
+> To find out what serial ports are available, you can open Device Manager and all connected serial ports are listed under "Ports (COM & LPT)" section.
+> To fix the line feeds you may want to go into configuration and under "Terminal" select "implicit CR in every LF".
 
-When running the `sonata_simple_demo.uf2`, you should see the following console output as well as some flashing LEDs and LCD activity.
+When running the `sonata_simple_demo.slot1.uf2`, you should see the following console output as well as some flashing LEDs and LCD activity.
 This UART output only gets printed once, so you may need to press the reset button (SW5) to see the output if you attach your console after programming.
 
 ```
+bootloader: Sonata system git SHA: <<SOME_16_HEX_HASH>>
+bootloader: Selected software slot: 1
 bootloader: Loading software from flash...
 bootloader: Booting into program, hopefully.
 Led Walk Raw: Look pretty LEDs!
