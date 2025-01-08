@@ -1,15 +1,13 @@
 # Sonata Software
 
 This repository contains software, build flows and examples for the [Sonata System][] running on the [Sonata PCB][].
+For a guide on how to get up and running on building software for the sonata board see the [getting started guide][].
+After you are all set up, take a look at the [exercises][].
 
 [sonata system]: https://github.com/lowRISC/sonata-system
 [sonata pcb]: https://github.com/newaetech/sonata-pcb
-
-For a guide on how to get up and running on building software for the sonata board see the [getting started guide][].
-After you are all set up, take a look at the [hardware access control exercise][].
-
 [getting started guide]: ./doc/getting-started.md
-[hardware access control exercise]: ./exercises/hardware_access_control/README.md
+[exercises]: ./exercises/README.md
 
 ## Orientation
 
@@ -22,7 +20,7 @@ The [`lowrisc/cheriot-rtos`][], included in this repository as a submodule, is a
 Other repositories of note:
 - [`sonata-system`][]: holds the Sonata system RTL and bootloader which come together to generate the bitstream.
 - [`sonata-rp2040`][]: The firmware that is running on the Sonata's RP2040 microcontroller and emulates the 'SONATA' drive when you plug it into your computer.
-- [`CHERIoT-Platform/llvm-project`][]: The CHERIoT compiler toolchain.
+- [`CHERIoT-Platform/llvm-project`][]: The CHERIoT LLVM compiler toolchain.
 - [`cheriot-audit`][]: A tool to explore and verify the relationships between CHERIoT RTOS components.
 - [`CHERIoT-Platform/book`][]: The source of the [CHERIoT Programmer's Guide][].
 
