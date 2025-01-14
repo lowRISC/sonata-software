@@ -2,7 +2,7 @@
 Copyright lowRISC Contributors.
 SPDX-License-Identifier: Apache-2.0
 -->
-# Firmware Auditing Exercise
+# Firmware auditing exercise
 
 First, make sure to go to the [building the exercises][] section to see how the exercises are built.
 
@@ -42,10 +42,10 @@ A very simple function `is_sealed_capability` is then defined, which takes the J
 
 Next, we use Rego's functionality to create a rule `no_sealed_capabilities_exist`, which should evaluate to `true` only if no sealed capabilities are used in any of the firmware's compartments.
 To do this, we perform a list comprehension, unifying with a wildcard variable to iterate over and filter all imported capabilities of all compartments in the firmware.
-We then use the built-in`count` function to ensure that the resulting array is empty.
+We then use the built-in `count` function to ensure that the resulting array is empty.
 
 Skipping to the end of the file, we can then create a simple Boolean `valid` rule which corresponds to whether `no_sealed_capabilities_exist` is defined or not.
-To convert the undefined value to a Boolean, we use the `default` keyword, which lets us provide a `false` asignment as a fall-through if no other rule definitions match.
+To convert the undefined value to a Boolean, we use the `default` keyword, which lets us provide a `false` assignment as a fall-through if no other rule definitions match.
 
 We can run this policy on our example firmware using the following command:
 
@@ -56,7 +56,7 @@ cheriot-audit --board=cheriot-rtos/sdk/boards/sonata.json \
               --query='data.no_seal.valid'
 ```
 
-Because `sealed_capability.cc` currently doesn't use any sealed capabilities, this policy should evalute to `true`.
+Because `sealed_capability.cc` currently doesn't use any sealed capabilities, this policy should evaluate to `true`.
 
 Now, navigate to [`sealed_capability.cc`][] and comment out or remove the line `uint32_t arr[ArrSize];`.
 Then, uncomment or add the line `uint32_t *arr = new uint32_t[ArrSize];`.
@@ -67,7 +67,7 @@ Rebuilding the exercises (using `xmake -P exercises`) and running the same comma
 
 However, it may not immediately be clear why the policy failed.
 When designing such a policy, you can see that it may be helpful to have a rule that lets us inspect the details of any sealed capabilities.
-We do this with our final `sealed_capability_info` rule, which constructs ojects storing the contents, key, and compartment of each sealed capability.
+We do this with our final `sealed_capability_info` rule, which constructs objects storing the contents, key, and compartment of each sealed capability.
 
 > ℹ️ Note the use of unification here.
 > We iterate over `input.compartments` with the non-defined variable `owner`, and then map the value that is bound this variable to the `owner` field of our new object.
@@ -80,7 +80,7 @@ You should see an output that looks something like this:
   "key":"MallocKey", "owner":"sealed_capability"}]
 ```
 
-This tells us where the sealed capabilty in our firmware originates - a static sealed object owned by our `sealed_capability` compartment, which is used by the RTOS' allocator for authorising memory allocation.
+This tells us where the sealed capability in our firmware originates - a static sealed object owned by our `sealed_capability` compartment, which is used by the RTOS' allocator for authorising memory allocation.
 Try experimenting by adding more functionality to this toy example!
 For example, try creating your own sealed capabilities and check the result.
 You might also try investigating the values of the different rules that we've made, and filtering or auditing other properties of the capabilities.
@@ -101,7 +101,7 @@ We then start by defining which functions in which compartments are allowed to r
 We do this by using a list, with each item in this list containing the name of the compartment, and a list of the function signatures that can run with interrupts disabled.
 
 We allow two specific functions to run without interrupts in the `disable_interrupts` compartment, and allow none to run in the `bad_disable_interrupts` compartment.
-Despite this, if you check the the source files, `not_allowed` is actually running with interrupts disabled.
+Despite this, if you check the source files, `not_allowed` is actually running with interrupts disabled.
 In a practical scenario, `disable_interrupts` might be a trusted library, where `bad_disable_interrupts` is only allowed to call functions from `disable_interrupts`, and not disable interrupts itself.
 
 We can then use this list to construct a smaller set containing just the compartments we expect to be present, which will be useful as the first condition that we want to check is that all (and only) the required compartments are present.
