@@ -72,29 +72,3 @@ firmware("hardware_access_part_2")
         }, {expand = false})
     end)
     after_link(convert_to_uf2)
-
-
--- Part 3
-firmware("hardware_access_part_3")
-    add_deps("freestanding", "debug")
-    add_deps("led_walk_raw", "led_walk_dynamic")
-    on_load(function(target)
-        target:values_set("board", "$(board)")
-        target:values_set("threads", {
-            {
-                compartment = "led_walk_raw",
-                priority = 2,
-                entry_point = "start_walking",
-                stack_size = 0x200,
-                trusted_stack_frames = 1
-            },
-            {
-                compartment = "led_walk_dynamic",
-                priority = 3,
-                entry_point = "start_walking",
-                stack_size = 0x400,
-                trusted_stack_frames = 3
-            },
-        }, {expand = false})
-    end)
-    after_link(convert_to_uf2)
