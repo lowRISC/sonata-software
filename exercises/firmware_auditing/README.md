@@ -128,9 +128,8 @@ It is not always trivial to manually demangle these symbols.
 Luckily for us, the libstdc++ cross-vendor C++ ABI defines a function `abi::__cxa_demangle` to help demangle these names, and `cheriot-audit` wraps and exposes this through the built-in `export_entry_demangle` function.
 This function takes the compartment name and export symbol as its two arguments.
 
-> ℹ️ The next rule `patched_export_entry_demangle` is not relevant to this example.
+> ℹ️ You don't need to know how the next rule `patched_export_entry_demangle` works for this example.
 > It simply manually adds support for an additional library export name mangling prefix that is not currently checked for.
-> However, it is a useful example of string operations in Rego, as well as another case of rules with multiple definitions.
 > We have one rule for export symbols that start with `__library_export_`, converting this to an `__export_` prefix, and otherwise we simply pass the symbol to `export_entry_demangle`.
 
 Now that we have a method to filter for exported symbols with disabled interrupts, and the means to demangle names, we can create a rule to check that a compartment only has the specified disabled interrupts.
