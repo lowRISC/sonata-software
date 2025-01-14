@@ -18,6 +18,7 @@ required_disabled_interrupts := [
         #"functions": {"not_allowed()"}
     }
 ]
+
 required_compartments := {x.compartment | x = required_disabled_interrupts[_]}
 
 all_exports := [
@@ -38,6 +39,7 @@ patched_export_entry_demangle(compartment, export_symbol) := demangled {
     modified_export = concat("", ["__export_", substring(export_symbol, 17, -1)])
     demangled := export_entry_demangle(compartment, modified_export)
 }
+
 patched_export_entry_demangle(compartment, export_symbol) := demangled {
     not startswith(export_symbol, "__library_export_")
     demangled := export_entry_demangle(compartment, export_symbol)
