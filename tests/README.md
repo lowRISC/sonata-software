@@ -1,4 +1,4 @@
-# Sonata Software Tests
+# Sonata software tests
 
 These tests test the sonata system's hardware.
 They are simple, only intended to catch regressions.

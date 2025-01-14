@@ -1,4 +1,4 @@
-# Sonata Software
+# Sonata software
 
 This repository contains software, build flows and examples for the [Sonata System][] running on the [Sonata PCB][].
 For a guide on how to get up and running on building software for the sonata board see the [getting started guide][].
