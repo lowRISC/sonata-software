@@ -187,11 +187,11 @@ Fortunately, `cheriot-audit` defines two functions that do exactly this! `data.r
 There is also a helpful built-in rule `data.rtos.all_sealed_capabilities_are_valid` which decodes all allocator capabilities to ensure that they are all valid for auditing.
 
 Using these built-in functions, we define a rule `allocator_capabilities` which filters through the input for allocator capabilities, and augments each with information about their compartment.
-This lets us define our first condition `all_allocations_less_than(limit)` as a parameterised function.
+This lets us define our first condition `all_allocations_leq(limit)` as a parameterised function.
 This rule ensures that no individual allocator capability is greater than a given limit, ensuring that only a certain amount of memory can be allocated in a single `malloc`.
 
 Next, we can create a rule to extract the list of unique compartments that allocate on the heap.
-We can do this using Rego's `contains` keyword and some term-matching syntax to extract the `"owner"` field.
+We can do this using Rego's `contains` keyword and some term-matching syntax to extract the "owner" field.
 Using this, we now have a construct which we can use to sum all quotas within a given compartment.
 By using the built-in `sum` function, `allocator_capabilities`, and `unique_allocator_compartments`, we can define an object that maps from a given compartment to its total allocation quota.
 
@@ -218,15 +218,7 @@ cheriot-audit --board=cheriot-rtos/sdk/boards/sonata.json \
 In this instance, the output of this test should be `true`, as our defined firmware meets these properties.
 You can check this yourself by looking at the source files and the values of the intermediary rules.
 To test that the policy is working, you can either change the amount of memory allocated by the firmware (making sure to rebuild), or change the policy itself to enforce lower limits.
-For example, changing the line
-```
-all_allocations_leq(20480)  # 20 KiB
-```
-to the new line
-```
-all_allocations_leq(10240)  # 10 KiB
-```
-should cause the `valid` rule of the policy to evaluate to `false`, because the `malloc_many` compartment contains a capability that permits the allocation of 16 KiB at once, which is greater than our specified limits.
+For example, changing the line `all_allocations_leq(20480) # 20 KiB` to `all_allocations_leq(10240) # 10 KiB` should cause the `valid` rule of the policy to evaluate to `false`, because the `malloc_many` compartment contains a capability that permits the allocation of 16 KiB at once, which is greater than our specified limit.
 
 Try playing around with these values to convince yourself that the policy is working as we expect it to.
 
@@ -245,4 +237,4 @@ There are other pieces of information that the linker exposes, which we do not u
 
 [hardware access control]: ../hardware_access_control/README.md#part-3
 
-Other ideas might include writing a policy that combines the above exercises, or integrating it into the `xmake` build system so that a given policy is automatically run when building your firmware image.
+Another idea is to write a policy that combines the above exercises, or integrating it into the `xmake` build system so that a given policy is automatically run when building your firmware image.
