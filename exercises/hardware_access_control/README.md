@@ -18,16 +18,17 @@ For this exercise, when the [`xmake.lua`][] build file is mentioned `exercises/h
 
 Let's start with the firmware image called `hardware_access_part_1` in the [`xmake.lua`][] file.
 This image has two threads running two compartments: `blinky_raw` and `led_walk_raw`.
-`blinky_raw` simply toggles an LED and `led_walk_raw` walks through all the LEDs toggling them as it goes.
+Compartment `blinky_raw` simply toggles an LED and compartment `led_walk_raw` walks through all the LEDs toggling them as it goes.
 The sources of these compartments can be found in [`exercises/hardware_access_control/part_1/`][].
 
 [`exercises/hardware_access_control/part_1/`]: https://github.com/lowRISC/sonata-software/tree/main/exercises/hardware_access_control/part_1
 
-Let's look inside `blinky_raw`.
+Let's look inside [`blinky_raw`][].
 It uses the RTOS' `MMIO_CAPABILITY` macro to get the capability that grants it access to the GPIO MMIO region.
 This magic macro will handle adding the MMIO region to the compartment's imports and mapping it to a type, in this case `SonataGpioBoard` (from [`platform-gpio.hh`][]).
 *For more information on this macro, see [the drivers section of CHERIoT programmers guide][].*
 
+[`blinky_raw`]: ./part_1/blinky_raw.cc
 [the drivers section of CHERIoT programmers guide]: https://cheriot.org/book/top-drivers-top.html#mmio_capabilities
 [`platform-gpio.hh`]: ../../cheriot-rtos/sdk/include/platform/sunburst/platform-gpio.hh
 
@@ -55,7 +56,7 @@ They are purely used as a proof of LED ownership.
 
 [`cheriot-rtos/examples/05.sealing/`]: ../../cheriot-rtos/examples/05.sealing/
 
-`blinky_raw` and `led_walk_raw` have been adapted to use this new compartment and renamed `blinky_dynamic` and `led_walk_dynamic`.
+For this part, `blinky_raw` and `led_walk_raw` have been adapted to use this new compartment and renamed `blinky_dynamic` and `led_walk_dynamic`.
 You'll notice these compartments use `add_deps` in the [`xmake.lua`][] file to declare that they depend on `gpio_access`.
 Take a moment to look at the sources for these compartments in [`exercises/hardware_access_control/part_2/`][].
 
@@ -79,9 +80,9 @@ Not only will both compartments run happily, but `led_walk_dynamic` will output 
 [`led_walk_dynamic.cc`]: ../../exercises/hardware_access_control/part_2/led_walk_dynamic.cc
 
 ```
-Led Walk Dynamic:           LED 3 Handle: 0x1087d0 (v:1 0x1087d0-0x1087e0 l:0x10 o:0xc p: G RWcgm- -- ---)
-Led Walk Dynamic: Destroyed LED 3 Handle: 0x1087d0 (v:1 0x1087d0-0x1087e0 l:0x10 o:0xc p: G RWcgm- -- ---)
-Led Walk Dynamic:       New LED 3 Handle: 0x108878 (v:1 0x108878-0x108888 l:0x10 o:0xc p: G RWcgm- -- ---)
+Led Walk Dynamic:           LED 3 Handle: 0x1024d0 (v:1 0x1024d0-0x1024e0 l:0x10 o:0xc p: G RWcgm- -- ---)
+Led Walk Dynamic: Destroyed LED 3 Handle: 0x1024d0 (v:0 0x1024d0-0x1024e0 l:0x10 o:0xc p: G RWcgm- -- ---)
+Led Walk Dynamic:       New LED 3 Handle: 0x102578 (v:1 0x102578-0x102588 l:0x10 o:0xc p: G RWcgm- -- ---)
 ```
 
 These come from some superfluous lines in [`led_walk_dynamic.cc`][], which release ownership of user LED 3 only to later reacquire ownership.
@@ -105,13 +106,13 @@ In other words, how do we ensure that only `gpio_access` has access to the GPIOs
 
 Luckily the linker has all the information needed to check which compartments can access the GPIO MMIOs.
 It outputs this information in a JSON report with the rest of the build artefacts.
-To automate checking this report, we can use `cheriot-audit` which should already be in your path.
+To automate checking this report, we can use CHERIoT Audit which should already be in your path.
 
-`cheriot-audit` allows you to query the JSON report and assert certain rules are followed.
+CHERIoT Audit allows you to query the JSON report and assert certain rules are followed.
 You do this with a language called [Rego][], but don't worry you won't have to learn it for this exercise.
 There are some pre-written rules in the [`gpio_access.rego`] module.
 Let's first look at `only_gpio_access_has_access`.
-It uses `mmio_allow_list` from the compartment package included in `cheriot-audit` to check that only the `gpio_access` compartment has access to the GPIO MMIOs.
+It uses `mmio_allow_list` from the compartment package included in CHERIoT Audit to check that only the `gpio_access` compartment has access to the GPIO MMIOs.
 If we run this on the part 2 firmware image's JSON report, it will return true.
 However, when run against the part 1 firmware image's report it will return false, because the `blinky_raw` and `led_walk_raw` are not in the allow list.
 
@@ -147,7 +148,7 @@ cheriot-audit \
 The above should return true as both compartments are in the allow list.
 Try removing one of the compartments from the allow list given to `compartment_allow_list` in [`gpio_access.rego`][] and check the result of the above command is no longer true.
 
-One can browse the other functions available as part of the compartment package in [`cheriot-audit`'s readme][compartment package].
+One can browse the other functions available as part of the compartment package in [CHERIoT Audit's readme][compartment package].
 
 [compartment package]: https://github.com/CHERIoT-Platform/cheriot-audit/blob/main/README.md#the-compartment-package
 
