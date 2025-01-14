@@ -2,8 +2,9 @@
 Copyright lowRISC Contributors.
 SPDX-License-Identifier: Apache-2.0
 -->
-# Sonata Software Exercises
-## Building the Exercises
+# Sonata software exercises
+
+## Building the exercises
 
 Assuming you've run through the [getting started guide][], you will have ran `xmake -P examples` and built the example firmware images.
 To build all the exercises, simply substitute `examples` for `exercises`.

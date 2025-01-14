@@ -1,5 +1,6 @@
 # Exploring CHERIoT RTOS
-## CHERIoT RTOS Orientation
+
+## CHERIoT RTOS orientation
 All the software in this repository runs on the CHERIoT RTOS, which is pulled in at the root of this repository as a submodule named [`cheriot-rtos`].
 The [CHERIoT Programmer's Guide] contains most of what a programmer would need to know to use the RTOS.
 
@@ -13,7 +14,7 @@ The drivers (structures that map onto a peripherals' MMIO) add functionality can
 To explore the various utility libraries available, look through [`cheriot-rtos/sdk/include/`](../cheriot-rtos/sdk/include/).
 When first starting to explore capabilities, the [`CHERI::Capability`](../cheriot-rtos/sdk/include/cheri.hh) class is useful for pointer introspection.
 
-## Build System
+## Build system
 
 The CHERIoT RTOS uses [xmake][] as it's build system.
 The main rules you'll use are *compartment* and *library*, for creating compartments and libraries, as well as the *firmware* rule for creating a firmware image.

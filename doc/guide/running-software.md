@@ -1,4 +1,4 @@
-# Running Sonata Software
+# Running Sonata software
 
 You can either run software [on the sonata FPGA board](#running-on-the-sonata-fpga) or [in the sonata simulator](#running-in-the-simulator).
 We recommend you focus on the FPGA as you get started and return to the simulator if you find it useful later.

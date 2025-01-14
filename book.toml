@@ -5,7 +5,7 @@
 language = "en"
 multilingual = false
 src = "."
-title = "Sonata Software"
+title = "Sonata software"
 
 [output.html]
 git-repository-url = "https://github.com/lowRISC/sonata-software"

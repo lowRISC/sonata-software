@@ -1,7 +1,7 @@
 # Copyright lowRISC Contributors.
 # SPDX-License-Identifier: Apache-2.0
 {
-  description = "Sonata Software";
+  description = "Sonata software";
   inputs = {
     sonata-system.url = "github:lowRISC/sonata-system";
     lowrisc-nix.follows = "sonata-system/lowrisc-nix";

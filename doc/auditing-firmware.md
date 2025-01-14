@@ -1,4 +1,4 @@
-# Auditing Firmware
+# Auditing firmware
 
 This documentation provides an introduction to CHERIoT Audit, alongside a quick guide on developing auditing policies with Rego.
 You can find more comprehensive information about these tools in their relevant documentation:

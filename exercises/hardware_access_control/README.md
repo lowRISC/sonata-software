@@ -2,7 +2,7 @@
 Copyright lowRISC Contributors.
 SPDX-License-Identifier: Apache-2.0
 -->
-# Hardware Access Control Exercise
+# Hardware access control exercise
 
 If you haven't already, please go to the '[building the exercises][]' section to see how the exercises are built.
 
