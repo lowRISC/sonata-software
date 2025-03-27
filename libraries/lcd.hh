@@ -26,21 +26,26 @@ namespace sonata::lcd
 		void __cheri_libcall lcd_destroy(LCD_Interface *, St7735Context *);
 	} // namespace internal
 
+	struct Size
+	{
+		uint32_t width;
+		uint32_t height;
+	};
+
 	struct Point
 	{
 		uint32_t x;
 		uint32_t y;
 
 		static const Point ORIGIN;
+
+		static Point offset(Point base, Size offset)
+		{
+			return {base.x + offset.width, base.y + offset.height};
+		}
 	};
 
 	inline constexpr const Point Point::ORIGIN{0, 0};
-
-	struct Size
-	{
-		uint32_t width;
-		uint32_t height;
-	};
 
 	struct Rect
 	{
