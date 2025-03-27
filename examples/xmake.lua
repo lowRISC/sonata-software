@@ -17,7 +17,7 @@ includes("all", "snake", "automotive")
 
 -- A simple demo using only devices on the Sonata board
 firmware("sonata_simple_demo")
-    add_deps("freestanding", "led_walk_raw", "echo", "lcd_test")
+    add_deps("freestanding", "led_walk_raw", "echo", "lcd_test", "rgbled_lerp")
     on_load(function(target)
         target:values_set("board", "$(board)")
         target:values_set("threads", {
@@ -40,6 +40,13 @@ firmware("sonata_simple_demo")
                 priority = 2,
                 entry_point = "lcd_test",
                 stack_size = 0x1000,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "rgbled_lerp",
+                priority = 2,
+                entry_point = "lerp_rgbleds",
+                stack_size = 0x200,
                 trusted_stack_frames = 1
             }
         }, {expand = false})
