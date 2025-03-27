@@ -53,6 +53,44 @@ firmware("sonata_simple_demo")
     end)
     after_link(convert_to_uf2)
 
+-- A simple demo using only devices on the Sonata XL board
+firmware("sonata_xl_simple_demo")
+    add_deps("freestanding", "led_walk_raw", "echo", "lcd_test_xl", "rgbled_lerp")
+    on_load(function(target)
+        target:values_set("board", "$(board)")
+        target:values_set("threads", {
+            {
+                compartment = "led_walk_raw",
+                priority = 2,
+                entry_point = "start_walking",
+                stack_size = 0x200,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "echo",
+                priority = 1,
+                entry_point = "entry_point",
+                stack_size = 0x200,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "lcd_test_xl",
+                priority = 2,
+                entry_point = "lcd_test_xl",
+                stack_size = 0x1000,
+                trusted_stack_frames = 1
+            },
+            {
+                compartment = "rgbled_lerp",
+                priority = 2,
+                entry_point = "lerp_rgbleds",
+                stack_size = 0x200,
+                trusted_stack_frames = 1
+            }
+        }, {expand = false})
+    end)
+    after_link(convert_to_uf2)
+
 -- A demo that expects additional devices such as I2C devices
 firmware("sonata_demo_everything")
     add_deps("freestanding", "led_walk_raw", "echo", "lcd_test", "i2c_example")

@@ -12,6 +12,10 @@ compartment("lcd_test")
     add_deps("lcd")
     add_files("lcd_test.cc")
 
+compartment("lcd_test_xl")
+    add_deps("lcd")
+    add_files("lcd_test_xl.cc")
+
 compartment("i2c_example")
     add_deps("debug")
     add_files("i2c_example.cc")
