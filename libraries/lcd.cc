@@ -44,7 +44,9 @@ void set_chip_select(uint8_t chipSelect, bool value)
 }
 namespace sonata::lcd::internal
 {
-	void __cheri_libcall lcd_init(LCD_Interface *lcdIntf, St7735Context *ctx)
+	void __cheri_libcall lcd_init(LCD_Interface  *lcdIntf,
+	                              St7735Context  *ctx,
+	                              LCD_Orientation rot)
 	{
 		// Set the initial state of the LCD control pins.
 		set_chip_select(LcdDcPin, false);
@@ -76,7 +78,7 @@ namespace sonata::lcd::internal
 		lcd_st7735_init(ctx, lcdIntf);
 
 		// Set the LCD orentiation.
-		lcd_st7735_set_orientation(ctx, LCD_Rotate180);
+		lcd_st7735_set_orientation(ctx, rot);
 
 		lcd_st7735_clean(ctx);
 	}
