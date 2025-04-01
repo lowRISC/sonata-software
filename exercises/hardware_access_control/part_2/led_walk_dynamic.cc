@@ -12,7 +12,7 @@ static constexpr uint32_t NumLeds = 8;
 
 void __cheri_compartment("led_walk_dynamic") start_walking()
 {
-	std::vector<LedHandle *> leds;
+	std::vector<SealedLedHandle> leds;
 	for (uint8_t num = 0; num < NumLeds; ++num)
 	{
 		auto led = acquire_led(num);

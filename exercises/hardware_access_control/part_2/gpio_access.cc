@@ -40,7 +40,7 @@ static auto gpio()
 /**
  * Acquire a handle to the LED at the given index.
  */
-auto acquire_led(uint8_t index) -> std::optional<LedHandle *>
+auto acquire_led(uint8_t index) -> std::optional<SealedLedHandle>
 {
 	if (NumLeds <= index)
 		return {};
@@ -55,7 +55,7 @@ auto acquire_led(uint8_t index) -> std::optional<LedHandle *>
 	// pointing to this allocation
 	auto [unsealed, sealed] =
 	  blocking_forever<token_allocate<LedHandle>>(MALLOC_CAPABILITY, key());
-	if (sealed == nullptr)
+	if (!sealed.is_valid())
 	{
 		return {};
 	}
@@ -66,20 +66,21 @@ auto acquire_led(uint8_t index) -> std::optional<LedHandle *>
 /**
  * Unseal a handle with our led token key.
  */
-static auto unseal_handle(LedHandle *handle) -> std::optional<LedHandle *>
+static auto unseal_handle(SealedLedHandle handle)
+  -> std::optional<LedHandle const *>
 {
-	const auto Unsealed = token_unseal(key(), Sealed<LedHandle>{handle});
-	if (nullptr == Unsealed)
+	const auto *unsealed = token_unseal(key(), Sealed<LedHandle>{handle});
+	if (nullptr == unsealed)
 	{
 		return {};
 	}
-	return Unsealed;
+	return unsealed;
 }
 
 /**
  * Toggle the LED of the given handle.
  */
-bool toggle_led(LedHandle *handle)
+bool toggle_led(SealedLedHandle handle)
 {
 	if (auto unsealedHandle = unseal_handle(handle))
 	{
@@ -93,7 +94,7 @@ bool toggle_led(LedHandle *handle)
 /**
  * Relinquish ownership of the LED of the given handle.
  */
-void release_led(LedHandle *handle)
+void release_led(SealedLedHandle handle)
 {
 	if (auto unsealedHandle = unseal_handle(handle))
 	{
@@ -102,5 +103,5 @@ void release_led(LedHandle *handle)
 		ledTaken &= ~LedBit;
 	}
 	// The allocator checks validity before destroying so we don't have to.
-	token_obj_destroy(MALLOC_CAPABILITY, key(), reinterpret_cast<SObj>(handle));
+	token_obj_destroy(MALLOC_CAPABILITY, key(), handle);
 }
