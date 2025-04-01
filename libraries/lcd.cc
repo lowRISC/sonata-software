@@ -8,21 +8,23 @@ template<typename T>
 using Cap = CHERI::Capability<T>;
 
 using namespace sonata::lcd;
+using LcdPwm = SonataPulseWidthModulation::LcdBacklight;
+using LcdSpi = SonataSpi::Lcd;
 
 /**
  * Helper. Returns a pointer to the SPI device.
  */
-[[nodiscard, gnu::always_inline]] static Cap<volatile SonataSpi> spi()
+[[nodiscard, gnu::always_inline]] static Cap<volatile LcdSpi> spi()
 {
-	return MMIO_CAPABILITY(SonataSpi, spi_lcd);
+	return MMIO_CAPABILITY(LcdSpi, spi_lcd);
 }
 
 /**
  * Helper. Returns a pointer to the LCD's backlight PWM device.
  */
-[[nodiscard, gnu::always_inline]] static Cap<volatile SonataLcdPwm> pwm_bl()
+[[nodiscard, gnu::always_inline]] static Cap<volatile LcdPwm> pwm_bl()
 {
-	return MMIO_CAPABILITY(SonataLcdPwm, pwm_lcd);
+	return MMIO_CAPABILITY(LcdPwm, pwm_lcd);
 }
 
 static constexpr uint8_t LcdCsPin  = 0;
@@ -37,7 +39,8 @@ static constexpr uint8_t LcdRstPin = 2;
 void set_chip_select(uint8_t chipSelect, bool value)
 {
 	const uint32_t CsBit = (1u << chipSelect);
-	spi()->cs            = value ? (spi()->cs | CsBit) : (spi()->cs & ~CsBit);
+	spi()->chipSelects =
+	  value ? (spi()->chipSelects | CsBit) : (spi()->chipSelects & ~CsBit);
 }
 namespace sonata::lcd::internal
 {
@@ -45,7 +48,7 @@ namespace sonata::lcd::internal
 	{
 		// Set the initial state of the LCD control pins.
 		set_chip_select(LcdDcPin, false);
-		pwm_bl()->output_set(/*index =*/0, /*period=*/1, /*duty_cycle=*/255);
+		pwm_bl()->output_set(/*period=*/1, /*duty_cycle=*/255);
 		set_chip_select(LcdCsPin, false);
 
 		// Initialise SPI driver.
@@ -83,7 +86,7 @@ namespace sonata::lcd::internal
 		// Hold LCD in reset.
 		set_chip_select(LcdRstPin, false);
 		// Turn off backlight.
-		pwm_bl()->output_set(/*index =*/0, /*period=*/0, /*duty_cycle=*/0);
+		pwm_bl()->output_set(/*period=*/0, /*duty_cycle=*/0);
 	}
 } // namespace sonata::lcd::internal
 
