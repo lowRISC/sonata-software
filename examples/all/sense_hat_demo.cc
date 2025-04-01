@@ -251,8 +251,7 @@ void __cheri_compartment("sense_hat_demo") test()
 		/* If a joystick press is detected during an update, switch the demo
 		type. This is not polled in a while waiting between updates, so a press
 		can be missed between updates. */
-		bool joystickIsPressed = static_cast<uint16_t>(gpio->read_joystick()) &
-		                         static_cast<uint16_t>(SonataJoystick::Pressed);
+		bool joystickIsPressed = gpio->read_joystick().is_pressed();
 		if (!joystickPrevPressed && joystickIsPressed)
 		{
 			currentDemo =

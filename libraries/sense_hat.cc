@@ -21,7 +21,7 @@ void __cheri_libcall Internal::init_i2c()
 	in case the I2C Controller gets into a bad state while loading demos. */
 	i2c()->control = i2c()->control & ~(OpenTitanI2c::ControlEnableHost |
 	                                    OpenTitanI2c::ControlEnableTarget);
-	if (i2c()->interrupt_is_asserted(OpenTitanI2cInterrupt::ControllerHalt))
+	if (i2c()->interrupt_is_asserted(OpenTitanI2c::Interrupt::ControllerHalt))
 	{
 		i2c()->reset_controller_events();
 	}
