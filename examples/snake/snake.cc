@@ -15,6 +15,8 @@
 using Debug = ConditionalDebug<true, "Snake">;
 using namespace sonata::lcd;
 using namespace CHERI;
+using JoystickDirection = SonataGpioBoard::JoystickDirection;
+using JoystickValue     = SonataGpioBoard::JoystickValue;
 
 // Control game speed
 static constexpr uint32_t MillisecondsPerFrame = 400;
@@ -50,6 +52,10 @@ enum class Direction
 	DOWN  = 2,
 	LEFT  = 3
 };
+
+static constexpr auto AllJoystickDirections = static_cast<JoystickDirection>(
+  JoystickDirection::Left | JoystickDirection::Up | JoystickDirection::Pressed |
+  JoystickDirection::Down | JoystickDirection::Right);
 
 // The allocator rounds heap allocations to a multiple of 8 bytes.
 // Tile is a uint64_t so the allocated game space array is guaranteed to be a
@@ -129,7 +135,7 @@ class SnakeGame
 		Size spacedTileSize = {TileSize.width + TileSpacing.width,
 		                       TileSize.height + TileSpacing.height};
 		gameSize            = {displaySize.width / spacedTileSize.width,
-                    displaySize.height / spacedTileSize.height};
+		                       displaySize.height / spacedTileSize.height};
 		gamePadding         = {
           displaySize.width % spacedTileSize.width + TileSpacing.width,
           displaySize.height % spacedTileSize.height + TileSpacing.height};
@@ -191,17 +197,17 @@ class SnakeGame
 		}
 
 		// Busy-wait for a valid joystick input
-		SonataJoystick joystickInp, noInput = static_cast<SonataJoystick>(0x0);
-		bool           waitingForInput = true;
+		bool waitingForInput = true;
 		while (waitingForInput)
 		{
 			thread_millisecond_wait(50);
-			joystickInp = gpio->read_joystick();
-			if (!StartOnAnyInput && joystickInp == SonataJoystick::Pressed)
+			auto joystickInput = gpio->read_joystick();
+			if (!StartOnAnyInput && joystickInput.is_pressed())
 			{
 				waitingForInput = false;
 			}
-			else if (StartOnAnyInput && joystickInp != noInput)
+			else if (StartOnAnyInput &&
+			         joystickInput.is_direction_pressed(AllJoystickDirections))
 			{
 				waitingForInput = false;
 			}
@@ -213,22 +219,6 @@ class SnakeGame
 	};
 
 	/**
-	 * @brief Compares the relevant bits of the input joystick state and the
-	 * given direction to determine if the joystick is held in that direction or
-	 * not.
-	 *
-	 * @param joystick The joystick GPIO input
-	 * @param direction The joystick direction to test for
-	 * @return true if the joystick is held in that direction, false otherwise.
-	 */
-	bool joystick_in_direction(SonataJoystick joystick,
-	                           SonataJoystick direction)
-	{
-		return (static_cast<uint16_t>(joystick) &
-		        static_cast<uint16_t>(direction)) > 0;
-	};
-
-	/**
 	 * @brief Reads the GPIO output to find the current joystick output, and
 	 * translates it into a relevant direction. Returns the previous direction
 	 * if no current output.
@@ -237,7 +227,7 @@ class SnakeGame
 	 */
 	Direction read_joystick(volatile SonataGpioBoard *gpio)
 	{
-		SonataJoystick joystickState = gpio->read_joystick();
+		JoystickValue joystickState = gpio->read_joystick();
 		// The joystick can be in many possible directions - we check directions
 		// in order relative to the current direction so that input prioritises
 		// turning left/right over staying in the same direction. This avoids
@@ -245,10 +235,10 @@ class SnakeGame
 		// smoother to play.
 		Direction directions[4] = {
 		  Direction::UP, Direction::RIGHT, Direction::DOWN, Direction::LEFT};
-		SonataJoystick joystickStates[4] = {SonataJoystick::Up,
-		                                    SonataJoystick::Right,
-		                                    SonataJoystick::Down,
-		                                    SonataJoystick::Left};
+		JoystickDirection joystickStates[4] = {JoystickDirection::Up,
+		                                       JoystickDirection::Right,
+		                                       JoystickDirection::Down,
+		                                       JoystickDirection::Left};
 
 		uint8_t base;
 		for (base = 0; base < 4; base++)
@@ -266,7 +256,7 @@ class SnakeGame
 				continue; // Disallow moving in the opposite direction
 			}
 			uint8_t idx = (base + offset) % 4;
-			if (joystick_in_direction(joystickState, joystickStates[idx]))
+			if (joystickState.is_direction_pressed(joystickStates[idx]))
 			{
 				return directions[idx];
 			}
