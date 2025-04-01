@@ -82,7 +82,7 @@ To determine the mapping between the pin names in the pinmux documentation and t
 
 ## Peripheral Device Details
 
-The device names used here are those given the CHERIoT RTOS Sonata board description file found in [cheriot-rtos/sdk/boards/sonata-prerelease.json][].
+The device names used here are those given the CHERIoT RTOS Sonata board description file found in [cheriot-rtos/sdk/boards/sonata-1.1.json][].
 For each peripheral type details of the instances available and what pins they can mux to are given below along with a link to the driver file used for that peripheral.
 
 ### SPI
@@ -190,7 +190,7 @@ However there is some test software used for Sonata testing in the sonata-system
 [pinmux driver]: https://github.com/lowRISC/cheriot-rtos/tree/a4b6ab0a80df3bca696cd9c598b93fa2deebef4d/sdk/include/platform/sunburst/platform-pinmux.hh
 [MMIO_CAPABILITY]: https://cheriot.org/book/language_extensions.html#_importing_mmio_access
 [sonata-software/examples/all/i2c_example.cc]: https://github.com/lowRISC/sonata-software/blob/a88d6b78405743956cc2aa0a5c272e87dc44b11d/examples/all/i2c_example.cc
-[cheriot-rtos/sdk/boards/sonata-prerelease.json]: https://github.com/lowRISC/cheriot-rtos/tree/a4b6ab0a80df3bca696cd9c598b93fa2deebef4d/sdk/boards/sonata-prerelease.json
+[cheriot-rtos/sdk/boards/sonata-1.1.json]: https://github.com/lowRISC/cheriot-rtos/tree/a4b6ab0a80df3bca696cd9c598b93fa2deebef4d/sdk/boards/sonata-1.1.json
 [Arduino Shield]: https://commons.wikimedia.org/wiki/File:Pinout_of_ARDUINO_Board_and_ATMega328PU.svg
 [Raspberry PI HAT]: https://pinout.xyz/
 [PMOD]: https://digilent.com/reference/_media/reference/pmod/pmod-interface-specification-1_3_1.pdf

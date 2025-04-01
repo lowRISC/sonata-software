@@ -10,7 +10,7 @@ includes(path.join(sdkdir, "lib"))
 includes("../common.lua")
 
 option("board")
-    set_default("sonata-prerelease")
+    set_default("sonata-1.1")
 
 library("uart_tests")
     set_default(false)
