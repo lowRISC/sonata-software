@@ -11,6 +11,6 @@ includes("../libraries")
 includes("../common.lua")
 
 option("board")
-    set_default("sonata-prerelease")
+    set_default("sonata-1.1")
 
 includes("hardware_access_control", "firmware_auditing")

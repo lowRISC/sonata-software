@@ -122,13 +122,13 @@ However, when run against the part 1 firmware image's report it will return fals
 ```sh
 # This should return true
 cheriot-audit \
-    --board cheriot-rtos/sdk/boards/sonata-prerelease.json \
+    --board cheriot-rtos/sdk/boards/sonata-1.1.json \
     --module exercises/hardware_access_control/part_3/gpio_access.rego \
     --query "data.gpio_access.only_gpio_access_has_access" \
     --firmware-report "build/cheriot/cheriot/release/hardware_access_part_2.json"
 # This should return false
 cheriot-audit \
-    --board cheriot-rtos/sdk/boards/sonata-prerelease.json \
+    --board cheriot-rtos/sdk/boards/sonata-1.1.json \
     --module exercises/hardware_access_control/part_3/gpio_access.rego \
     --query "data.gpio_access.only_gpio_access_has_access" \
     --firmware-report "build/cheriot/cheriot/release/hardware_access_part_1.json"
@@ -139,7 +139,7 @@ We can use this to restrict which compartments have access to the GPIO via `gpio
 
 ```sh
 cheriot-audit \
-    --board cheriot-rtos/sdk/boards/sonata-prerelease.json \
+    --board cheriot-rtos/sdk/boards/sonata-1.1.json \
     --module exercises/hardware_access_control/part_3/gpio_access.rego \
     --query "data.gpio_access.whitelisted_compartments_only" \
     --firmware-report "build/cheriot/cheriot/release/hardware_access_part_2.json"
