@@ -3,7 +3,7 @@
 
 [submodule "cheriot-rtos"]
 	path = cheriot-rtos
-	url = https://github.com/lowrisc/cheriot-rtos
+	url = https://github.com/CHERIoT-Platform/cheriot-rtos
 	branch = sonata
 [submodule "display_drivers"]
 	path = third_party/display_drivers
