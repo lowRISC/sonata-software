@@ -157,7 +157,9 @@
           text = ''
             shopt -s globstar
             clang-format --dry-run --Werror ${srcGlob}
-            clang-tidy ${srcGlob}
+            # Disabled clang-tidy lint because it is core dumping with the
+            # latest toolchain version.
+            #clang-tidy ${srcGlob}
             echo "No warnings outside of dependancies."
           '';
         };
