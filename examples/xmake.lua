@@ -13,7 +13,7 @@ includes("../common.lua")
 option("board")
     set_default("sonata-1.1")
 
-includes("all", "snake", "automotive")
+includes("all", "snake", "automotive", "heartbleed")
 
 -- A simple demo using only devices on the Sonata board
 firmware("sonata_simple_demo")
