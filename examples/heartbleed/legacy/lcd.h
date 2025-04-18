@@ -18,9 +18,8 @@ extern "C"
 	{
 		// Pin out mapping.
 		LcdCsPin = 0,
-		LcdRstPin,
 		LcdDcPin,
-		LcdBlPin,
+		LcdRstPin,
 		LcdMosiPin,
 		LcdSclkPin,
 		// Spi clock rate.

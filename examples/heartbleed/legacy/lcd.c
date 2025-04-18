@@ -37,17 +37,16 @@ static uint32_t spi_write(void *handle, uint8_t *data, size_t len)
 
 static uint32_t gpio_write(void *handle, bool cs, bool dc)
 {
-	set_output_bit(GPIO_OUT_LCD, LcdDcPin, dc);
-	set_output_bit(GPIO_OUT_LCD, LcdCsPin, cs);
+	spi_set_cs((spi_t *)handle, LcdDcPin, dc);
+	spi_set_cs((spi_t *)handle, LcdCsPin, cs);
 	return 0;
 }
 
 int lcd_init(spi_t *spi, St7735Context *lcd, LCD_Interface *interface)
 {
 	// Set the initial state of the LCD control pins
-	set_output_bit(GPIO_OUT_LCD, LcdDcPin, 0x0);
-	set_output_bit(GPIO_OUT_LCD, LcdBlPin, 0x1);
-	set_output_bit(GPIO_OUT_LCD, LcdCsPin, 0x0);
+	spi_set_cs(spi, LcdDcPin, 0x00);
+	spi_set_cs(spi, LcdCsPin, 0x00);
 
 	// Reset the LCD
 	set_output_bit(GPIO_OUT_LCD, LcdRstPin, 0x0);

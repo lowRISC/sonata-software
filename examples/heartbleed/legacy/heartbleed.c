@@ -8,6 +8,7 @@
 #include <gpio.h>
 #include <lcd_st7735.h>
 #include <m3x6_16pt.h>
+#include <pwm.h>
 #include <sonata_system.h>
 #include <spi.h>
 #include <timer.h>
@@ -314,6 +315,10 @@ int main()
 	spi_init(&lcdSpi, LCD_SPI, LcdSpiSpeedHz);
 	lcd_init(&lcdSpi, &lcd, &lcdInterface);
 	lcd_clean(&lcd, BACKGROUND_COLOR);
+
+	// Turn on LCD backlight via PWM
+	pwm_t lcd_bl = PWM_FROM_ADDR_AND_INDEX(PWM_BASE, PWM_LCD);
+	set_pwm(lcd_bl, 1, 255);
 
 // We represent the heartbeat message as a small array of incoming bytes,
 // and initialise with its actual size.
