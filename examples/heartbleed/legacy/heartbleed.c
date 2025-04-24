@@ -221,15 +221,12 @@ void get_request_length(St7735Context *lcd, size_t *request_length)
 }
 
 /**
- * @brief This function contains the logic for writing the heartbeat/bleed
- * response message to the LCD, breaking the message across lines where it is
- * necessary.
+ * @brief This function mocks the network and show the package on the lcd
+ * instead.
  *
  * @param lcd A handle to Sonata's LCD
- * @param request_length The length of the heartbeat request. May not be the
- * actual message length.
- * @param result The heartbeat response to reply with. This should not be
- * null-terminated.
+ * @param package The package to be sent.
+ * @param len The length of the package .
  */
 void network_send(void *handle, const char *package, size_t len)
 {
@@ -311,7 +308,7 @@ int main()
 	pwm_t lcd_bl = PWM_FROM_ADDR_AND_INDEX(PWM_BASE, PWM_LCD);
 	set_pwm(lcd_bl, 1, 255);
 
-	size_t req_len = 4;
+	size_t req_len = 8;
 	while (true)
 	{
 		// We allocate a big chunck of memory to temporary store a json file

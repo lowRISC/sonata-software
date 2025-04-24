@@ -27,7 +27,7 @@ static const char *json =
 
 	// We represent the heartbeat message as a small array of incoming bytes,
 	// and initialise with its actual size.
-	static const char *QueryResponse = "Bird";
+	static const char *QueryResponse = "Sparrow";
 
 	// We don't have filesystem so we mock it.
 	void read_file(const char *filename, char *buffer, size_t buffer_size)
@@ -43,7 +43,6 @@ static const char *json =
 		strcpy(buff, QueryResponse);
 		return buff;
 	}
-
 
 	void heartbleed(void *handle, const char *buffer, size_t len)
 	{

@@ -3,7 +3,7 @@
 
 -- Compartments used for the automotive demo firmware
 compartment("heartbleed")
-    add_deps("lcd", "debug")
+    add_deps("lcd", "debug", "string")
     add_files("heartbleed.cc", "../common.c")
 
 -- CHERIoT version of Heartbleed Demo Firmware
