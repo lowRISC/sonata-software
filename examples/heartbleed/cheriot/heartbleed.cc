@@ -1,5 +1,4 @@
-// Copyright lowRISC contributors.
-// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// Copyright lowRISC Contributors.
 // SPDX-License-Identifier: Apache-2.0
 
 #include <compartment.h>
@@ -17,7 +16,7 @@ using namespace CHERI;
 using namespace sonata::lcd;
 
 constexpr bool     DebugDemo          = true;
-constexpr uint32_t LengthScrollMillis = 350u;
+constexpr uint32_t LengthScrollMillis = 150u;
 constexpr Color    BackgroundColor    = Color::Black;
 constexpr Color    ForegroundColor    = Color::White;
 
@@ -141,24 +140,28 @@ bool length_joystick_control(volatile SonataGpioBoard *gpio, size_t *current)
  * @param actual_req_len The genuine length of the `bufferMessage`. This MUST
  * match, or is undefined behaviour.
  */
-void initial_lcd_write(SonataLcd  *lcd,
-                       const char *bufferMessage,
-                       size_t      actual_req_len)
+void initial_lcd_write(SonataLcd *lcd)
 {
 	lcd->draw_str({5, 5},
 	              "Move Joystick to Change Length.",
 	              BackgroundColor,
-	              ForegroundColor);
-	lcd->draw_str(
-	  {5, 15}, "Press Joystick to Send.", BackgroundColor, ForegroundColor);
-	lcd->draw_str(
-	  {5, 30}, "Buffer Message: ", BackgroundColor, ForegroundColor);
-	char displayMessage[actual_req_len + 1];
-	memcpy(displayMessage, bufferMessage, actual_req_len);
-	displayMessage[actual_req_len] = '\0';
-	lcd->draw_str({70, 30}, displayMessage, BackgroundColor, ForegroundColor);
-	lcd->draw_str(
-	  {5, 40}, "Request Length: ", BackgroundColor, ForegroundColor);
+	              ForegroundColor,
+	              Font::M5x7_16pt);
+	lcd->draw_str({5, 15},
+	              "Press Joystick to Send.",
+	              BackgroundColor,
+	              ForegroundColor,
+	              Font::M5x7_16pt);
+	lcd->draw_str({5, 30},
+	              "Request a larger buffer ",
+	              BackgroundColor,
+	              ForegroundColor,
+	              Font::M5x7_16pt);
+	lcd->draw_str({5, 40},
+	              "Suggested Length: ",
+	              BackgroundColor,
+	              ForegroundColor,
+	              Font::M5x7_16pt);
 }
 
 /**
@@ -175,7 +178,8 @@ void draw_request_length(SonataLcd                *lcd,
 	constexpr size_t ReqLenStrLen = 15u;
 	char             req_len_s[ReqLenStrLen];
 	size_t_to_str_base10(req_len_s, request_length);
-	lcd->draw_str({70, 40}, req_len_s, BackgroundColor, ForegroundColor);
+	lcd->draw_str(
+	  {110, 40}, req_len_s, BackgroundColor, ForegroundColor, Font::M5x7_16pt);
 }
 
 /**
@@ -206,7 +210,11 @@ void get_request_length(SonataLcd                *lcd,
 		{
 			continue; // Only re-draw when changed
 		}
-		lcd->draw_str({70, 40}, "       ", BackgroundColor, ForegroundColor);
+		lcd->draw_str({110, 40},
+		              "       ",
+		              BackgroundColor,
+		              ForegroundColor,
+		              Font::M5x7_16pt);
 		draw_request_length(lcd, gpio, *request_length);
 	}
 
@@ -214,47 +222,50 @@ void get_request_length(SonataLcd                *lcd,
 }
 
 /**
- * @brief This function contains the logic for writing the heartbeat/bleed
- * response message to the LCD, breaking the message across lines where it is
- * necessary.
+ * @brief This function mocks the network and show the package on the lcd
+ * instead.
  *
- * @param lcd The Sonata LCD driver to use.
- * @param request_length The length of the heartbeat request. May not be the
- * actual message length.
- * @param result The heartbeat response to reply with. This should not be
- * null-terminated.
+ * @param lcd A handle to Sonata's LCD
+ * @param package The package to be sent.
+ * @param len The length of the package .
  */
-void draw_heartbleed_response(SonataLcd  *lcd,
-                              size_t      request_length,
-                              const char *result)
+void network_send(void *handle, const char *package, size_t len)
 {
-	constexpr uint32_t CharsPerLine = 50u;
+	constexpr uint32_t CharsPerLine = 29;
+	SonataLcd         *lcd          = (SonataLcd *)handle;
 
-	// Format the result message for LCD display as a null-terminated string.
-	constexpr size_t PrefixLen                     = 10u;
-	constexpr char   ResponsePrefix[PrefixLen + 1] = "Response: ";
-	char             result_s[PrefixLen + request_length + 1];
-	memcpy(result_s, ResponsePrefix, PrefixLen);
-	memcpy(&result_s[PrefixLen], result, request_length);
-	result_s[PrefixLen + request_length] = '\0';
+	size_t w_border = 2;
+	lcd->fill_rect({w_border, 50, 160 - w_border, 128}, Color::Grey);
 
 	// Break the result message into several lines if it is too long to fit on
 	// one line.
-	char        result_line[CharsPerLine + 1];
-	const char *result_char = result_s;
+	char        line_content[CharsPerLine + 1];
+	const char *cursor      = package;
 	size_t      line_length = 0u;
 	size_t      line_num    = 0u;
-	while (*result_char != '\0')
+	while (len-- != 0)
 	{
-		result_line[line_length++] = *result_char;
-		result_char++;
+		if (*cursor == 0)
+		{
+			line_content[line_length++] = '`';
+		}
+		else if (isprint((int)(*cursor)) == 0)
+		{
+			line_content[line_length++] = '%';
+		}
+		else
+		{
+			line_content[line_length++] = *cursor;
+		}
+		cursor++;
 		if (line_length == CharsPerLine)
 		{
-			result_line[line_length] = '\0';
+			line_content[line_length] = '\0';
 			lcd->draw_str({5, 55 + 10 * line_num},
-			              result_line,
-			              BackgroundColor,
-			              ForegroundColor);
+			              line_content,
+			              Color::Grey,
+			              Color::Black,
+			              Font::M5x7_16pt);
 			line_length = 0;
 			line_num++;
 		}
@@ -262,11 +273,12 @@ void draw_heartbleed_response(SonataLcd  *lcd,
 	// Write the final line containing the remainder of the message.
 	if (line_length)
 	{
-		result_line[line_length] = '\0';
+		line_content[line_length] = '\0';
 		lcd->draw_str({5, 55 + 10 * line_num},
-		              result_line,
-		              BackgroundColor,
-		              ForegroundColor);
+		              line_content,
+		              Color::Grey,
+		              Color::Black,
+		              Font::M5x7_16pt);
 	}
 }
 
@@ -277,24 +289,35 @@ void draw_heartbleed_response(SonataLcd  *lcd,
 	Size       displaySize = lcd->resolution();
 	Point      centre      = {displaySize.width / 2, displaySize.height / 2};
 	lcd->clean(BackgroundColor);
+	size_t w_border = 2;
+	lcd->fill_rect({w_border, 50, 160 - w_border, 128}, Color::Grey);
 
 	// Initialise GPIO driver to interact with the Joystick
 	auto gpio = MMIO_CAPABILITY(SonataGpioBoard, gpio_board);
 
-	// We represent the heartbeat message as a small array of incoming bytes,
-	// and initialise with its actual size.
-	constexpr size_t actual_req_len                = 4;
-	const char       bufferMessage[actual_req_len] = {'B', 'i', 'r', 'd'};
-
-	size_t req_len = actual_req_len;
+	size_t req_len = 8;
 	while (true)
 	{
-		initial_lcd_write(lcd, bufferMessage, actual_req_len);
+		// We allocate a big chunck of memory to temporary store a json file
+		// with sensitive information. Then we free the buffer without cleaning
+		// the content.
+		const size_t DbSize = 128;
+		char        *ptr    = (char *)malloc(DbSize);
+		read_file("clients.db", ptr, DbSize);
+		free(ptr);
+
+		initial_lcd_write(lcd);
+
+		// Wait for the request.
 		get_request_length(lcd, gpio, &req_len);
-		const char *result = heartbleed(bufferMessage, req_len);
-		lcd->fill_rect({5, 55, displaySize.width, displaySize.height},
-		               BackgroundColor);
-		draw_heartbleed_response(lcd, req_len, result);
+
+		const char *result =
+		  run_query("SELECT name FROM animal WHERE can_fly=yes LIMIT 1");
+
+		// We send back the response to the request without checking that the
+		// requested length exeeds the needed size, which can leek information.
+		heartbleed(lcd, result, req_len);
+
 		free((void *)result);
 	}
 

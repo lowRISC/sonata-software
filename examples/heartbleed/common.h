@@ -14,21 +14,25 @@ extern "C"
 	extern void network_send(void *handle, const char *package, size_t len);
 
 	/**
-	 * @brief Run a query and allocate a buffer with the response, the buffer should be deallocated by the caller.
-   *
-   * @param query The query to be executed.
+	 * @brief Run a query and allocate a buffer with the response, the buffer
+	 * should be deallocated by the caller.
+	 *
+	 * @param query The query to be executed.
 	 * @return A heap-allocated copy of the message. Simulates a response
 	 * packet.
 	 */
 	char *run_query(const char *query);
 
 	/**
-	 * @brief Format the response package, the buffer is copied to the response package based on teh len,
-   * if the is larger than the buffer, sensitive information can be leaked throught the network.
-   *
-   * This function requires that the caller implements the function `network_send`.
-   *
-   * @param handle A pointer to a handle that will be forward to the network_send.
+	 * @brief Format the response package, the buffer is copied to the response
+	 * package based on the length, if larger than the buffer, sensitive
+	 * information can be leaked throught the network.
+	 *
+	 * This function requires that the caller implements the function
+	 * `network_send`.
+	 *
+	 * @param handle A pointer to a handle that will be forward to the
+	 * network_send.
 	 * @param buffer The buffer to be sent.
 	 * @param buffer_size The size of the buffer.
 	 * @return A heap-allocated copy of the message. Simulates a response

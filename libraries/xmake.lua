@@ -10,6 +10,9 @@ library("lcd")
   add_files("../third_party/display_drivers/src/core/lucida_console_12pt.c")
   add_files("../third_party/display_drivers/src/st7735/lcd_st7735.c")
   add_files("lcd.cc")
+  add_includedirs(
+  "../third_party/display_drivers/core/src/", {public = true}
+  )
 
 library("sense_hat")
   set_default(false)
