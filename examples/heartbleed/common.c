@@ -17,21 +17,42 @@ extern "C"
 {
 #endif //__cplusplus
 
-	// We launder here as a fence to attempt to stop the compiler optimising
-	// around undefined behaviour for demo consistency.
-	char *heartbleed(const char *msg, size_t len)
-	{
-		if (len == 0u)
-		{
-			return NULL;
-		}
-		char *buff = (char *)malloc(*LAUNDER(&len));
+	// clang-format off
+static const char *json =
+  "[{user: John Von Neumann, pin: 123498,"
+  "user: James Clerk Maxwell, pin: 488758},"
+  "{log: John transfered 100 Bitcoins to James}"
+  "{log: James Withdrew 100 Bitcoins. }]";
+	// clang-format on
 
-		// We copy the non-terminated string to the new buffer. This should
-		// cause an error on a CHERIoT platform when given a `len` that is
-		// too high, but will leak arbitrary memory on legacy platforms.
-		memcpy(buff, msg, *LAUNDER(&len));
+	// We represent the heartbeat message as a small array of incoming bytes,
+	// and initialise with its actual size.
+	static const char *QueryResponse = "Bird";
+
+	// We don't have filesystem so we mock it.
+	void read_file(const char *filename, char *buffer, size_t buffer_size)
+	{
+		strncpy(buffer, json, buffer_size);
+	}
+
+	// We don't have a query engine so we mock it.
+	char *run_query(const char *query)
+	{
+		char *buff = (char *)malloc(strlen(QueryResponse) + 1);
+
+		strcpy(buff, QueryResponse);
 		return buff;
+	}
+
+
+	void heartbleed(void *handle, const char *buffer, size_t len)
+	{
+		const size_t headerLen = 7u;
+		char         package[headerLen + len + 1];
+		memcpy(package, "{Resp: ", headerLen);
+		memcpy(&package[headerLen], buffer, len);
+		package[headerLen + len] = '\0';
+		network_send(handle, package, sizeof(package));
 	}
 
 	void size_t_to_str_base10(char *buffer, size_t num)

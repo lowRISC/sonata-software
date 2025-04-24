@@ -23,7 +23,7 @@
 
 #define CPU_TIMER_HZ (40 * 1000 * 1000) // 40 MHz
 
-static uart_t uart0, uart1;
+static uart_t uart0;
 
 /**
  * A function that writes a string to the UART console, wrapping a call to

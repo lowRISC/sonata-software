@@ -90,6 +90,12 @@ legacy_firmware("heartbleed_demo_legacy")
     add_includedirs(
         "../../../third_party/display_drivers/core/",
         "../../../third_party/display_drivers/st7735/",
-        "../../../third_party/sonata-system/sw/legacy/common/"
+        "../../../third_party/sonata-system/sw/legacy/common/",
+        "../../../libraries/"
+    )
+    add_ldflags("-specs=nosys.specs", {force = true})
+    add_files(
+        "../../../third_party/sonata-system/vendor/cheriot_debug_module/tb/prog/syscalls.c",
+        "../../../libraries/m5x7_16pt.c"
     )
     add_files("heartbleed.c", "../common.c", "lcd.c")
