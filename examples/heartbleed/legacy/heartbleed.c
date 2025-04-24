@@ -2,12 +2,14 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <gpio.h>
 #include <lcd_st7735.h>
 #include <m3x6_16pt.h>
+#include <m5x7_16pt.h>
 #include <pwm.h>
 #include <sonata_system.h>
 #include <spi.h>
@@ -18,7 +20,7 @@
 #include "lcd.h"
 
 #define DEBUG_DEMO true
-#define LENGTH_SCROLL_MILLIS 350u
+#define LENGTH_SCROLL_MILLIS 150u
 #define BACKGROUND_COLOR BGRColorBlack
 #define FOREGROUND_COLOR BGRColorWhite
 
@@ -128,46 +130,34 @@ bool length_joystick_control(size_t *current)
  * @param actual_req_len The genuine length of the `bufferMessage`. This MUST
  * match, or is undefined behaviour.
  */
-void initial_lcd_write(St7735Context *lcd,
-                       const char    *bufferMessage,
-                       size_t         actual_req_len)
+void initial_lcd_write(St7735Context *lcd)
 {
 	lcd_draw_str(lcd,
 	             5,
 	             5,
-	             LcdFontM3x6_16pt,
+	             LcdFontM5x7_16pt,
 	             "Move Joystick to Change Length.",
 	             BACKGROUND_COLOR,
 	             FOREGROUND_COLOR);
 	lcd_draw_str(lcd,
 	             5,
 	             15,
-	             LcdFontM3x6_16pt,
+	             LcdFontM5x7_16pt,
 	             "Press Joystick to Send.",
 	             BACKGROUND_COLOR,
 	             FOREGROUND_COLOR);
 	lcd_draw_str(lcd,
 	             5,
 	             30,
-	             LcdFontM3x6_16pt,
-	             "Buffer Message: ",
-	             BACKGROUND_COLOR,
-	             FOREGROUND_COLOR);
-	char displayMessage[actual_req_len + 1];
-	memcpy(displayMessage, bufferMessage, actual_req_len);
-	displayMessage[actual_req_len] = '\0';
-	lcd_draw_str(lcd,
-	             70,
-	             30,
-	             LcdFontM3x6_16pt,
-	             displayMessage,
+	             LcdFontM5x7_16pt,
+	             "Request a larger buffer",
 	             BACKGROUND_COLOR,
 	             FOREGROUND_COLOR);
 	lcd_draw_str(lcd,
 	             5,
 	             40,
-	             LcdFontM3x6_16pt,
-	             "Request Length: ",
+	             LcdFontM5x7_16pt,
+	             "Suggested Length: ",
 	             BACKGROUND_COLOR,
 	             FOREGROUND_COLOR);
 }
@@ -184,9 +174,9 @@ void draw_request_length(St7735Context *lcd, size_t request_length)
 	char         req_len_s[ReqLenStrLen];
 	size_t_to_str_base10(req_len_s, request_length);
 	lcd_draw_str(lcd,
-	             70,
+	             110,
 	             40,
-	             LcdFontM3x6_16pt,
+	             LcdFontM5x7_16pt,
 	             req_len_s,
 	             BACKGROUND_COLOR,
 	             FOREGROUND_COLOR);
@@ -207,7 +197,7 @@ void get_request_length(St7735Context *lcd, size_t *request_length)
 	draw_request_length(lcd, *request_length);
 
 	// Get user input
-	DEBUG_LOG("Waiting for user input on the joystick...");
+	DEBUG_LOG("Waiting for user input on the joystick...\n");
 	bool inputSubmitted = false;
 	while (!inputSubmitted)
 	{
@@ -218,16 +208,16 @@ void get_request_length(St7735Context *lcd, size_t *request_length)
 			continue; // Only re-draw when changed
 		}
 		lcd_draw_str(lcd,
-		             70,
+		             110,
 		             40,
-		             LcdFontM3x6_16pt,
+		             LcdFontM5x7_16pt,
 		             "       ",
 		             BACKGROUND_COLOR,
 		             FOREGROUND_COLOR);
 		draw_request_length(lcd, *request_length);
 	}
 
-	DEBUG_LOG("Heartbeat submitted with length %d", (int)(*request_length));
+	DEBUG_LOG("Heartbeat submitted with length %d\n", (int)(*request_length));
 }
 
 /**
@@ -241,41 +231,44 @@ void get_request_length(St7735Context *lcd, size_t *request_length)
  * @param result The heartbeat response to reply with. This should not be
  * null-terminated.
  */
-void draw_heartbleed_response(St7735Context *lcd,
-                              size_t         request_length,
-                              const char    *result)
+void network_send(void *handle, const char *package, size_t len)
 {
-	const uint32_t CharsPerLine = 50u;
+	const uint32_t CharsPerLine = 29u;
+	St7735Context *lcd          = (St7735Context *)handle;
 
-	// Format the result message for LCD display as a null-terminated string.
-	const size_t PrefixLen = 10u;
-	char         ResponsePrefix[PrefixLen + 1];
-	memcpy(ResponsePrefix, "Response: ", PrefixLen + 1);
-	char result_s[PrefixLen + request_length + 1];
-	memcpy(result_s, ResponsePrefix, PrefixLen);
-	memcpy(&result_s[PrefixLen], result, request_length);
-	result_s[PrefixLen + request_length] = '\0';
+	const uint32_t TextAreaBgColor = BGRColorGrey;
+	const uint32_t TextAreaFgColor = BGRColorBlack;
+	// Clean the botton of the display.
+	lcd_fill_rect(
+	  lcd, 0, 50, lcd->parent.width, lcd->parent.height - 50, TextAreaBgColor);
 
 	// Break the result message into several lines if it is too long to fit on
 	// one line.
-	char        result_line[CharsPerLine + 1];
-	const char *result_char = result_s;
+	char        line_content[CharsPerLine + 1];
+	const char *cursor      = package;
 	size_t      line_length = 0u;
 	size_t      line_num    = 0u;
-	while (*result_char != '\0')
+	while (len-- != 0)
 	{
-		result_line[line_length++] = *result_char;
-		result_char++;
+		if (isprint((int)(*cursor)) == 0)
+		{
+			line_content[line_length++] = '%';
+		}
+		else
+		{
+			line_content[line_length++] = *cursor;
+		}
+		cursor++;
 		if (line_length == CharsPerLine)
 		{
-			result_line[line_length] = '\0';
+			line_content[line_length] = '\0';
 			lcd_draw_str(lcd,
-			             5,
+			             1,
 			             55 + 10 * line_num,
-			             LcdFontM3x6_16pt,
-			             result_line,
-			             BACKGROUND_COLOR,
-			             FOREGROUND_COLOR);
+			             LcdFontM5x7_16pt,
+			             line_content,
+			             TextAreaBgColor,
+			             TextAreaFgColor);
 			line_length = 0;
 			line_num++;
 		}
@@ -283,14 +276,14 @@ void draw_heartbleed_response(St7735Context *lcd,
 	// Write the final line containing the remainder of the message.
 	if (line_length)
 	{
-		result_line[line_length] = '\0';
+		line_content[line_length] = '\0';
 		lcd_draw_str(lcd,
-		             5,
+		             1,
 		             55 + 10 * line_num,
-		             LcdFontM3x6_16pt,
-		             result_line,
-		             BACKGROUND_COLOR,
-		             FOREGROUND_COLOR);
+		             LcdFontM5x7_16pt,
+		             line_content,
+		             TextAreaBgColor,
+		             TextAreaFgColor);
 	}
 }
 
@@ -298,11 +291,9 @@ int main()
 {
 	// Initialise UART drivers for debug logging
 	uart0 = UART_FROM_BASE_ADDR(UART0_BASE);
-	uart1 = UART_FROM_BASE_ADDR(UART1_BASE);
 	uart_init(uart0);
-	uart_init(uart1);
 
-	write_to_uart("Initialized UART driver");
+	write_to_uart("\n\nInitialized UART driver\n");
 
 	// Initialise the timer
 	timer_init();
@@ -320,20 +311,29 @@ int main()
 	pwm_t lcd_bl = PWM_FROM_ADDR_AND_INDEX(PWM_BASE, PWM_LCD);
 	set_pwm(lcd_bl, 1, 255);
 
-// We represent the heartbeat message as a small array of incoming bytes,
-// and initialise with its actual size.
-#define ACTUAL_REQ_LEN 4
-	const char bufferMessage[ACTUAL_REQ_LEN] = {'B', 'i', 'r', 'd'};
-
-	size_t req_len = ACTUAL_REQ_LEN;
+	size_t req_len = 4;
 	while (true)
 	{
-		initial_lcd_write(&lcd, bufferMessage, ACTUAL_REQ_LEN);
+		// We allocate a big chunck of memory to temporary store a json file
+		// with sensitive information. Then we free the buffer without cleaning
+		// the content.
+		const size_t DbSize = 128;
+		char        *ptr    = (char *)malloc(DbSize);
+		read_file("clients.db", ptr, DbSize);
+		free(ptr);
+
+		initial_lcd_write(&lcd);
+
+		// Wait for the request.
 		get_request_length(&lcd, &req_len);
-		const char *result = heartbleed(bufferMessage, req_len);
-		lcd_fill_rect(
-		  &lcd, 5, 55, lcd.parent.width, lcd.parent.height, BACKGROUND_COLOR);
-		draw_heartbleed_response(&lcd, req_len, result);
+
+		const char *result =
+		  run_query("SELECT name FROM animal WHERE can_fly=yes LIMIT 1");
+
+		// We send back the response to the request without checking that the
+		// requested length exeeds the needed size, which can leek information.
+		heartbleed(&lcd, result, req_len);
+
 		free((void *)result);
 	}
 

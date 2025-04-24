@@ -11,19 +11,30 @@ extern "C"
 {
 #endif //__cplusplus
 
+	extern void network_send(void *handle, const char *package, size_t len);
+
 	/**
-	 * @brief Contains the buggy "heartbleed"-like implementation. Allocates
-	 * some space on the heap to store the copied string, entirely trusting the
-	 * user-provided length parameter without any sanitisation. This means that
-	 * if a length longer than the message is given, the remainder of the buffer
-	 * will be uninitialised and contain values from memory.
-	 *
-	 * @param msg The message to echo back.
-	 * @param len The unsanitized length of the message.
+	 * @brief Run a query and allocate a buffer with the response, the buffer should be deallocated by the caller.
+   *
+   * @param query The query to be executed.
 	 * @return A heap-allocated copy of the message. Simulates a response
 	 * packet.
 	 */
-	char *heartbleed(const char *msg, size_t len);
+	char *run_query(const char *query);
+
+	/**
+	 * @brief Format the response package, the buffer is copied to the response package based on teh len,
+   * if the is larger than the buffer, sensitive information can be leaked throught the network.
+   *
+   * This function requires that the caller implements the function `network_send`.
+   *
+   * @param handle A pointer to a handle that will be forward to the network_send.
+	 * @param buffer The buffer to be sent.
+	 * @param buffer_size The size of the buffer.
+	 * @return A heap-allocated copy of the message. Simulates a response
+	 * packet.
+	 */
+	void heartbleed(void *handle, const char *buffer, size_t len);
 
 	/**
 	 * @brief Converts a given size_t to an equivalent string representing its
@@ -34,6 +45,15 @@ extern "C"
 	 * @param num The size_t number to convert
 	 */
 	void size_t_to_str_base10(char *buffer, size_t num);
+
+	/**
+	 * @brief Reads a file content in the given buffer.
+	 *
+	 * @param filename The name of the file.
+	 * @param buffer The buffer/string to write the file content.
+	 * @param buffer_size The of the buffer.
+	 */
+	void read_file(const char *filename, char *buffer, size_t buffer_size);
 
 #ifdef __cplusplus
 }
