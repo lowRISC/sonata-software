@@ -14,6 +14,7 @@
 
 using namespace CHERI;
 using namespace sonata::lcd;
+SonataLcd *lcd = nullptr;
 
 constexpr bool     DebugDemo          = true;
 constexpr uint32_t LengthScrollMillis = 150u;
@@ -282,12 +283,41 @@ void network_send(void *handle, const char *package, size_t len)
 	}
 }
 
+/**
+ * @brief Handles any CHERI Capability Violation errors. If the error was a
+ * Bounds or Tag violation it assumes it is because of the incorrect memory
+ * access in SnakeGame::check_if_colliding and therefore it recovers the program
+ * and ends the game. Otherwise, this force unwinds and ends the program.
+ */
+extern "C" ErrorRecoveryBehaviour
+compartment_error_handler(ErrorState *frame, size_t mcause, size_t mtval)
+{
+	lcd->fill_rect({0, 0, 160, 128}, Color::Blue);
+	lcd->draw_str(
+	  {5, 30}, "Oops ;-(", Color::Blue, Color::White, Font::LucidaConsole_12pt);
+	lcd->draw_str({30, 80},
+	              "Protected by",
+	              Color::Blue,
+	              Color::White,
+	              Font::LucidaConsole_10pt);
+	lcd->draw_str(
+	  {50, 95}, "CHERIoT", Color::Blue, Color::White, Font::LucidaConsole_10pt);
+
+	Debug::log(
+	  "Unexpected CHERI Capability violation encountered. Stopping...");
+	while (1)
+	{
+		asm("wfi");
+	}
+	return ErrorRecoveryBehaviour::ForceUnwind;
+}
+
 [[noreturn]] void __cheri_compartment("heartbleed") entry()
 {
 	// Initialise the LCD driver and calculate display information
-	SonataLcd *lcd         = new SonataLcd();
-	Size       displaySize = lcd->resolution();
-	Point      centre      = {displaySize.width / 2, displaySize.height / 2};
+	lcd               = new SonataLcd();
+	Size  displaySize = lcd->resolution();
+	Point centre      = {displaySize.width / 2, displaySize.height / 2};
 	lcd->clean(BackgroundColor);
 	size_t w_border = 2;
 	lcd->fill_rect({w_border, 50, 160 - w_border, 128}, Color::Grey);
