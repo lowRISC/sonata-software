@@ -12,6 +12,7 @@ local legacy_dir = path.join(rootdir, "third_party/sonata-system/sw/legacy")
 
 set_defaultarchs("cheriot")
 set_defaultplat("cheriot")
+includes("../../../common.lua")
 
 -- Setup the GCC toolchain for building non-CHERI baremetal programs
 toolchain("legacy-gcc")
@@ -68,8 +69,8 @@ function legacy_firmware(name)
             path.join(legacy_dir, "common/timer.c"), 
             path.join(legacy_dir, "common/uart.c")
         )
+        after_link(convert_to_vmem)
 end
-
 set_toolchains("legacy-gcc")
 
 -- Legacy-specific LCD library for using the display drivers
