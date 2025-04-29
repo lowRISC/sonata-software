@@ -6,6 +6,7 @@
 #define _HEARTBLEED_LCD_H_
 
 #include <lcd_st7735.h>
+#include <pwm.h>
 #include <spi.h>
 
 #ifdef __cplusplus
@@ -47,10 +48,15 @@ extern "C"
 	 * @brief Initialise the LCD, starting and clearing the screen.
 	 *
 	 * @param spi contains an initialized SPI handle to use to write to the LCD.
+	 * @param backlight contains an initialized pwm handle to use to control the
+	 * LCD backlight.
 	 * @param lcd is an outparam to store the initialized LCD handle.
 	 * @param interface is an outparam storing the initialized LCD interface.
 	 */
-	int lcd_init(spi_t *spi, St7735Context *lcd, LCD_Interface *interface);
+	int lcd_init(spi_t         *spi,
+	             pwm_t          backlight,
+	             St7735Context *lcd,
+	             LCD_Interface *interface);
 
 	/**
 	 * @brief Formats and draws a string to the LCD display based upon the
