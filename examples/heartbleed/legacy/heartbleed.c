@@ -289,6 +289,7 @@ int main()
 	// Initialise UART drivers for debug logging
 	uart0 = UART_FROM_BASE_ADDR(UART0_BASE);
 	uart_init(uart0);
+	pwm_t lcd_bl = PWM_FROM_ADDR_AND_INDEX(PWM_BASE, PWM_LCD);
 
 	write_to_uart("\n\nInitialized UART driver\n");
 
@@ -301,12 +302,8 @@ int main()
 	spi_t         lcdSpi;
 	St7735Context lcd;
 	spi_init(&lcdSpi, LCD_SPI, LcdSpiSpeedHz);
-	lcd_init(&lcdSpi, &lcd, &lcdInterface);
+	lcd_init(&lcdSpi, lcd_bl, &lcd, &lcdInterface);
 	lcd_clean(&lcd, BACKGROUND_COLOR);
-
-	// Turn on LCD backlight via PWM
-	pwm_t lcd_bl = PWM_FROM_ADDR_AND_INDEX(PWM_BASE, PWM_LCD);
-	set_pwm(lcd_bl, 1, 255);
 
 	size_t req_len = 8;
 	while (true)

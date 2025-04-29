@@ -8,6 +8,8 @@
 #include <lucida_console_10pt.h>
 #include <lucida_console_12pt.h>
 #include <m3x6_16pt.h>
+#include <m5x7_16pt.h>
+#include <pwm.h>
 #include <sonata_system.h>
 #include <spi.h>
 #include <stdarg.h>
@@ -42,7 +44,10 @@ static uint32_t gpio_write(void *handle, bool cs, bool dc)
 	return 0;
 }
 
-int lcd_init(spi_t *spi, St7735Context *lcd, LCD_Interface *interface)
+int lcd_init(spi_t         *spi,
+             pwm_t          backlight,
+             St7735Context *lcd,
+             LCD_Interface *interface)
 {
 	// Set the initial state of the LCD control pins
 	spi_set_cs(spi, LcdDcPin, 0x00);
@@ -69,6 +74,7 @@ int lcd_init(spi_t *spi, St7735Context *lcd, LCD_Interface *interface)
 
 	// Clean display with a white rectangle.
 	lcd_st7735_clean(lcd);
+	set_pwm(backlight, 1, 255);
 
 	return 0;
 }
