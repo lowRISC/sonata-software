@@ -163,28 +163,31 @@ class SnakeGame
 		// Text sizes are hard-coded for now as `draw_str` always uses 16pt font
 		if (isFirstGame)
 		{
-			lcd->draw_str({centre.x - 60, centre.y},
+			lcd->draw_str({centre.x - 70, centre.y},
 			              StartOnAnyInput ? "Move the joystick to start"
 			                              : "Press the joystick to start",
 			              BackgroundColor,
-			              ForegroundColor);
+			              ForegroundColor,
+			              Font::M5x7_16pt);
 		}
 		else
 		{
-			lcd->draw_str({centre.x - 25, centre.y - 15},
+			lcd->draw_str({centre.x - 45, centre.y - 45},
 			              lastGameWon ? "You won!" : "Game over!",
 			              BackgroundColor,
-			              ForegroundColor);
+			              ForegroundColor,
+			              Font::LucidaConsole_12pt);
 			lastGameWon = false;
 			// Manually convert and concatenate score string due to no
 			// implementation of existing utils
 			char scoreStr[50];
 			memcpy(scoreStr, "Your score: ", 12);
 			size_t_to_str_base10(&scoreStr[12], snakePositions.size() - 1);
-			lcd->draw_str({centre.x - 31, centre.y - 5},
+			lcd->draw_str({centre.x - 38, centre.y - 5},
 			              scoreStr,
 			              BackgroundColor,
-			              ForegroundColor);
+			              ForegroundColor,
+			              Font::M5x7_16pt);
 			lcd->draw_str({centre.x - 65, centre.y + 5},
 			              StartOnAnyInput
 			                ? "Move the joystick to play again..."
