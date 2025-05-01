@@ -18,6 +18,7 @@ namespace sonata::lcd
 #include "../third_party/display_drivers/src/core/lucida_console_10pt.h"
 #include "../third_party/display_drivers/src/core/lucida_console_12pt.h"
 #include "../third_party/display_drivers/src/core/m3x6_16pt.h"
+#include "../third_party/display_drivers/src/core/m5x7_16pt.h"
 #include "../third_party/display_drivers/src/st7735/lcd_st7735.h"
 		}
 		void __cheri_libcall lcd_init(LCD_Interface *,
@@ -92,6 +93,7 @@ namespace sonata::lcd
 		M3x6_16pt,          // NOLINT  Removing _ from these names can make them
 		LucidaConsole_10pt, // NOLINT  harder to read as they end and start with
 		LucidaConsole_12pt, // NOLINT  numbers (e.g. M3x616pt).
+		M5x7_16pt,
 	};
 
 	class SonataLcd
