@@ -30,6 +30,7 @@ using LcdSpi = SonataSpi::Lcd;
 static constexpr uint8_t LcdCsPin  = 0;
 static constexpr uint8_t LcdDcPin  = 1;
 static constexpr uint8_t LcdRstPin = 2;
+static constexpr uint8_t SpiOutEn  = 3;
 
 /**
  * Sets the value of a specific Chip Select of SPI1. These Chip Select
@@ -54,7 +55,7 @@ namespace sonata::lcd::internal
 		set_chip_select(LcdCsPin, false);
 
 		// Initialise SPI driver.
-		spi()->init(false, false, true, false);
+		spi()->init(false, false, true, 2);
 
 		// Reset LCD.
 		set_chip_select(LcdRstPin, false);
@@ -65,7 +66,16 @@ namespace sonata::lcd::internal
 		lcdIntf->handle = nullptr;
 		lcdIntf->spi_write =
 		  [](void *handle, uint8_t *data, size_t len) -> uint32_t {
+			set_chip_select(SpiOutEn, true);
 			spi()->blocking_write(data, len);
+			spi()->wait_idle();
+			return len;
+		};
+		lcdIntf->spi_read =
+		  [](void *handle, uint8_t *data, size_t len) -> uint32_t {
+			set_chip_select(SpiOutEn, false);
+			spi()->blocking_read(data, len);
+			spi()->wait_idle();
 			return len;
 		};
 		lcdIntf->gpio_write =
@@ -79,6 +89,21 @@ namespace sonata::lcd::internal
 		};
 		lcd_st7735_init(ctx, lcdIntf);
 
+		// Detect the resolution configuration and workaround if misconfigured.
+		size_t w = 0, h = 0;
+		Result res = lcd_st7735_check_frame_buffer_resolution(ctx, &w, &h);
+		if (res.code != 0)
+		{
+			Debug::log("Warning: Unable to determine LCD offset. Try slower "
+			           "SPI clock.\r\n");
+		}
+		else if (w != 160)
+		{
+			lcd_st7735_set_frame_buffer_resolution(ctx, w, h);
+		}
+
+		// Re-configure the SPI driver at maximum speed.
+		spi()->init(false, false, true, 0);
 		lcd_st7735_startup(ctx);
 
 		// Set the LCD orentiation.
