@@ -45,6 +45,7 @@ void set_chip_select(uint8_t chipSelect, bool value)
 }
 namespace sonata::lcd::internal
 {
+	using Debug = ConditionalDebug<true, "LCD">;
 	void __cheri_libcall lcd_init(LCD_Interface  *lcdIntf,
 	                              St7735Context  *ctx,
 	                              LCD_Orientation rot)
@@ -169,6 +170,9 @@ void __cheri_libcall SonataLcd::draw_str(Point       point,
 			break;
 		case Font::LucidaConsole_12pt:
 			internalFont = &internal::lucidaConsole_12ptFont;
+			break;
+		case Font::M5x7_16pt:
+			internalFont = &internal::m5x7_16ptFont;
 			break;
 		default:
 			internalFont = &internal::m3x6_16ptFont;
