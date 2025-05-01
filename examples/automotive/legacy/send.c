@@ -8,10 +8,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "../../../third_party/display_drivers/core/lucida_console_10pt.h"
-#include "../../../third_party/display_drivers/core/lucida_console_12pt.h"
-#include "../../../third_party/display_drivers/core/m3x6_16pt.h"
-#include "../../../third_party/display_drivers/st7735/lcd_st7735.h"
+#include "../../../third_party/display_drivers/src/core/lucida_console_10pt.h"
+#include "../../../third_party/display_drivers/src/core/lucida_console_12pt.h"
+#include "../../../third_party/display_drivers/src/core/m3x6_16pt.h"
+#include "../../../third_party/display_drivers/src/st7735/lcd_st7735.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/gpio.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/rv_plic.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/sonata_system.h"

@@ -14,11 +14,11 @@ namespace sonata::lcd
 	{
 		extern "C"
 		{
-#include "../third_party/display_drivers/core/lcd_base.h"
-#include "../third_party/display_drivers/core/lucida_console_10pt.h"
-#include "../third_party/display_drivers/core/lucida_console_12pt.h"
-#include "../third_party/display_drivers/core/m3x6_16pt.h"
-#include "../third_party/display_drivers/st7735/lcd_st7735.h"
+#include "../third_party/display_drivers/src/core/lcd_base.h"
+#include "../third_party/display_drivers/src/core/lucida_console_10pt.h"
+#include "../third_party/display_drivers/src/core/lucida_console_12pt.h"
+#include "../third_party/display_drivers/src/core/m3x6_16pt.h"
+#include "../third_party/display_drivers/src/st7735/lcd_st7735.h"
 		}
 		void __cheri_libcall lcd_init(LCD_Interface *,
 		                              St7735Context *,
@@ -81,8 +81,10 @@ namespace sonata::lcd
 	{
 		Black = 0x000000,
 		White = 0xFFFFFF,
-		Red   = 0x0000FF,
-		Green = 0x00FF00
+		Red   = 0xFF0000,
+		Green = 0x00FF00,
+		Blue  = 0x0000FF,
+		Grey  = 0xAAAAAA,
 	};
 
 	enum class Font

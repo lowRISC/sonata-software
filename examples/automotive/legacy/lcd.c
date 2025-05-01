@@ -4,9 +4,9 @@
 
 #include "lcd.h"
 
-#include "../../../third_party/display_drivers/core/lucida_console_10pt.h"
-#include "../../../third_party/display_drivers/core/m3x6_16pt.h"
-#include "../../../third_party/display_drivers/st7735/lcd_st7735.h"
+#include "../../../third_party/display_drivers/src/core/lucida_console_10pt.h"
+#include "../../../third_party/display_drivers/src/core/m3x6_16pt.h"
+#include "../../../third_party/display_drivers/src/st7735/lcd_st7735.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/gpio.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/sonata_system.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/spi.h"
@@ -16,7 +16,7 @@
 // pointer arithmetic, which clang-tidy forbids.
 #define GPIO_OUT_LCD GPIO_FROM_BASE_ADDR((GPIO_BASE + GPIO_OUT_REG))
 
-static void timer_delay(uint32_t ms)
+static void timer_delay(void *handle, uint32_t ms)
 {
 	uint32_t timeout = get_elapsed_time() + ms;
 	while (get_elapsed_time() < timeout)
@@ -48,7 +48,7 @@ int lcd_init(spi_t *spi, St7735Context *lcd, LCD_Interface *interface)
 
 	// Reset the LCD
 	set_output_bit(GPIO_OUT_LCD, LcdRstPin, 0x0);
-	timer_delay(150);
+	timer_delay(NULL, 150);
 	set_output_bit(GPIO_OUT_LCD, LcdRstPin, 0x1);
 
 	// Init LCD Driver, and set the SPI driver
@@ -57,6 +57,7 @@ int lcd_init(spi_t *spi, St7735Context *lcd, LCD_Interface *interface)
 	interface->gpio_write  = gpio_write;  // GPIO write callback.
 	interface->timer_delay = timer_delay; // Timer delay callback.
 	lcd_st7735_init(lcd, interface);
+	lcd_st7735_startup(lcd);
 
 	// Set the LCD orientation
 	lcd_st7735_set_orientation(lcd, LCD_Rotate180);
