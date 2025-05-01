@@ -74,8 +74,12 @@ namespace sonata::lcd::internal
 			set_chip_select(LcdDcPin, dcHigh);
 			return 0;
 		};
-		lcdIntf->timer_delay = [](uint32_t ms) { thread_millisecond_wait(ms); };
+		lcdIntf->timer_delay = [](void *handle, uint32_t ms) {
+			thread_millisecond_wait(ms);
+		};
 		lcd_st7735_init(ctx, lcdIntf);
+
+		lcd_st7735_startup(ctx);
 
 		// Set the LCD orentiation.
 		lcd_st7735_set_orientation(ctx, rot);

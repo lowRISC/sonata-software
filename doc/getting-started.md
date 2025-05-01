@@ -179,11 +179,11 @@ generating /home/mvdmaas/repos/sw-sonata/cheriot-rtos/sdk/firmware.ldscript.in .
 [ 34%]: cache compiling.release ../cheriot-rtos/sdk/core/scheduler/main.cc
 [ 34%]: cache compiling.release all/led_walk_raw.cc
 [ 35%]: cache compiling.release all/echo.cc
-[ 36%]: cache compiling.release ../third_party/display_drivers/core/lcd_base.c
-[ 36%]: cache compiling.release ../third_party/display_drivers/core/m3x6_16pt.c
-[ 37%]: cache compiling.release ../third_party/display_drivers/core/lucida_console_10pt.c
-[ 37%]: cache compiling.release ../third_party/display_drivers/core/lucida_console_12pt.c
-[ 38%]: cache compiling.release ../third_party/display_drivers/st7735/lcd_st7735.c
+[ 36%]: cache compiling.release ../third_party/display_drivers/src/core/lcd_base.c
+[ 36%]: cache compiling.release ../third_party/display_drivers/src/core/m3x6_16pt.c
+[ 37%]: cache compiling.release ../third_party/display_drivers/src/core/lucida_console_10pt.c
+[ 37%]: cache compiling.release ../third_party/display_drivers/src/core/lucida_console_12pt.c
+[ 38%]: cache compiling.release ../third_party/display_drivers/src/st7735/lcd_st7735.c
 [ 39%]: cache compiling.release ../libraries/lcd.cc
 [ 39%]: cache compiling.release automotive/lib/automotive_common.c
 [ 40%]: cache compiling.release automotive/cheri/receive.cc

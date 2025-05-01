@@ -81,7 +81,7 @@ set_toolchains("legacy-gcc")
 -- Legacy-specific LCD library for using the display drivers
 target("lcd_st7735_lib_am")
     set_kind("static")
-    local lcd_dir = path.join(rootdir, "third_party/display_drivers")
+    local lcd_dir = path.join(rootdir, "third_party/display_drivers/src/")
     add_files(
         path.join(lcd_dir, "core/lcd_base.c"),
         path.join(lcd_dir, "core/lucida_console_10pt.c"),

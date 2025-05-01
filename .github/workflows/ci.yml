@@ -30,7 +30,7 @@ jobs:
         uses: cachix/install-nix-action@v30
 
       - name: Nix Format Check
-        run: nix fmt -- . --check
+        run: nix fmt -- . --check --exclude ./third_party --exclude ./cheriot-rtos
 
       - name: Run Lints
         run: nix run .?submodules=1#lint-all

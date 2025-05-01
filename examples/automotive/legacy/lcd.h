@@ -5,7 +5,7 @@
 #ifndef LCD_H
 #define LCD_H
 
-#include "../../../third_party/display_drivers/st7735/lcd_st7735.h"
+#include "../../../third_party/display_drivers/src/st7735/lcd_st7735.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/spi.h"
 
 // Constants.

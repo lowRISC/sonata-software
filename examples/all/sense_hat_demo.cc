@@ -16,7 +16,7 @@
  */
 
 #include "../../libraries/sense_hat.hh"
-#include "../../third_party/display_drivers/core/m3x6_16pt.h"
+#include "../../third_party/display_drivers/src/core/m3x6_16pt.h"
 #include <compartment.h>
 #include <debug.hh>
 #include <platform-gpio.hh>
