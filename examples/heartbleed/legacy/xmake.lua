@@ -98,4 +98,5 @@ legacy_firmware("heartbleed_demo_legacy")
     add_files(
         "../../../third_party/sonata-system/vendor/cheriot_debug_module/tb/prog/syscalls.c"
     )
-    add_files("heartbleed.c", "../common.c", "lcd.c")
+    -- Keep the "-g3 -O0" flags as an example of a legacy flow that supports using a debugger
+    add_files("heartbleed.c", "../common.c", "lcd.c", {force = {cxflags = {"-g3", "-O0"}}})
