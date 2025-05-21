@@ -29,17 +29,19 @@ extern "C"
 
 	enum
 	{
-		BGRColorBlack = 0x000000,
-		BGRColorWhite = 0xFFFFFF,
-		BGRColorBlue  = 0xFF0000,
-		BGRColorGreen = 0x00FF00,
-		BGRColorRed   = 0x0000FF,
+		RGBColorBlack = 0x000000,
+		RGBColorWhite = 0xFFFFFF,
+		RGBColorBlue  = 0xFF0000,
+		RGBColorGreen = 0x00FF00,
+		RGBColorRed   = 0x0000FF,
+		RGBColorGrey  = 0xAAAAAA,
 	};
 
 	// Fonts available for LCD rendering
 	typedef enum LcdFont
 	{
 		LcdFontM3x6_16pt,          // NOLINT
+		LcdFontM5x7_16pt,          // NOLINT
 		LcdFontLucidaConsole_10pt, // NOLINT
 		LcdFontLucidaConsole_12pt, // NOLINT
 	} LcdFont;

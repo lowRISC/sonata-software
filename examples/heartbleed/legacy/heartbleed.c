@@ -8,7 +8,6 @@
 
 #include <gpio.h>
 #include <lcd_st7735.h>
-#include <m3x6_16pt.h>
 #include <m5x7_16pt.h>
 #include <pwm.h>
 #include <sonata_system.h>
@@ -21,8 +20,8 @@
 
 #define DEBUG_DEMO true
 #define LENGTH_SCROLL_MILLIS 150u
-#define BACKGROUND_COLOR BGRColorBlack
-#define FOREGROUND_COLOR BGRColorWhite
+#define BACKGROUND_COLOR RGBColorBlack
+#define FOREGROUND_COLOR RGBColorWhite
 
 // Define our own GPIO_IN_DBNC as the version from `sonata-system` uses void
 // pointer arithmetic, which clang-tidy forbids.
@@ -233,8 +232,8 @@ void network_send(void *handle, const char *package, size_t len)
 	const uint32_t CharsPerLine = 29u;
 	St7735Context *lcd          = (St7735Context *)handle;
 
-	const uint32_t TextAreaBgColor = BGRColorGrey;
-	const uint32_t TextAreaFgColor = BGRColorBlack;
+	const uint32_t TextAreaBgColor = RGBColorGrey;
+	const uint32_t TextAreaFgColor = RGBColorBlack;
 	// Clean the botton of the display.
 	lcd_fill_rect(
 	  lcd, 0, 50, lcd->parent.width, lcd->parent.height - 50, TextAreaBgColor);
