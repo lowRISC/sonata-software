@@ -21,7 +21,7 @@
 // pointer arithmetic, which clang-tidy forbids.
 #define GPIO_OUT_LCD GPIO_FROM_BASE_ADDR((GPIO_BASE + GPIO_OUT_REG))
 
-static void timer_delay(uint32_t ms)
+static void timer_delay(void *handle, uint32_t ms)
 {
 	uint32_t timeout = get_elapsed_time() + ms;
 	while (get_elapsed_time() < timeout)
@@ -55,7 +55,7 @@ int lcd_init(spi_t         *spi,
 
 	// Reset the LCD
 	set_output_bit(GPIO_OUT_LCD, LcdRstPin, 0x0);
-	timer_delay(150);
+	timer_delay(NULL, 150);
 	set_output_bit(GPIO_OUT_LCD, LcdRstPin, 0x1);
 
 	// Init LCD Driver, and set the SPI driver
@@ -64,13 +64,14 @@ int lcd_init(spi_t         *spi,
 	interface->gpio_write  = gpio_write;  // GPIO write callback.
 	interface->timer_delay = timer_delay; // Timer delay callback.
 	lcd_st7735_init(lcd, interface);
+	lcd_st7735_startup(lcd);
 
 	// Set the LCD orientation
 	lcd_st7735_set_orientation(lcd, LCD_Rotate180);
 
 	// Setup text font bitmaps to be used and the colors.
 	lcd_st7735_set_font(lcd, &m3x6_16ptFont);
-	lcd_st7735_set_font_colors(lcd, BGRColorWhite, BGRColorBlack);
+	lcd_st7735_set_font_colors(lcd, RGBColorWhite, RGBColorBlack);
 
 	// Clean display with a white rectangle.
 	lcd_st7735_clean(lcd);
@@ -103,6 +104,9 @@ void lcd_draw_str(St7735Context *lcd,
 			break;
 		case LcdFontLucidaConsole_12pt:
 			stringFont = lucidaConsole_12ptFont;
+			break;
+		case LcdFontM5x7_16pt:
+			stringFont = m5x7_16ptFont;
 			break;
 		default:
 			stringFont = m3x6_16ptFont;

@@ -76,12 +76,13 @@ set_toolchains("legacy-gcc")
 -- Legacy-specific LCD library for using the display drivers
 target("lcd_st7735_lib_am")
     set_kind("static")
-    local lcd_dir = path.join(rootdir, "third_party/display_drivers")
+    local lcd_dir = path.join(rootdir, "third_party/display_drivers/src")
     add_files(
         path.join(lcd_dir, "core/lcd_base.c"),
         path.join(lcd_dir, "core/lucida_console_10pt.c"),
         path.join(lcd_dir, "core/lucida_console_12pt.c"),
         path.join(lcd_dir, "core/m3x6_16pt.c"),
+        path.join(lcd_dir, "core/m5x7_16pt.c"),
         path.join(lcd_dir, "st7735/lcd_st7735.c")
     )
 
@@ -89,14 +90,12 @@ target("lcd_st7735_lib_am")
 legacy_firmware("heartbleed_demo_legacy")
     add_deps("lcd_st7735_lib_am")
     add_includedirs(
-        "../../../third_party/display_drivers/core/",
-        "../../../third_party/display_drivers/st7735/",
-        "../../../third_party/sonata-system/sw/legacy/common/",
-        "../../../libraries/"
+        "../../../third_party/display_drivers/src/core/",
+        "../../../third_party/display_drivers/src/st7735/",
+        "../../../third_party/sonata-system/sw/legacy/common/"
     )
     add_ldflags("-specs=nosys.specs", {force = true})
     add_files(
-        "../../../third_party/sonata-system/vendor/cheriot_debug_module/tb/prog/syscalls.c",
-        "../../../libraries/m5x7_16pt.c"
+        "../../../third_party/sonata-system/vendor/cheriot_debug_module/tb/prog/syscalls.c"
     )
     add_files("heartbleed.c", "../common.c", "lcd.c")
