@@ -40,6 +40,7 @@ jobs:
           nix build -L .?submodules=1#sonata-exercises
           nix build -L .?submodules=1#sonata-examples
           nix build -L .?submodules=1#sonata-automotive-demo-legacy-component
+          nix build -L .?submodules=1#sonata-heartbleed-demo-legacy-component
           nix build -L .?submodules=1#sonata-tests
 
       - name: Run Nix Checks

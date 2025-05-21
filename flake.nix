@@ -60,6 +60,21 @@
         dontFixup = true;
       };
 
+      sonata-heartbleed-demo-legacy-component = pkgs.stdenvNoCC.mkDerivation {
+        name = "sonata-heartbleed-demo-legacy-component";
+        src = fileset.toSource {
+          root = ./.;
+          fileset = fileset.unions [./examples/heartbleed ./common.lua ./third_party];
+        };
+        buildInputs = [pkgs.srecord] ++ (with lrPkgs; [xmake lowrisc-toolchain-gcc-rv32imcb uf2conv]);
+        buildPhase = "xmake -P ./examples/heartbleed/legacy/";
+        installPhase = ''
+          mkdir -p $out/share/
+          cp build/ilp32/rv32imc/release/heartbleed_demo_legacy $out/share
+        '';
+        dontFixup = true;
+      };
+
       sonata-software-documentation = lrDoc.buildMdbookSite {
         version = "";
         pname = "sonata-software-documentation";
@@ -204,6 +219,7 @@
           sonata-tests
           sonata-software-documentation
           sonata-automotive-demo-legacy-component
+          sonata-heartbleed-demo-legacy-component
           ;
       };
       checks = {inherit tests-simulator;};
