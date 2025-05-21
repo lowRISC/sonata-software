@@ -303,6 +303,8 @@ int main()
 	spi_init(&lcdSpi, LCD_SPI, LcdSpiSpeedHz);
 	lcd_init(&lcdSpi, lcd_bl, &lcd, &lcdInterface);
 	lcd_clean(&lcd, BACKGROUND_COLOR);
+	lcd_fill_rect(
+	  &lcd, 0, 50, lcd.parent.width, lcd.parent.height - 50, RGBColorGrey);
 
 	size_t req_len = 8;
 	while (true)
