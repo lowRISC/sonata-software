@@ -52,7 +52,19 @@ void write_to_uart(const char *format, ...)
 		write_to_uart(__VA_ARGS__);                                            \
 	}
 
-#define rdcycle64 get_mcycle
+uint64_t rdcycle64()
+{
+	uint32_t mcycle_high, mcycle_low;
+	__asm__ volatile("1: "
+	                 "csrr t0, mcycleh\n"
+	                 "csrr %0, mcycle\n"
+	                 "csrr %1, mcycleh\n"
+	                 "bne t0, %1, 1b"
+	                 : "=r"(mcycle_low), "=r"(mcycle_high)
+	                 :
+	                 : "t0");
+	return ((uint64_t)mcycle_high << 32) | mcycle_low;
+}
 
 /**
  * @brief Read the current GPIO joystick state.
