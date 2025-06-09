@@ -60,7 +60,7 @@ To make use of the lowRISC Nix cache, so you don't have to rebuild binaries your
 To do this, you add your username to the trusted users in `/etc/nix/nix.conf`, e.g. `trusted-users = root username`.
 *You can also add all users from a certain group instead of a single user by using an `@` symbol before the group name, e.g. `@sudo` or `@wheel`.*
 
-> ℹ️ For Ubuntu users (including WSL users), this means adding this line to the `/etc/nix/nix.conf`:
+> ℹ️ For Ubuntu users (including WSL users), this means adding this line to the `/etc/nix/nix.custom.conf` (for older version of Nix you may need to edit `/etc/nix/nix.conf` directly):
 > ```
 > trusted-users = root @sudo
 > ```
@@ -70,7 +70,7 @@ To do this, you add your username to the trusted users in `/etc/nix/nix.conf`, e
 > sudo systemctl restart nix-daemon
 > ```
 
-> ℹ️ For macOS users, this means adding this line to the `/etc/nix/nix.conf`:
+> ℹ️ For macOS users, the configuration file is found in the same place as Ubuntu, but the added line is slightly different:
 > ```
 > trusted-users = root @admin
 > ```
