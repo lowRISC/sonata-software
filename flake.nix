@@ -228,6 +228,7 @@
         value = {
           type = "app";
           program = getExe program;
+          meta.description = "Part of the Sonata Software lints and tests suite.";
         };
       }) [lint-all lint-cpp lint-python tests-runner tests-fpga-runner]);
     };
