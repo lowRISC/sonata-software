@@ -33,15 +33,15 @@ jobs:
         run: nix fmt -- . --check --exclude ./third_party --exclude ./cheriot-rtos
 
       - name: Run Lints
-        run: nix run .?submodules=1#lint-all
+        run: nix run .#lint-all
 
       - name: Build Software
         run: |
-          nix build -L .?submodules=1#sonata-exercises
-          nix build -L .?submodules=1#sonata-examples
-          nix build -L .?submodules=1#sonata-automotive-demo-legacy-component
-          nix build -L .?submodules=1#sonata-heartbleed-demo-legacy-component
-          nix build -L .?submodules=1#sonata-tests
+          nix build -L .#sonata-exercises
+          nix build -L .#sonata-examples
+          nix build -L .#sonata-automotive-demo-legacy-component
+          nix build -L .#sonata-heartbleed-demo-legacy-component
+          nix build -L .#sonata-tests
 
       - name: Run Nix Checks
-        run: nix flake check -L .?submodules=1#
+        run: nix flake check -L .#
