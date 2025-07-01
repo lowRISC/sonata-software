@@ -3,6 +3,7 @@
 {
   description = "Sonata software";
   inputs = {
+    self.submodules = true;
     sonata-system.url = "github:lowRISC/sonata-system";
     lowrisc-nix.follows = "sonata-system/lowrisc-nix";
     nixpkgs.follows = "lowrisc-nix/nixpkgs";
