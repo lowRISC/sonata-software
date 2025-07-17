@@ -12,10 +12,10 @@ required_disabled_interrupts := [
         "functions": {"run_without_interrupts(int)", "also_without_interrupts(int*)"}
     }, {
         "compartment": "bad_disable_interrupts",
-        "functions": {}
+        "functions": {},
         # Uncomment the below line (and comment the above line) to allow the disallowed
         # function to be run with interrupts disabled
-        #"functions": {"not_allowed()"}
+        # "functions": {"not_allowed()"}
     }
 ]
 required_compartments := {x.compartment | x = required_disabled_interrupts[_]}

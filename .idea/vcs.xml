@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cheriot-rtos" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cheriot-rtos/sdk/third_party/magic_enum" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cheriot-rtos/sdk/third_party/microvium" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/display_drivers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/sonata-system" vcs="Git" />
+  </component>
+</project>

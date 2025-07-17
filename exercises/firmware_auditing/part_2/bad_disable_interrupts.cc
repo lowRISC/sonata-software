@@ -3,7 +3,7 @@
 
 #include <compartment.h>
 
-[[cheri::interrupt_state(disabled)]] int not_allowed()
+int not_allowed()
 {
 	int x = 0;
 	x += 1;

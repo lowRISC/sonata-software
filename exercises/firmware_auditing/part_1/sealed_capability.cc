@@ -12,16 +12,21 @@ void __cheri_compartment("sealed_capability") do_things()
 {
 	auto gpio = MMIO_CAPABILITY(SonataGpioBoard, gpio_board);
 
-	uint32_t arr[ArrSize];
+	// uint32_t arr[ArrSize];
 	// Comment the above line and uncomment the below line to allocate on the
 	// heap!
-	// uint32_t *arr = new uint32_t[ArrSize];
+	uint32_t *arr = new uint32_t[ArrSize];
 
 	for (size_t i = 0; i < ArrSize; i++)
 	{
 		arr[i] = i;
 	}
 
+    uint32_t *other_arr = new uint32_t[ArrSize];
+	for (size_t i = 0; i < ArrSize; i++)
+	{
+		other_arr[i] = i;
+	}
 	while (true)
 	{
 		gpio->led_toggle(LedIdx);
