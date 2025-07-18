@@ -16,8 +16,10 @@ using Debug = ConditionalDebug<true, "Flying_game">;
 using namespace sonata::lcd;
 using namespace CHERI;
 
+// Debug mode
+static constexpr bool DebugMode = true;
 // Control game speed
-static constexpr uint32_t MillisecondsPerFrame = 400;
+static constexpr uint32_t MillisecondsPerFrame = 100;
 // Small wait between games to avoid accidentally starting the next
 static constexpr uint32_t StartMenuWaitMilliseconds = 400;
 
@@ -36,6 +38,9 @@ static constexpr Color BackgroundColor = Color::Black,
 // Change the size of game elements (will automatically fit display)
 static constexpr Size TileSize = {10, 10}, TileSpacing = {2, 2},
                       BorderSize = {4, 3};
+
+// width of each hole in the walls
+static constexpr int hole_width = 3;
 
 typedef struct Position
 {
@@ -106,8 +111,11 @@ class FlyingGame
 
 	EntropySource prng{};
 
-	Position heroPosition;
-	Size                  gameSize, gamePadding;
+	Position currentPosition, nextPosition, wall_one, wall_two, wall_three;
+	Size     gameSize, gamePadding, displaySize;
+    Direction lastSeenDirection, currentDirection;
+
+    int playerMovement;
 
 	/**
 	 * @brief Calculate game size and padding information from defined constants
@@ -121,19 +129,14 @@ class FlyingGame
 		  Rect::from_point_and_size(Point::ORIGIN, lcd->resolution());
 		Size displaySize = {screen.right - screen.left - BorderSize.width * 2,
 		                    screen.bottom - screen.top - BorderSize.height * 2};
-		Size spacedTileSize = {TileSize.width + TileSpacing.width,
-		                       TileSize.height + TileSpacing.height};
-		gameSize            = {displaySize.width / spacedTileSize.width,
-                    displaySize.height / spacedTileSize.height};
-		gamePadding         = {
-          displaySize.width % spacedTileSize.width + TileSpacing.width,
-          displaySize.height % spacedTileSize.height + TileSpacing.height};
-		gamePadding = {
-		  Point::ORIGIN.x + BorderSize.width + gamePadding.width / 2,
-		  Point::ORIGIN.y + BorderSize.height + gamePadding.height / 2};
+		gameSize            = {displaySize.width,
+		                       displaySize.height};
 		Debug::log("Calculated game size based on settings: {}x{}",
 		           static_cast<int>(gameSize.width),
 		           static_cast<int>(gameSize.height));
+		Debug::log("Padding size: {}x{}",
+		           static_cast<int>(gamePadding.width),
+		           static_cast<int>(gamePadding.height));
 	};
 
 	/**
@@ -179,7 +182,7 @@ class FlyingGame
 
 		// Busy-wait for a valid joystick input
 		SonataJoystick joystickInp, noInput = static_cast<SonataJoystick>(0x0);
-		bool           waitingForInput = true;
+		bool           waitingForInput = !DebugMode;
 		while (waitingForInput)
 		{
 			thread_millisecond_wait(50);
@@ -232,32 +235,15 @@ class FlyingGame
 		// smoother to play.
 		Direction directions[2] = {
 		  Direction::UP, Direction::DOWN};
-		SonataJoystick joystickStates[2] = {SonataJoystick::Up,
-		                                    SonataJoystick::Down};
+		SonataJoystick joystickStates[2] = {SonataJoystick::Pressed};
 
-		uint8_t base;
-		for (base = 0; base < 4; base++)
-		{
-			if (currentDirection == directions[base])
-			{
-				break;
-			}
-		}
+        if (joystick_in_direction(joystickState, joystickStates[0]))
+        {
+            return directions[0];
+        }
 
-		for (uint8_t offset = 1; offset <= 4; offset++)
-		{
-			if (offset == 2 && snakePositions.size() != 1)
-			{
-				continue; // Disallow moving in the opposite direction
-			}
-			uint8_t idx = (base + offset) % 4;
-			if (joystick_in_direction(joystickState, joystickStates[idx]))
-			{
-				return directions[idx];
-			}
-		}
-		return lastSeenDirection;
-	};
+		return Direction::DOWN;
+};
 
 	/**
 	 * @brief Busy waits for a given amount of time, constantly polling for any
@@ -279,15 +265,41 @@ class FlyingGame
 			lastSeenDirection = read_joystick(gpio);
 			current           = rdcycle64();
 		}
+		Debug::log("{}", lastSeenDirection);
 	};
+
+    void draw_edge_wall(Position wall_position, SonataLcd *lcd, Color color){
+        int wall_height = gameSize.width / 5;
+        Rect bottom_rect = get_bottom_rect(wall_position);
+        draw_rect(lcd, bottom_rect, color);
+        Rect top_rect = get_top_rect({static_cast<int32_t>(wall_position.x + wall_height), wall_position.y});
+        draw_rect(lcd, top_rect, color);
+    }
+
+	/**
+	 * @brief Draws a wall given its position
+	 */
+    void draw_wall(Position wall_position, SonataLcd *lcd, Color color){
+        int wall_width = gameSize.height / 10;
+        draw_edge_wall(wall_position, lcd, SnakeColor);
+        draw_edge_wall({wall_position.x, wall_position.y-wall_width}, lcd, BackgroundColor);
+    }
 
 	/**
 	 * @brief Initialises information required for starting the game, including
 	 * the snake and fruit positions.
 	 */
-	void initialise_game()
+	void initialise_game(SonataLcd *lcd)
 	{
-
+		// Allocate a non-contiguous 2D array storing the game (tile) space for
+		// collision checks, allowing Out Of Bounds memory accesses to trigger
+		// CHERI capability violations for scoring
+		initialise_game_size(lcd);
+		Position startPosition = {static_cast<int32_t>(gameSize.width / 2),
+		                          static_cast<int32_t>(7 * gameSize.height / 8)};
+		currentDirection = lastSeenDirection = Direction::UP;
+		currentPosition = startPosition;
+		wall_one = {static_cast<int32_t>(50), static_cast<int32_t>(0)};
 	};
 
 	/**
@@ -295,7 +307,7 @@ class FlyingGame
 	 *
 	 * @param lcd The LCD that will be drawn to.
 	 */
-	void draw_background(SonataLcd *lcd)
+	void draw_background(SonataLcd *lcd, Color c)
 	{
 		Size lcdSize = lcd->resolution();
 		lcd->clean(BorderColor);
@@ -303,7 +315,7 @@ class FlyingGame
 		                BorderSize.height,
 		                lcdSize.width - BorderSize.width,
 		                lcdSize.height - BorderSize.height},
-		               BackgroundColor);
+		               c);
 	}
 
 	/**
@@ -314,64 +326,40 @@ class FlyingGame
 	 */
 	Rect get_tile_rect(Position position)
 	{
-		Size spacedTileSize = {TileSize.width + TileSpacing.width,
-		                       TileSize.height + TileSpacing.height};
 		return Rect::from_point_and_size(
-		  {gamePadding.width + position.x * spacedTileSize.width,
-		   gamePadding.height + position.y * spacedTileSize.height},
-		  TileSize);
+		  {gamePadding.width + position.x,
+		   gamePadding.height + position.y},
+		  {10,10});
 	}
 
 	/**
-	 * @brief Draw a filled rectangle the size of one game tile at the specified
-	 * position and colour.
+	 * @brief Get the rectangle bounding box for the space below
+	 * the bottom of the wall
 	 *
-	 * @param lcd The LCD that will be drawn to.
-	 * @param position The integer tile position (x, y) to draw at.
-	 * @param color The colour to fill the drawn tile.
+	 * @param position The integer tile position (x, y) for the start of the hole.
 	 */
-	void draw_tile(SonataLcd *lcd, Position position, Color color)
+	Rect get_bottom_rect(Position position)
 	{
-		Rect tileRect = get_tile_rect(position);
-		lcd->fill_rect(tileRect, color);
+		return Rect::from_point_and_size(
+		  {static_cast<uint32_t>(BorderSize.width), static_cast<uint32_t>(position.y + BorderSize.height)},
+		  {static_cast<uint32_t>(position.x), static_cast<uint32_t>(10)}
+		  );
 	}
 
-	/**
-	 * @brief Checks whether the snake is colliding with anything (i.e. itself)
-	 * in the game's space. Also responsible for causing the Out of Bounds
-	 * accesses when hitting the game's boundary which trigger CHERI violations
-	 * for scoring.
-	 *
-	 * @return true if the snake is colliding, false otherwise.
-	 *
-	 * @note The attribute nextPosition is used to pass along the snake's
-	 * position instead of using a traditional argument to allow us to use the
-	 * CHERI capability mechanisms for scoring. By keeping a simple function and
-	 * ignoring caller/callee-saves responsibilities we can just change the PCC
-	 * address to a function of the same kind that returns True to continue
-	 * execution after an out of bounds access occurs.
-	 */
-	[[gnu::noinline]] bool check_if_colliding()
+	Rect get_top_rect(Position position)
 	{
-		if (gameSpace[nextPosition.y][nextPosition.x] == Tile::WALL)
-		{
-			// Cause an out of bounds access on purpose when the snake collides
-			// with itself so we can use CHERI violations for game scoring
-			return gameSpace[gameSize.height][gameSize.width] == Tile::WALL;
-		}
-		return false;
-	};
+	    return Rect::from_point_and_size(
+		  {static_cast<uint32_t>(BorderSize.width + position.x), static_cast<uint32_t>(position.y + BorderSize.height)},
+		  {static_cast<uint32_t>(gameSize.width - position.x), static_cast<uint32_t>(10)}
+	    );
+	}
 
-	/**
-	 * @brief Updates the game's state by a frame, advancing the snake forward
-	 * by 1 step in the input/previous direction, and handling collision and
-	 * fruit-eating logic. Updates the display by drawing only relevant/new
-	 * information, rather than drawing everything each frame.
-	 *
-	 * @param lcd The LCD that will be drawn to.
-	 * @param position The integer tile position (x, y) to draw at.
-	 * @return true if the game is still active, false if the game is over.
-	 */
+
+    void draw_rect(SonataLcd *lcd, Rect rect, Color color)
+    {
+        lcd->fill_rect(rect, color);
+    }
+
 	bool update_game_state(volatile SonataGpioBoard *gpio, SonataLcd *lcd)
 	{
 		currentDirection = read_joystick(gpio);
@@ -380,28 +368,26 @@ class FlyingGame
 		switch (currentDirection)
 		{
 			case Direction::UP:
-				dx = -1;
-				dy = 0;
+				playerMovement += 5;
 				break;
 			case Direction::DOWN:
-				dx = 1;
-				dy = 0;
+                playerMovement += 0.25;
 				break;
 		};
+        draw_rect(lcd, get_tile_rect(currentPosition), BackgroundColor);
+		nextPosition = {currentPosition.x + playerMovement, currentPosition.y};
+//		Debug::log("{}", currentPosition.x);
 
-		Position currentPosition = snakePositions.back();
-		nextPosition = {currentPosition.x + dx, currentPosition.y + dy};
-		if (check_if_colliding())
-		{
-			Debug::log("Snake collided with something - game over.");
-			return false;
+		currentPosition = nextPosition;
+
+		draw_wall(wall_one, lcd, BackgroundColor);
+		wall_one.y += 1;
+		if (wall_one.y >= gameSize.height){
+		    wall_one.y = 0;
 		}
-		snakePositions.push_back(nextPosition);
-		gameSpace[nextPosition.y][nextPosition.x] = Tile::SNAKE;
-		draw_tile(lcd, nextPosition, SnakeColor);
+        draw_rect(lcd, get_tile_rect(currentPosition), SnakeColor);
 		return true;
 	}
-
 	/**
 	 * @brief Runs the main game loop, updating the snake's movement and drawing
 	 * new information to the display, and regulates update/frame timing.
@@ -416,9 +402,7 @@ class FlyingGame
 
 		// Draw initial information (to be drawn on top of, rather than
 		// re-drawing each frame)
-		draw_background(lcd);
-		draw_tile(lcd, snakePositions.front(), SnakeColor);
-		draw_cherry(lcd, fruitPosition);
+		draw_background(lcd, BackgroundColor);
 
 		bool gameStillActive = true;
 		while (gameStillActive)
@@ -427,20 +411,12 @@ class FlyingGame
 			uint64_t elapsedTimeMilliseconds =
 			  (nextTime - currentTime) / CyclesPerMillisecond;
 			uint64_t frameTime = MillisecondsPerFrame;
-			if (SpeedScalingEnabled)
-			{
-				// Scale the game's speed in an inverse relationship between
-				// MILLISECONDS_PER_FRAME and MILLISECONDS_PER_FRAME / 2
-				frameTime /= 2;
-				frameTime += (frameTime / snakePositions.size());
-			}
 			if (elapsedTimeMilliseconds < frameTime)
 			{
 				uint64_t remainingTime = frameTime - elapsedTimeMilliseconds;
 				wait_with_input(remainingTime, gpio);
 			}
 			currentTime = rdcycle64();
-
 			gameStillActive = update_game_state(gpio, lcd);
 		}
 	};
@@ -451,11 +427,11 @@ class FlyingGame
 	 */
 	void free_game_space()
 	{
-		for (size_t y = 0; y < gameSize.height; y++)
-		{
-			delete[] gameSpace[y];
-		}
-		delete[] gameSpace;
+//		for (size_t y = 0; y < gameSize.height; y++)
+//		{
+//			delete[] gameSpace[y];
+//		}
+//		delete[] gameSpace;
 	}
 
 	public:
@@ -467,9 +443,13 @@ class FlyingGame
 	 */
 	void run_game(volatile SonataGpioBoard *gpio, SonataLcd *lcd)
 	{
+		Debug::log("Waiting for start");
 		wait_for_start(gpio, lcd);
-		initialise_game();
+		Debug::log("Initialising game");
+		initialise_game(lcd);
+		Debug::log("Main game loop");
 		main_game_loop(gpio, lcd);
+		Debug::log("Free game space");
 		free_game_space();
 		isFirstGame = false;
 	};
@@ -479,27 +459,20 @@ class FlyingGame
 	 *
 	 * @param lcd The LCD that the game will be drawn to.
 	 */
-	SnakeGame(SonataLcd *lcd)
+	FlyingGame(SonataLcd *lcd)
 	{
 		initialise_game_size(lcd);
 	};
 
-	~SnakeGame()
+	~FlyingGame()
 	{
-		if (gameSpace != nullptr)
-		{
-			free_game_space();
-		}
+//		if (gameSpace != nullptr)
+//		{
+//			free_game_space();
+//		}
 	};
 };
 
-/**
- * @brief A minimal function used to replace SnakeGame::check_if_colliding for
- * use in error recovery, letting us utilise RISC-V's capability violations with
- * a single compartment as a scoring mechanism.
- *
- * @return True, always.
- */
 [[gnu::noinline]] bool return_from_handled_error()
 {
 	return true;
@@ -514,6 +487,7 @@ class FlyingGame
 extern "C" ErrorRecoveryBehaviour
 compartment_error_handler(ErrorState *frame, size_t mcause, size_t mtval)
 {
+    Debug::log("Capability violation encountered");
 	auto [exceptionCode, registerNumber] = extract_cheri_mtval(mtval);
 	if (exceptionCode == CauseCode::BoundsViolation ||
 	    exceptionCode == CauseCode::TagViolation)
@@ -539,7 +513,7 @@ void __cheri_compartment("flying_game") flying_game()
 	Debug::log("Detected display resolution: {} {}",
 	           static_cast<int>(lcd.resolution().width),
 	           static_cast<int>(lcd.resolution().height));
-	SnakeGame game = SnakeGame(&lcd);
+	FlyingGame game = FlyingGame(&lcd);
 	while (true)
 	{
 		game.run_game(gpio, &lcd);
