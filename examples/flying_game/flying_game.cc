@@ -107,7 +107,7 @@ class FlyingGame
 {
 	private:
 	bool   isFirstGame = true;
-	Tile **gameSpace   = nullptr;
+	Tile *gameSpace   = nullptr;
 
 	EntropySource prng{};
 
@@ -265,11 +265,11 @@ class FlyingGame
 			lastSeenDirection = read_joystick(gpio);
 			current           = rdcycle64();
 		}
-		Debug::log("{}", lastSeenDirection);
+		//Debug::log("{}", lastSeenDirection);
 	};
 
     void draw_edge_wall(Position wall_position, SonataLcd *lcd, Color color){
-        int wall_height = gameSize.width / 5;
+        int wall_height = gameSize.width / 3;
         Rect bottom_rect = get_bottom_rect(wall_position);
         draw_rect(lcd, bottom_rect, color);
         Rect top_rect = get_top_rect({static_cast<int32_t>(wall_position.x + wall_height), wall_position.y});
@@ -300,6 +300,10 @@ class FlyingGame
 		currentDirection = lastSeenDirection = Direction::UP;
 		currentPosition = startPosition;
 		wall_one = {static_cast<int32_t>(50), static_cast<int32_t>(0)};
+		gameSpace = new Tile[static_cast<int>(gameSize.width)];
+        Debug::log("start position: {} {}", startPosition.x, startPosition.y);
+        gameSpace[startPosition.x] = Tile::PLAYER;
+
 	};
 
 	/**
@@ -360,18 +364,23 @@ class FlyingGame
         lcd->fill_rect(rect, color);
     }
 
+    void setPlayerLocation(Position playerPosition, int lower_height, Tile* column){
+        Debug::log("{} {}", playerPosition.x, lower_height);
+        column[playerPosition.x - lower_height] = Tile::PLAYER;
+    }
 	bool update_game_state(volatile SonataGpioBoard *gpio, SonataLcd *lcd)
 	{
+	    int wall_height = gameSize.width / 3;
 		currentDirection = read_joystick(gpio);
 
 		int8_t dx, dy;
 		switch (currentDirection)
 		{
 			case Direction::UP:
-				playerMovement += 5;
+				playerMovement = -1;
 				break;
 			case Direction::DOWN:
-                playerMovement += 0.25;
+                playerMovement += 1;
 				break;
 		};
         draw_rect(lcd, get_tile_rect(currentPosition), BackgroundColor);
@@ -386,6 +395,10 @@ class FlyingGame
 		    wall_one.y = 0;
 		}
         draw_rect(lcd, get_tile_rect(currentPosition), SnakeColor);
+        if (wall_one.y == currentPosition.y){
+            setPlayerLocation(currentPosition, wall_one.x, new Tile[wall_height]);
+        }
+        gameSpace[currentPosition.x] = Tile::PLAYER;
 		return true;
 	}
 	/**
