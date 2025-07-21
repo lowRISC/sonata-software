@@ -19,7 +19,7 @@ using namespace CHERI;
 // Debug mode
 static constexpr bool DebugMode = true;
 // Control game speed
-static constexpr uint32_t MillisecondsPerFrame = 100;
+static constexpr uint32_t MillisecondsPerFrame = 50;
 // Small wait between games to avoid accidentally starting the next
 static constexpr uint32_t StartMenuWaitMilliseconds = 400;
 
@@ -108,14 +108,14 @@ class FlyingGame
 	private:
 	bool   isFirstGame = true;
 	Tile *gameSpace   = nullptr;
-
+    Tile *column;
 	EntropySource prng{};
 
 	Position currentPosition, nextPosition, wall_one, wall_two, wall_three;
 	Size     gameSize, gamePadding, displaySize;
     Direction lastSeenDirection, currentDirection;
 
-    int playerMovement;
+    int playerMovement, lower_height, wall_height, wall_width;
 
 	/**
 	 * @brief Calculate game size and padding information from defined constants
@@ -137,6 +137,8 @@ class FlyingGame
 		Debug::log("Padding size: {}x{}",
 		           static_cast<int>(gamePadding.width),
 		           static_cast<int>(gamePadding.height));
+        wall_height = gameSize.width / 3;
+        wall_width = gameSize.height / 10;
 	};
 
 	/**
@@ -182,7 +184,7 @@ class FlyingGame
 
 		// Busy-wait for a valid joystick input
 		SonataJoystick joystickInp, noInput = static_cast<SonataJoystick>(0x0);
-		bool           waitingForInput = !DebugMode;
+		bool           waitingForInput = true;
 		while (waitingForInput)
 		{
 			thread_millisecond_wait(50);
@@ -281,8 +283,13 @@ class FlyingGame
 	 */
     void draw_wall(Position wall_position, SonataLcd *lcd, Color color){
         int wall_width = gameSize.height / 10;
-        draw_edge_wall(wall_position, lcd, SnakeColor);
-        draw_edge_wall({wall_position.x, wall_position.y-wall_width}, lcd, BackgroundColor);
+
+        if (BorderSize.height < wall_position.y-wall_width){
+            draw_edge_wall({wall_position.x, wall_position.y-wall_width}, lcd, BackgroundColor);
+        }
+        if (wall_position.y < gameSize.height && wall_position.y > BorderSize.height){
+            draw_edge_wall(wall_position, lcd, SnakeColor);
+        }
     }
 
 	/**
@@ -299,7 +306,16 @@ class FlyingGame
 		                          static_cast<int32_t>(7 * gameSize.height / 8)};
 		currentDirection = lastSeenDirection = Direction::UP;
 		currentPosition = startPosition;
+
+		// wall_one starts at y = 0
 		wall_one = {static_cast<int32_t>(50), static_cast<int32_t>(0)};
+
+		// wall_two starts so that they all are equidistant and remain so
+		int wallTwoStart =  - int(gameSize.height) * 4 / 10;
+		wall_two = {static_cast<int32_t>(prng() % (gameSize.width - wall_height + BorderSize.height)), static_cast<int32_t>(wallTwoStart)};
+		int wallThreeStart = - int(gameSize.height) * 8 / 10;
+		wall_three = {static_cast<int32_t>(prng() % (gameSize.width - wall_height + BorderSize.height)), static_cast<int32_t>(wallThreeStart)};
+
 		gameSpace = new Tile[static_cast<int>(gameSize.width)];
         Debug::log("start position: {} {}", startPosition.x, startPosition.y);
         gameSpace[startPosition.x] = Tile::PLAYER;
@@ -345,16 +361,16 @@ class FlyingGame
 	Rect get_bottom_rect(Position position)
 	{
 		return Rect::from_point_and_size(
-		  {static_cast<uint32_t>(BorderSize.width), static_cast<uint32_t>(position.y + BorderSize.height)},
-		  {static_cast<uint32_t>(position.x), static_cast<uint32_t>(10)}
+		  {static_cast<uint32_t>(BorderSize.width), static_cast<uint32_t>(position.y)},
+		  {static_cast<uint32_t>(position.x), static_cast<uint32_t>(1)}
 		  );
 	}
 
 	Rect get_top_rect(Position position)
 	{
 	    return Rect::from_point_and_size(
-		  {static_cast<uint32_t>(BorderSize.width + position.x), static_cast<uint32_t>(position.y + BorderSize.height)},
-		  {static_cast<uint32_t>(gameSize.width - position.x), static_cast<uint32_t>(10)}
+		  {static_cast<uint32_t>(BorderSize.width + position.x), static_cast<uint32_t>(position.y)},
+		  {static_cast<uint32_t>(gameSize.width - position.x), static_cast<uint32_t>(1)}
 	    );
 	}
 
@@ -364,13 +380,33 @@ class FlyingGame
         lcd->fill_rect(rect, color);
     }
 
-    void setPlayerLocation(Position playerPosition, int lower_height, Tile* column){
-        Debug::log("{} {}", playerPosition.x, lower_height);
-        column[playerPosition.x - lower_height] = Tile::PLAYER;
+    [[gnu::noinline]] bool setPlayerLocation(){
+        //Debug::log("{} {}", playerPosition.x, lower_height);
+        return column[currentPosition.x-lower_height] == Tile::WALL;
+//        if (column[currentPosition.x-lower_height] == Tile::WALL){
+//            Debug::log("Cannot set location here");
+//            return true;
+//        }
+//        Debug::log("Can set location here");
+//        return false;
+    }
+
+    void update_wall(Position *wall, SonataLcd *lcd){
+        int wallRestartPoint = - (int)gameSize.height * 2 / 10;
+
+        wall->y += 1;
+		Debug::log("Wall one y: {}", wall_one.y);
+        if (wall->y >= 0){
+            draw_wall(*wall, lcd, BackgroundColor);
+        }
+        if (wall->y >= gameSize.height + wall_width && wall->y > 0){
+		    // Debug::log("Off edge");
+            wall->y = static_cast<int32_t>(wallRestartPoint);
+            wall->x = prng() % (gameSize.width - wall_height + BorderSize.height);
+        }
     }
 	bool update_game_state(volatile SonataGpioBoard *gpio, SonataLcd *lcd)
 	{
-	    int wall_height = gameSize.width / 3;
 		currentDirection = read_joystick(gpio);
 
 		int8_t dx, dy;
@@ -385,21 +421,27 @@ class FlyingGame
 		};
         draw_rect(lcd, get_tile_rect(currentPosition), BackgroundColor);
 		nextPosition = {currentPosition.x + playerMovement, currentPosition.y};
-//		Debug::log("{}", currentPosition.x);
-
 		currentPosition = nextPosition;
-
-		draw_wall(wall_one, lcd, BackgroundColor);
-		wall_one.y += 1;
-		if (wall_one.y >= gameSize.height){
-		    wall_one.y = 0;
-		}
         draw_rect(lcd, get_tile_rect(currentPosition), SnakeColor);
+        update_wall(&wall_one, lcd);
+        update_wall(&wall_two, lcd);
+        update_wall(&wall_three, lcd);
+        CHERI::Capability y{gameSpace};
+        lower_height = 0;
         if (wall_one.y == currentPosition.y){
-            setPlayerLocation(currentPosition, wall_one.x, new Tile[wall_height]);
+            y.address() += wall_one.x;
+            y.bounds() = wall_height * 8;
+            lower_height = wall_one.x;
         }
-        gameSpace[currentPosition.x] = Tile::PLAYER;
-		return true;
+        column = y;
+
+        bool s = !setPlayerLocation();
+        if (s) {
+            return true;
+        }
+        else {
+            return false;
+        }
 	}
 	/**
 	 * @brief Runs the main game loop, updating the snake's movement and drawing
@@ -440,11 +482,7 @@ class FlyingGame
 	 */
 	void free_game_space()
 	{
-//		for (size_t y = 0; y < gameSize.height; y++)
-//		{
-//			delete[] gameSpace[y];
-//		}
-//		delete[] gameSpace;
+		delete[] gameSpace;
 	}
 
 	public:
@@ -479,15 +517,16 @@ class FlyingGame
 
 	~FlyingGame()
 	{
-//		if (gameSpace != nullptr)
-//		{
-//			free_game_space();
-//		}
+		if (gameSpace != nullptr)
+		{
+			free_game_space();
+		}
 	};
 };
 
 [[gnu::noinline]] bool return_from_handled_error()
 {
+//    Debug::log("Returning true from the exception");
 	return true;
 }
 
@@ -500,7 +539,7 @@ class FlyingGame
 extern "C" ErrorRecoveryBehaviour
 compartment_error_handler(ErrorState *frame, size_t mcause, size_t mtval)
 {
-    Debug::log("Capability violation encountered");
+    // Debug::log("Capability violation encountered");
 	auto [exceptionCode, registerNumber] = extract_cheri_mtval(mtval);
 	if (exceptionCode == CauseCode::BoundsViolation ||
 	    exceptionCode == CauseCode::TagViolation)
@@ -531,4 +570,4 @@ void __cheri_compartment("flying_game") flying_game()
 	{
 		game.run_game(gpio, &lcd);
 	}
-}
+    }
