@@ -86,10 +86,10 @@ If you want debug logs from the RTOS, configure your build with the following ad
 
 ```sh
 rm -rf build .xmake
-xmake config -P examples
+xmake config -P examples \
     --debug-scheduler=y --debug-locks=y \
     --debug-cxxrt=y --debug-loader=y \
-    --debug-token_library=y --debug-allocator=y
+    --debug-token_library=y --debug-allocator=information
 xmake -P examples
 ```
 
