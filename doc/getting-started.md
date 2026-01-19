@@ -43,16 +43,19 @@ Follow the Linux (Ubuntu) steps for the rest of this guide.
 ## Installing Nix
 
 The Nix package manager is used to create reproducible builds and consistent development environments.
-We recommend installing Nix with the Determinate Systems' [`nix-installer`](https://github.com/DeterminateSystems/nix-installer):
-
+For Linux systems it's recommended the following command from the official [documentation](https://nixos.org/download/):
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
 ```
+For other systems such as macOS, Windows(WSL2), Docker and others, follow the official [documentation](https://nixos.org/download/).
 
-For more in-depth instructions, follow the guide on [the zero to nix site](https://zero-to-nix.com/start/install).
 To use Nix from the terminal you need to open up a new terminal for it to be added to your path.
 
-* ℹ️ If you've downloaded Nix through another method, make sure the experimental features ["flakes"](https://nixos.wiki/wiki/Flakes) and ["nix-command"](https://nixos.wiki/wiki/Nix_command) are enabled.*
+Make sure the experimental features ["flakes"](https://nixos.wiki/wiki/Flakes) and ["nix-command"](https://nixos.wiki/wiki/Nix_command) are enabled
+by adding the following to `/etc/nix/nix.conf` or `~/.config/nix/nix.conf`:
+```console
+experimental-features = nix-command flakes
+```
 
 ### Setup Nix cache
 
