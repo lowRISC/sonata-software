@@ -5,14 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 # Hardware access control exercise
 
 If you haven't already, please go to the '[building the exercises][]' section to see how the exercises are built.
-
-[Building the Exercises]: ../README.md#building-the-exercises
-
 In this exercise we utilise the compartmentalisation available in CHERIoT RTOS to control access to a hardware peripheral: the LEDs.
 
-For this exercise, when the [`xmake.lua`][] build file is mentioned `exercises/hardware_access_control/xmake.lua` is being referred to.
-
-[`xmake.lua`]: ../../exercises/hardware_access_control/xmake.lua
+[Building the Exercises]: ../README.md#building-the-exercises
 
 ## Part 1
 
@@ -21,6 +16,7 @@ This image has two threads running two compartments: `blinky_raw` and `led_walk_
 Compartment `blinky_raw` simply toggles an LED and compartment `led_walk_raw` walks through all the LEDs toggling them as it goes.
 The sources of these compartments can be found in [`exercises/hardware_access_control/part_1/`][].
 
+[`xmake.lua`]: ../../exercises/hardware_access_control/xmake.lua
 [`exercises/hardware_access_control/part_1/`]: https://github.com/lowRISC/sonata-software/tree/main/exercises/hardware_access_control/part_1
 
 Let's look inside [`blinky_raw`][].
@@ -159,5 +155,5 @@ Where to go from here...
     You could have a go at adding these to the `gpio_access` compartment.
 - The interactions with `ledTaken` global in the `gpio_access` compartment aren't thread safe.
     You could take a look at `cheriot-rtos/examples/06.producer-consumer/` to learn how to use a futex to make it thread safe.
-- There is a technical interest group for Sunburst and a technology access programme run by UKRI that lowRISC is helping to adjudicate.
-    If you are interested in either of these please reach out to [info@lowrisc.org](mailto:info@lowrisc.org).
+- There is a technical interest group run by lowRISC focussing on CHERI technology, and specifically through the [COSMIC project](https://cosmic-project.lowrisc.org/).
+    If you are interested in joining please reach out to [info@lowrisc.org](mailto:info@lowrisc.org).
