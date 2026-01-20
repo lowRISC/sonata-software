@@ -12,10 +12,8 @@ After you are all set up, take a look at the [exercises][].
 ## Orientation
 
 You are in the [`sonata-software`][] repository.
-This repository wraps the [`lowrisc/cheriot-rtos`][], adding some Sonata specific demonstration code on top of the CHERIoT stack.
-The [`lowrisc/cheriot-rtos`][], included in this repository as a submodule, is a fork of the upstream [`CHERIoT-Platform/cheriot-rtos`][].
-[`CHERIoT-Platform/cheriot-rtos`][] contains the CHERIoT software stack; it is well documented by the [CHERIoT Programmer's Guide][].
-*The [`lowrisc/cheriot-rtos`][] fork only exists to hold fresh patches that aren't quite ready to be upstreamed to [`CHERIoT-Platform/cheriot-rtos`][] but will be.*
+This repository wraps the [`cheriot-rtos`][], which is included in this repository as a submodule.
+[`cheriot-rtos`][] contains the CHERIoT software stack as well as drivers for using the Sonata board; it is well documented by the [CHERIoT Programmer's Guide][].
 
 Other repositories of note:
 - [`sonata-system`][]: holds the Sonata system RTL and bootloader which come together to generate the bitstream.
@@ -27,8 +25,7 @@ Other repositories of note:
 For hardware documentation, see the [Sonata system book][].
 
 [`sonata-software`]: https://github.com/lowRISC/sonata-software
-[`lowrisc/cheriot-rtos`]: https://github.com/lowRISC/cheriot-rtos
-[`CHERIoT-Platform/cheriot-rtos`]: https://github.com/CHERIoT-Platform/cheriot-rtos
+[`cheriot-rtos`]: https://github.com/CHERIoT-Platform/cheriot-rtos
 [`sonata-system`]: https://github.com/lowRISC/sonata-system
 [`sonata-rp2040`]: https://github.com/newaetech/sonata-rp2040
 [`CHERIoT-Platform/llvm-project`]: https://github.com/CHERIoT-Platform/llvm-project
