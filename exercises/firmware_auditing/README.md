@@ -5,20 +5,14 @@ SPDX-License-Identifier: Apache-2.0
 # Firmware auditing exercise
 
 First, make sure to go to the [building the exercises][] section to see how the exercises are built.
-
-[building the exercises]: ../README.md#building-the-exercises
-
 You might find it useful to look at the [auditing firmware][] documentation to get a brief introduction to `cheriot-audit` and the Rego policy language.
 
+[building the exercises]: ../README.md#building-the-exercises
 [auditing firmware]: ../../doc/auditing-firmware.md
 
 In this exercise, we use the `cheriot-audit` tool to audit the JSON firmware reports produced by the CHERIoT RTOS linker.
 This will let us assert a properties about our firmware images at link-time, guaranteeing desired safety checks.
 This exercise explores a set of self-contained policies which audit a variety of properties, to give an idea of what can be achieved using CHERIoT Audit.
-
-For this exercise, when the `xmake.lua` build file is mentioned, we are referring to [`exercises/firmware_auditing/xmake.lua`][].
-
-[`exercises/firmware_auditing/xmake.lua`]: ../../exercises/firmware_auditing/xmake.lua
 
 ## Part 1 - check that firmware contains no sealed capabilities
 
