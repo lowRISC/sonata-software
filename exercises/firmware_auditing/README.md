@@ -44,7 +44,7 @@ To convert the undefined value to a Boolean, we use the `default` keyword, which
 We can run this policy on our example firmware using the following command:
 
 ```sh
-cheriot-audit --board=cheriot-rtos/sdk/boards/sonata.json \
+cheriot-audit --board=cheriot-rtos/sdk/boards/sonata-prerelease.json \
               --firmware-report=build/cheriot/cheriot/release/firmware_auditing_part_1.json \
               --module=exercises/firmware_auditing/part_1/no_sealed_capabilities.rego \
               --query='data.no_seal.valid'
@@ -138,7 +138,7 @@ Finally, we create a simple Boolean `valid` rule which combines our two conditio
 
 Now, we can audit the firmware for this exercise by using the following command:
 ```sh
-cheriot-audit --board=cheriot-rtos/sdk/boards/sonata.json \
+cheriot-audit --board=cheriot-rtos/sdk/boards/sonata-prerelease.json \
               --firmware-report=build/cheriot/cheriot/release/firmware_auditing_part_2.json \
               --module=exercises/firmware_auditing/part_2/interrupt_disables.rego \
               --query='data.interrupts.valid'
@@ -203,7 +203,7 @@ For this exercise, we decide that all sealed allocator capabilities must be vali
 
 We can audit our firmware using the following command:
 ```sh
-cheriot-audit --board=cheriot-rtos/sdk/boards/sonata.json \
+cheriot-audit --board=cheriot-rtos/sdk/boards/sonata-prerelease.json \
               --firmware-report=build/cheriot/cheriot/release/firmware_auditing_part_3.json \
               --module=exercises/firmware_auditing/part_3/malloc_check.rego \
               --query='data.malloc_check.valid'
