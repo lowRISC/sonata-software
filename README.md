@@ -4,8 +4,8 @@ This repository contains software, build flows and examples for the [Sonata Syst
 For a guide on how to get up and running on building software for the sonata board see the [getting started guide][].
 After you are all set up, take a look at the [exercises][].
 
-[sonata system]: https://github.com/lowRISC/sonata-system
-[sonata pcb]: https://github.com/newaetech/sonata-pcb
+[Sonata System]: https://github.com/lowRISC/sonata-system
+[Sonata PCB]: https://github.com/newaetech/sonata-pcb
 [getting started guide]: ./doc/getting-started.md
 [exercises]: ./exercises/README.md
 
@@ -15,25 +15,12 @@ You are in the [`sonata-software`][] repository.
 This repository wraps the [`cheriot-rtos`][], which is included in this repository as a submodule.
 [`cheriot-rtos`][] contains the CHERIoT software stack as well as drivers for using the Sonata board; it is well documented by the [CHERIoT Programmer's Guide][].
 
-Other repositories of note:
-- [`sonata-system`][]: holds the Sonata system RTL and bootloader which come together to generate the bitstream.
-- [`sonata-rp2040`][]: The firmware that is running on the Sonata's RP2040 microcontroller and emulates the 'SONATA' drive when you plug it into your computer.
-- [`CHERIoT-Platform/llvm-project`][]: The CHERIoT LLVM compiler toolchain.
-- [`cheriot-audit`][]: A tool to explore and verify the relationships between CHERIoT RTOS components.
-- [`CHERIoT-Platform/book`][]: The source of the [CHERIoT Programmer's Guide][].
-
-For hardware documentation, see the [Sonata system book][].
+You do not need this to do the exercises but if you would like more detailed documentation about the hardware, see the [Sonata System book][].
 
 [`sonata-software`]: https://github.com/lowRISC/sonata-software
 [`cheriot-rtos`]: https://github.com/CHERIoT-Platform/cheriot-rtos
-[`sonata-system`]: https://github.com/lowRISC/sonata-system
-[`sonata-rp2040`]: https://github.com/newaetech/sonata-rp2040
-[`CHERIoT-Platform/llvm-project`]: https://github.com/CHERIoT-Platform/llvm-project
-[`cheriot-audit`]: https://github.com/CHERIoT-Platform/cheriot-audit
-[`CHERIoT-Platform/book`]: https://github.com/CHERIoT-Platform/book
 [CHERIoT Programmer's Guide]: https://cheriot.org/book/
-[Sonata system book]: https://lowrisc.org/sonata-system/
-
+[Sonata System book]: https://lowrisc.org/sonata-system/
 
 ## License
 
