@@ -16,17 +16,13 @@
 #include "../../../third_party/sonata-system/sw/legacy/common/spi.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/timer.h"
 
-// Define our own GPIO_OUT as the version from `sonata-system` uses void
-// pointer arithmetic, which clang-tidy forbids.
-#define GPIO_OUT_ETH GPIO_FROM_BASE_ADDR((GPIO_BASE + GPIO_OUT_REG))
-
 enum
 {
 	// Ethernet IRQs
-	EthIntrIrq = 47,
-	// Ethernet GPIO Output Pins
-	EthCsPin  = 13,
-	EthRstPin = 14,
+	EthIntrIrq = 2,
+	// Ethernet chip-select
+	EthSpiCs  = 0,
+	EthSpiRst = 1,
 };
 
 static struct Netif *ethNetif;
@@ -47,11 +43,11 @@ static uint16_t ksz8851_reg_read(spi_t *spi, uint8_t reg)
 	bytes[0] = (0b00 << 6) | (be << 2) | (reg >> 6);
 	bytes[1] = (reg << 2) & 0b11110000;
 
-	set_output_bit(GPIO_OUT_ETH, EthCsPin, 0);
+	spi_set_cs(spi, EthSpiCs, 0);
 	spi_tx(spi, bytes, 2);
 	uint16_t val;
 	spi_rx(spi, (uint8_t *)&val, 2);
-	set_output_bit(GPIO_OUT_ETH, EthCsPin, 1);
+	spi_set_cs(spi, EthSpiCs, 1);
 	return val;
 }
 
@@ -62,11 +58,11 @@ static void ksz8851_reg_write(spi_t *spi, uint8_t reg, uint16_t val)
 	bytes[0] = (0b01 << 6) | (be << 2) | (reg >> 6);
 	bytes[1] = (reg << 2) & 0b11110000;
 
-	set_output_bit(GPIO_OUT_ETH, EthCsPin, 0);
+	spi_set_cs(spi, EthSpiCs, 0);
 	spi_tx(spi, bytes, 2);
 	spi_tx(spi, (uint8_t *)&val, 2);
 	spi_wait_idle(spi);
-	set_output_bit(GPIO_OUT_ETH, EthCsPin, 1);
+	spi_set_cs(spi, EthSpiCs, 1);
 }
 
 static void ksz8851_reg_set(spi_t *spi, uint8_t reg, uint16_t mask)
@@ -150,7 +146,7 @@ bool ksz8851_output(struct Netif *netif, struct Fbuf *buf)
 
 	// Start transmission.
 	uint8_t cmd = 0b11 << 6;
-	set_output_bit(GPIO_OUT_ETH, EthCsPin, 0);
+	spi_set_cs(spi, EthSpiCs, 0);
 	spi_tx(spi, &cmd, 1);
 
 	uint32_t header = 0x8000 | (buf->len << 16);
@@ -171,7 +167,7 @@ bool ksz8851_output(struct Netif *netif, struct Fbuf *buf)
 	}
 
 	spi_wait_idle(spi);
-	set_output_bit(GPIO_OUT_ETH, EthCsPin, 1);
+	spi_set_cs(spi, EthSpiCs, 1);
 
 	// Stop QMU DMA transfer operation
 	ksz8851_reg_clear(spi, ETH_RXQCR, StartDmaAccess);
@@ -210,9 +206,9 @@ bool ksz8851_init(struct Netif *netif, uint8_t hwaddr[6])
 		return false;
 
 	// Reset chip
-	set_output_bit(GPIO_OUT_ETH, EthRstPin, 0);
+	spi_set_cs(spi, EthSpiRst, 0);
 	timer_delay(150);
-	set_output_bit(GPIO_OUT_ETH, EthRstPin, 0x1);
+	spi_set_cs(spi, EthSpiRst, 1);
 
 	uint16_t cider = ksz8851_reg_read(spi, ETH_CIDER);
 #ifdef KSZ8851_DEBUG_PRINT
