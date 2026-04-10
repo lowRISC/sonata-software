@@ -6,6 +6,7 @@
 #define LCD_H
 
 #include "../../../third_party/display_drivers/src/st7735/lcd_st7735.h"
+#include "../../../third_party/sonata-system/sw/legacy/common/pwm.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/spi.h"
 
 // Constants.
@@ -13,9 +14,8 @@ enum
 {
 	// Pin out mapping.
 	LcdCsPin = 0,
-	LcdRstPin,
 	LcdDcPin,
-	LcdBlPin,
+	LcdRstPin,
 	LcdMosiPin,
 	LcdSclkPin,
 	// Spi clock rate.
@@ -31,6 +31,9 @@ enum
 	BGRColorWhite = 0xFFFFFF,
 };
 
-int lcd_init(spi_t *spi, St7735Context *lcd, LCD_Interface *interface);
+int lcd_init(spi_t         *spi,
+             pwm_t          backlight,
+             St7735Context *lcd,
+             LCD_Interface *interface);
 
 #endif // LCD_H
