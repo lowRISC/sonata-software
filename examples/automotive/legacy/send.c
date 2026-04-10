@@ -13,6 +13,7 @@
 #include "../../../third_party/display_drivers/src/core/m3x6_16pt.h"
 #include "../../../third_party/display_drivers/src/st7735/lcd_st7735.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/gpio.h"
+#include "../../../third_party/sonata-system/sw/legacy/common/pwm.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/rv_plic.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/sonata_system.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/spi.h"
@@ -191,7 +192,7 @@ void lcd_draw_img(uint32_t       x,
  */
 uint8_t read_joystick()
 {
-	return ((uint8_t)read_gpio(GPIO_IN_DBNC_AM)) & 0x1f;
+	return ((uint8_t)(read_gpio(GPIO_IN_DBNC_AM) >> 8u) & 0x1f);
 }
 
 /**
@@ -361,25 +362,30 @@ int main()
 	timer_init();
 	timer_enable(SYSCLK_FREQ / 1000);
 
+	pwm_t lcd_bl = PWM_FROM_ADDR_AND_INDEX(PWM_BASE, PWM_LCD);
+
 	// Initialise LCD display driver
 	LCD_Interface lcdInterface;
 	spi_t         lcdSpi;
 	spi_init(&lcdSpi, LCD_SPI, LcdSpiSpeedHz);
-	lcd_init(&lcdSpi, &lcd, &lcdInterface);
+	lcd_init(&lcdSpi, lcd_bl, &lcd, &lcdInterface);
 	lcd_clean(BACKGROUND_COLOUR);
 	const LCD_Point Centre = {lcd.parent.width / 2, lcd.parent.height / 2};
+	write_to_uart("%s:%d\n", __func__, __LINE__);
 
 	// Initialise Ethernet support for use via callback
 	rv_plic_init();
 	spi_t ethernetSpi;
-	spi_init(&ethernetSpi, ETH_SPI, /*speed=*/0);
+	spi_init(&ethernetSpi, ETH_SPI, 1 * 1000 * 1000);
 	ethernetInterface.spi = &ethernetSpi;
 	uint8_t macSource[6];
 	for (uint8_t i = 0; i < 6; i++)
 	{
 		macSource[i] = FixedDemoHeader.macSource[i];
 	}
+	write_to_uart("%s:%d\n", __func__, __LINE__);
 	ksz8851_init(&ethernetInterface, macSource);
+	write_to_uart("%s:%d\n", __func__, __LINE__);
 
 	// Wait until a good physical ethernet link to start the demo
 	if (!ksz8851_get_phy_status(&ethernetInterface))

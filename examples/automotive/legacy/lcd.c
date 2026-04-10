@@ -8,6 +8,7 @@
 #include "../../../third_party/display_drivers/src/core/m3x6_16pt.h"
 #include "../../../third_party/display_drivers/src/st7735/lcd_st7735.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/gpio.h"
+#include "../../../third_party/sonata-system/sw/legacy/common/pwm.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/sonata_system.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/spi.h"
 #include "../../../third_party/sonata-system/sw/legacy/common/timer.h"
@@ -34,17 +35,19 @@ static uint32_t spi_write(void *handle, uint8_t *data, size_t len)
 
 static uint32_t gpio_write(void *handle, bool cs, bool dc)
 {
-	set_output_bit(GPIO_OUT_LCD, LcdDcPin, dc);
-	set_output_bit(GPIO_OUT_LCD, LcdCsPin, cs);
+	spi_set_cs((spi_t *)handle, LcdDcPin, dc);
+	spi_set_cs((spi_t *)handle, LcdCsPin, cs);
 	return 0;
 }
 
-int lcd_init(spi_t *spi, St7735Context *lcd, LCD_Interface *interface)
+int lcd_init(spi_t         *spi,
+             pwm_t          backlight,
+             St7735Context *lcd,
+             LCD_Interface *interface)
 {
 	// Set the initial state of the LCD control pins
-	set_output_bit(GPIO_OUT_LCD, LcdDcPin, 0x0);
-	set_output_bit(GPIO_OUT_LCD, LcdBlPin, 0x1);
-	set_output_bit(GPIO_OUT_LCD, LcdCsPin, 0x0);
+	spi_set_cs(spi, LcdDcPin, 0x00);
+	spi_set_cs(spi, LcdCsPin, 0x00);
 
 	// Reset the LCD
 	set_output_bit(GPIO_OUT_LCD, LcdRstPin, 0x0);
@@ -68,6 +71,7 @@ int lcd_init(spi_t *spi, St7735Context *lcd, LCD_Interface *interface)
 
 	// Clean display with a white rectangle.
 	lcd_st7735_clean(lcd);
+	set_pwm(backlight, 1, 255);
 
 	return 0;
 }
