@@ -14,12 +14,12 @@ namespace sonata::lcd
 	{
 		extern "C"
 		{
-#include "../third_party/display_drivers/src/core/lcd_base.h"
-#include "../third_party/display_drivers/src/core/lucida_console_10pt.h"
-#include "../third_party/display_drivers/src/core/lucida_console_12pt.h"
-#include "../third_party/display_drivers/src/core/m3x6_16pt.h"
-#include "../third_party/display_drivers/src/core/m5x7_16pt.h"
-#include "../third_party/display_drivers/src/st7735/lcd_st7735.h"
+#include "core/lcd_base.h"
+#include "core/lucida_console_10pt.h"
+#include "core/lucida_console_12pt.h"
+#include "core/m3x6_16pt.h"
+#include "core/m5x7_16pt.h"
+#include "st7735/lcd_st7735.h"
 		}
 		void __cheri_libcall lcd_init(LCD_Interface *,
 		                              St7735Context *,
