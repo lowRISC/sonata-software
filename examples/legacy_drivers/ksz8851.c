@@ -11,10 +11,10 @@
 
 #include <string.h>
 
-#include "../../../third_party/sonata-system/sw/legacy/common/rv_plic.h"
-#include "../../../third_party/sonata-system/sw/legacy/common/sonata_system.h"
-#include "../../../third_party/sonata-system/sw/legacy/common/spi.h"
-#include "../../../third_party/sonata-system/sw/legacy/common/timer.h"
+#include "rv_plic.h"
+#include "sonata_system.h"
+#include "spi.h"
+#include "timer.h"
 
 enum
 {

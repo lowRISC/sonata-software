@@ -50,7 +50,7 @@
         name = "sonata-automotive-demo-legacy-component";
         src = fileset.toSource {
           root = ./.;
-          fileset = fileset.unions [./examples/automotive ./third_party];
+          fileset = fileset.unions [./examples/automotive ./examples/legacy_drivers ./examples/common ./third_party];
         };
         buildInputs = with lrPkgs; [xmake lowrisc-toolchain-gcc-rv32imcb];
         buildPhase = "xmake -P ./examples/automotive/legacy/";
@@ -65,7 +65,7 @@
         name = "sonata-heartbleed-demo-legacy-component";
         src = fileset.toSource {
           root = ./.;
-          fileset = fileset.unions [./examples/heartbleed ./common.lua ./third_party];
+          fileset = fileset.unions [./examples/heartbleed ./examples/legacy_drivers ./examples/common ./common.lua ./third_party];
         };
         buildInputs = [pkgs.srecord] ++ (with lrPkgs; [xmake lowrisc-toolchain-gcc-rv32imcb uf2conv]);
         buildPhase = "xmake -P ./examples/heartbleed/legacy/";
