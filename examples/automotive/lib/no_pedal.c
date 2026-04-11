@@ -70,16 +70,22 @@ bool no_pedal_task_two()
 	callbacks.uart_send("task_two, count = %u\n", (unsigned int)counter);
 
 	// Draw simple pseudocode explaining the bug to the LCD
-	callbacks.lcd.draw_str(5,
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       5,
 	                       25,
 	                       LucidaConsole_10pt,
 	                       "int i = %u;",
-	                       ColorBlack,
-	                       ColorGrey,
+	                       RGBColorBlack,
+	                       RGBColorGrey,
 	                       (unsigned int)counter);
-	uint32_t textColor = (counter >= 100) ? ColorRed : ColorGrey;
-	callbacks.lcd.draw_str(
-	  5, 55, LucidaConsole_10pt, "  arr[i] = 1000;", ColorBlack, textColor);
+	uint32_t textColor = (counter >= 100) ? RGBColorRed : RGBColorGrey;
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       5,
+	                       55,
+	                       LucidaConsole_10pt,
+	                       "  arr[i] = 1000;",
+	                       RGBColorBlack,
+	                       textColor);
 
 	// The buggy line of code implementing task two - this should be a "<" check
 	// to be within the `write` array bounds, but the "<=" comparison check
@@ -114,12 +120,22 @@ void run_no_pedal_demo(uint64_t initTime)
 	resetCounter             = true;
 
 	// Draw pseudocode display information to the LCD.
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       5,
+	                       10,
+	                       LucidaConsole_10pt,
+	                       "int arr[100];",
+	                       RGBColorBlack,
+	                       RGBColorGrey);
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       5,
+	                       40,
+	                       LucidaConsole_10pt,
+	                       "if (i <= 100) {",
+	                       RGBColorBlack,
+	                       RGBColorGrey);
 	callbacks.lcd.draw_str(
-	  5, 10, LucidaConsole_10pt, "int arr[100];", ColorBlack, ColorGrey);
-	callbacks.lcd.draw_str(
-	  5, 40, LucidaConsole_10pt, "if (i <= 100) {", ColorBlack, ColorGrey);
-	callbacks.lcd.draw_str(
-	  5, 70, LucidaConsole_10pt, "}", ColorBlack, ColorGrey);
+	  callbacks.lcd.lcd, 5, 70, LucidaConsole_10pt, "}", RGBColorBlack, RGBColorGrey);
 
 	// Call task one and task two sequentially in a loop for 175 iterations.
 	uint64_t prevTime = initTime;

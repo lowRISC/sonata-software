@@ -134,28 +134,28 @@ void initial_lcd_write(St7735Context *lcd)
 	lcd_draw_str(lcd,
 	             5,
 	             5,
-	             LcdFontM5x7_16pt,
+	             M5x7_16pt,
 	             "Move Joystick to Change Length.",
 	             BACKGROUND_COLOR,
 	             FOREGROUND_COLOR);
 	lcd_draw_str(lcd,
 	             5,
 	             15,
-	             LcdFontM5x7_16pt,
+	             M5x7_16pt,
 	             "Press Joystick to Send.",
 	             BACKGROUND_COLOR,
 	             FOREGROUND_COLOR);
 	lcd_draw_str(lcd,
 	             5,
 	             30,
-	             LcdFontM5x7_16pt,
+	             M5x7_16pt,
 	             "Request a larger buffer",
 	             BACKGROUND_COLOR,
 	             FOREGROUND_COLOR);
 	lcd_draw_str(lcd,
 	             5,
 	             40,
-	             LcdFontM5x7_16pt,
+	             M5x7_16pt,
 	             "Suggested Length: ",
 	             BACKGROUND_COLOR,
 	             FOREGROUND_COLOR);
@@ -172,13 +172,8 @@ void draw_request_length(St7735Context *lcd, size_t request_length)
 	const size_t ReqLenStrLen = 15u;
 	char         req_len_s[ReqLenStrLen];
 	size_t_to_str_base10(req_len_s, request_length);
-	lcd_draw_str(lcd,
-	             110,
-	             40,
-	             LcdFontM5x7_16pt,
-	             req_len_s,
-	             BACKGROUND_COLOR,
-	             FOREGROUND_COLOR);
+	lcd_draw_str(
+	  lcd, 110, 40, M5x7_16pt, req_len_s, BACKGROUND_COLOR, FOREGROUND_COLOR);
 }
 
 /**
@@ -209,7 +204,7 @@ void get_request_length(St7735Context *lcd, size_t *request_length)
 		lcd_draw_str(lcd,
 		             110,
 		             40,
-		             LcdFontM5x7_16pt,
+		             M5x7_16pt,
 		             "       ",
 		             BACKGROUND_COLOR,
 		             FOREGROUND_COLOR);
@@ -261,7 +256,7 @@ void network_send(void *handle, const char *package, size_t len)
 			lcd_draw_str(lcd,
 			             1,
 			             55 + 10 * line_num,
-			             LcdFontM5x7_16pt,
+			             M5x7_16pt,
 			             line_content,
 			             TextAreaBgColor,
 			             TextAreaFgColor);
@@ -276,7 +271,7 @@ void network_send(void *handle, const char *package, size_t len)
 		lcd_draw_str(lcd,
 		             1,
 		             55 + 10 * line_num,
-		             LcdFontM5x7_16pt,
+		             M5x7_16pt,
 		             line_content,
 		             TextAreaBgColor,
 		             TextAreaFgColor);

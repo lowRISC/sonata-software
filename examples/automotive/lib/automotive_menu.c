@@ -22,19 +22,28 @@
 static void
 fill_option_select_rects(uint8_t prev, uint8_t current, bool cursorImg)
 {
-	callbacks.lcd.fill_rect(
-	  lcdCentre.x - 64, lcdCentre.y - 22 + prev * 20, 5, 5, ColorBlack);
+	callbacks.lcd.fill_rect(callbacks.lcd.lcd,
+	                        lcdCentre.x - 64,
+	                        lcdCentre.y - 22 + prev * 20,
+	                        5,
+	                        5,
+	                        RGBColorBlack);
 	if (cursorImg)
 	{
-		callbacks.lcd.draw_img_rgb565(lcdCentre.x - 64,
+		callbacks.lcd.draw_img_rgb565(callbacks.lcd.lcd,
+		                              lcdCentre.x - 64,
 		                              lcdCentre.y - 22 + current * 20,
 		                              5,
 		                              5,
 		                              cursorImg5x5);
 		return;
 	}
-	callbacks.lcd.fill_rect(
-	  lcdCentre.x - 64, lcdCentre.y - 22 + current * 20, 5, 5, ColorWhite);
+	callbacks.lcd.fill_rect(callbacks.lcd.lcd,
+	                        lcdCentre.x - 64,
+	                        lcdCentre.y - 22 + current * 20,
+	                        5,
+	                        5,
+	                        RGBColorWhite);
 }
 
 /**
@@ -48,13 +57,14 @@ fill_option_select_rects(uint8_t prev, uint8_t current, bool cursorImg)
 DemoApplication select_demo()
 {
 	// Display static menu information to the LCD
-	callbacks.lcd.clean(ColorBlack);
-	callbacks.lcd.draw_str(lcdCentre.x - 60,
+	callbacks.lcd.clean(callbacks.lcd.lcd, RGBColorBlack);
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       lcdCentre.x - 60,
 	                       lcdCentre.y - 50,
 	                       LucidaConsole_12pt,
 	                       "Select Demo",
-	                       ColorBlack,
-	                       ColorWhite);
+	                       RGBColorBlack,
+	                       RGBColorWhite);
 	const char *demoOptions[] = {
 	  "[1] Analogue",
 	  "[2] Digital",
@@ -63,12 +73,13 @@ DemoApplication select_demo()
 	};
 	for (uint8_t i = 0; i < 4; i++)
 	{
-		callbacks.lcd.draw_str(lcdCentre.x - 55,
+		callbacks.lcd.draw_str(callbacks.lcd.lcd,
+		                       lcdCentre.x - 55,
 		                       lcdCentre.y - 25 + i * 20,
 		                       LucidaConsole_10pt,
 		                       demoOptions[i],
-		                       ColorBlack,
-		                       ColorDarkerGrey);
+		                       RGBColorBlack,
+		                       RGBColorDarkerGrey);
 	}
 	const uint8_t NumOptions = 4;
 
@@ -101,6 +112,6 @@ DemoApplication select_demo()
 		}
 	}
 
-	callbacks.lcd.clean(ColorBlack);
+	callbacks.lcd.clean(callbacks.lcd.lcd, RGBColorBlack);
 	return (DemoApplication)currentOption;
 }

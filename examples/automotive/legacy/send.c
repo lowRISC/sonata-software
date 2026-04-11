@@ -8,16 +8,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "../../../third_party/display_drivers/src/core/lucida_console_10pt.h"
-#include "../../../third_party/display_drivers/src/core/lucida_console_12pt.h"
-#include "../../../third_party/display_drivers/src/core/m3x6_16pt.h"
-#include "../../../third_party/display_drivers/src/st7735/lcd_st7735.h"
-#include "../../../third_party/sonata-system/sw/legacy/common/gpio.h"
-#include "../../../third_party/sonata-system/sw/legacy/common/pwm.h"
-#include "../../../third_party/sonata-system/sw/legacy/common/rv_plic.h"
-#include "../../../third_party/sonata-system/sw/legacy/common/sonata_system.h"
-#include "../../../third_party/sonata-system/sw/legacy/common/spi.h"
-#include "../../../third_party/sonata-system/sw/legacy/common/timer.h"
 #include "../lib/analogue_pedal.h"
 #include "../lib/automotive_common.h"
 #include "../lib/automotive_menu.h"
@@ -25,8 +15,18 @@
 #include "../lib/joystick_pedal.h"
 #include "../lib/no_pedal.h"
 #include "adc.h"
+#include "gpio.h"
 #include "ksz8851.h"
 #include "lcd.h"
+#include "lcd_st7735.h"
+#include "lucida_console_10pt.h"
+#include "lucida_console_12pt.h"
+#include "m3x6_16pt.h"
+#include "pwm.h"
+#include "rv_plic.h"
+#include "sonata_system.h"
+#include "spi.h"
+#include "timer.h"
 
 // When using our model pedal, these are the maximum and minimum values that
 // are measured through the ADC from the pedal's full range of motion. We
@@ -35,8 +35,8 @@
 #define PEDAL_MIN_ANALOGUE 310
 #define PEDAL_MAX_ANALOGUE 1700
 
-#define BACKGROUND_COLOUR ColorBlack
-#define TEXT_COLOUR ColorWhite
+#define BACKGROUND_COLOUR RGBColorBlack
+#define TEXT_COLOUR RGBColorWhite
 
 #define ADC_BASE 0x8000B000
 
@@ -84,104 +84,6 @@ uint64_t wait(const uint64_t EndTime)
 		currentTime = get_elapsed_time();
 	}
 	return currentTime;
-}
-
-/**
- * Formats and draws a string to the LCD display based upon the provided
- * formatting and display information. The string can use formatting
- * specifiers as defined by `vsnprintf(3)`.
- *
- * `x` is the X-coordinate on the LCD of the top left of the string.
- * `y` is the Y-coordinate on the LCD of the top left of the string.
- * `font` is the font to render the string with.
- * `format` is the formatting string to write.
- * `backgroundColour` is the colour to use for the string's background.
- * `textColour` is the colour to render the text in.
- * The remaining variable arguments are unsigned integers used to fill in the
- * formatiting specifiers in the format string.
- */
-void lcd_draw_str(uint32_t    x,
-                  uint32_t    y,
-                  LcdFont     font,
-                  const char *format,
-                  uint32_t    backgroundColour,
-                  uint32_t    textColour,
-                  ...)
-{
-	// Format the provided string
-	char    buffer[1024];
-	va_list args;
-	va_start(args, textColour);
-	vsnprintf(buffer, 1024, format, args);
-	va_end(args);
-
-	Font stringFont;
-	switch (font)
-	{
-		case LucidaConsole_10pt:
-			stringFont = lucidaConsole_10ptFont;
-			break;
-		case LucidaConsole_12pt:
-			stringFont = lucidaConsole_12ptFont;
-			break;
-		default:
-			stringFont = m3x6_16ptFont;
-	}
-	lcd_st7735_set_font(&lcd, &stringFont);
-	lcd_st7735_set_font_colors(&lcd, backgroundColour, textColour);
-	lcd_st7735_puts(&lcd, (LCD_Point){x, y}, buffer);
-}
-
-/**
- * A callback function used to clean the LCD display with a given colour.
- *
- * `color` is the 32-bit colour to display.
- */
-void lcd_clean(uint32_t color)
-{
-	size_t w, h;
-	lcd_st7735_get_resolution(&lcd, &h, &w);
-	LCD_rectangle rect = {(LCD_Point){0, 0}, w, h};
-	lcd_st7735_fill_rectangle(&lcd, rect, color);
-}
-
-/**
- * A callback function used to draw a rectangle on the LCD.
- *
- * `x` is the X-position of the top-left corner of the rectangle on the LCD.
- * `y` is the Y-position of the top-left corner of the rectangle on the LCD.
- * `w` is the width of the rectangle.
- * `h` is the height of the rectangle.
- * `color` is the 32-bit colour to fill the rectangle with.
- */
-void lcd_fill_rect(uint32_t x,
-                   uint32_t y,
-                   uint32_t w,
-                   uint32_t h,
-                   uint32_t color)
-{
-	LCD_rectangle rect = {(LCD_Point){x, y}, w, h};
-	lcd_st7735_fill_rectangle(&lcd, rect, color);
-}
-
-/**
- * A callback function used to draw an image to the LCD.
- *
- * `x` is the X-position of the top-left corner of the image on the LCD.
- * `y` is the Y-position of the top-left corner of the image on the LCD.
- * `w` is the width of the image.
- * `h` is the height of the image.
- * `data` is the byte array containing the image data, of size at least
- * of `w` * `h`, where each value is a RGB565 colour value.
- */
-void lcd_draw_img(uint32_t       x,
-                  uint32_t       y,
-                  uint32_t       w,
-                  uint32_t       h,
-                  const uint8_t *data)
-{
-	LCD_rectangle rect = {(LCD_Point){x, y}, w, h};
-	lcd_st7735_draw_rgb565(&lcd, rect, data);
 }
 
 /**
@@ -369,7 +271,7 @@ int main()
 	spi_t         lcdSpi;
 	spi_init(&lcdSpi, LCD_SPI, LcdSpiSpeedHz);
 	lcd_init(&lcdSpi, lcd_bl, &lcd, &lcdInterface);
-	lcd_clean(BACKGROUND_COLOUR);
+	lcd_clean(&lcd, BACKGROUND_COLOUR);
 	const LCD_Point Centre = {lcd.parent.width / 2, lcd.parent.height / 2};
 	write_to_uart("%s:%d\n", __func__, __LINE__);
 
@@ -391,13 +293,15 @@ int main()
 	if (!ksz8851_get_phy_status(&ethernetInterface))
 	{
 		write_to_uart("Waiting for a good physical ethernet link...\n");
-		lcd_draw_str(Centre.x - 55,
+		lcd_draw_str(&lcd,
+		             Centre.x - 55,
 		             Centre.y - 5,
 		             M3x6_16pt,
 		             "Waiting for a good physical",
 		             BACKGROUND_COLOUR,
 		             TEXT_COLOUR);
-		lcd_draw_str(Centre.x - 30,
+		lcd_draw_str(&lcd,
+		             Centre.x - 30,
 		             Centre.y + 5,
 		             M3x6_16pt,
 		             "ethernet link...",
@@ -431,6 +335,7 @@ int main()
 	  .ethernet_transmit   = send_ethernet_frame,
 	  .lcd =
 	    {
+	      .lcd             = &lcd,
 	      .draw_str        = lcd_draw_str,
 	      .clean           = lcd_clean,
 	      .fill_rect       = lcd_fill_rect,

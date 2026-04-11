@@ -222,7 +222,8 @@ void update_cheri_error_handling()
  * The remaining variable arguments are unsigned integers used to fill
  * in the formatting specifiers in the format string.
  */
-void lcd_draw_str(uint32_t    x,
+void lcd_draw_str(void       *handle,
+                  uint32_t    x,
                   uint32_t    y,
                   LcdFont     font,
                   const char *format,
@@ -259,7 +260,7 @@ void lcd_draw_str(uint32_t    x,
  *
  * `color` is the 32-bit colour to display.
  */
-void lcd_clean(uint32_t color)
+void lcd_clean(void *handle, uint32_t color)
 {
 	lcd->clean(static_cast<Color>(color));
 }
@@ -273,7 +274,8 @@ void lcd_clean(uint32_t color)
  * `h` is the height of the rectangle.
  * `color` is the 32-bit colour to fill the rectangle with.
  */
-void lcd_fill_rect(uint32_t x,
+void lcd_fill_rect(void    *handle,
+                   uint32_t x,
                    uint32_t y,
                    uint32_t w,
                    uint32_t h,
@@ -293,7 +295,8 @@ void lcd_fill_rect(uint32_t x,
  * `data` is the byte array containing the image data, of size at least
  * of `w` * `h`, where each value is a RGB565 colour value.
  */
-void lcd_draw_img(uint32_t       x,
+void lcd_draw_img(void          *handle,
+                  uint32_t       x,
                   uint32_t       y,
                   uint32_t       w,
                   uint32_t       h,
@@ -571,6 +574,7 @@ void __cheri_compartment("automotive_send") entry()
 	  .ethernet_transmit   = send_ethernet_frame,
 	  .lcd =
 	    {
+	      lcd              = lcd,
 	      .draw_str        = lcd_draw_str,
 	      .clean           = lcd_clean,
 	      .fill_rect       = lcd_fill_rect,

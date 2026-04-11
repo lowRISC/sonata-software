@@ -41,12 +41,13 @@ void init_joystick_demo_mem(TaskOne *taskOne, TaskTwo *taskTwo)
 static void joystick_task_one()
 {
 	// Display speed information to the LCD
-	callbacks.lcd.draw_str(10,
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       10,
 	                       45,
 	                       LucidaConsole_10pt,
 	                       "Current speed: %u   ",
-	                       ColorBlack,
-	                       ColorWhite,
+	                       RGBColorBlack,
+	                       RGBColorWhite,
 	                       (unsigned int)taskOneMem->acceleration);
 
 	// Transmit the previously measured pedal information to the car.
@@ -104,8 +105,13 @@ bool joystick_task_two()
 
 	// Display bug status information to the LCD
 	const char *bugStr = isBugged ? "Bug triggered" : "Not triggered";
-	callbacks.lcd.draw_str(
-	  10, 10, LucidaConsole_10pt, bugStr, ColorBlack, ColorGrey);
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       10,
+	                       10,
+	                       LucidaConsole_10pt,
+	                       bugStr,
+	                       RGBColorBlack,
+	                       RGBColorGrey);
 
 	// If flagged to be bugged, use an out-of-bounds index
 	uint32_t index = 99;
@@ -149,24 +155,27 @@ void run_joystick_demo(uint64_t initTime)
 	isBugged = false;
 
 	// Draw static demo operation/usage information to the LCD
-	callbacks.lcd.draw_str(10,
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       10,
 	                       62,
 	                       M3x6_16pt,
 	                       "Joystick up/down to change speed",
-	                       ColorBlack,
-	                       ColorDarkGrey);
-	callbacks.lcd.draw_str(10,
+	                       RGBColorBlack,
+	                       RGBColorDarkGrey);
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       10,
 	                       27,
 	                       M3x6_16pt,
 	                       "Joystick left/right to trigger bug",
-	                       ColorBlack,
-	                       ColorDarkGrey);
-	callbacks.lcd.draw_str(10,
+	                       RGBColorBlack,
+	                       RGBColorDarkGrey);
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       10,
 	                       80,
 	                       M3x6_16pt,
 	                       "Press the joystick to end the demo.",
-	                       ColorBlack,
-	                       ColorDarkerGrey);
+	                       RGBColorBlack,
+	                       RGBColorDarkerGrey);
 
 	// Call task one and task two sequentially in a loop until the
 	// user selects to quit the demo by pressing the joystick.

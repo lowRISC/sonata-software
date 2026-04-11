@@ -80,7 +80,7 @@ int lcd_init(spi_t         *spi,
 	return 0;
 }
 
-void lcd_draw_str(St7735Context *lcd,
+void lcd_draw_str(void *lcd,
                   uint32_t       x,
                   uint32_t       y,
                   LcdFont        font,
@@ -89,6 +89,7 @@ void lcd_draw_str(St7735Context *lcd,
                   uint32_t       textColour,
                   ...)
 {
+St7735Context * lcd_ = (St7735Context *) lcd;
 	// Format the provided string
 	char    buffer[1024];
 	va_list args;
@@ -99,49 +100,52 @@ void lcd_draw_str(St7735Context *lcd,
 	Font stringFont;
 	switch (font)
 	{
-		case LcdFontLucidaConsole_10pt:
+		case LucidaConsole_10pt:
 			stringFont = lucidaConsole_10ptFont;
 			break;
-		case LcdFontLucidaConsole_12pt:
+		case LucidaConsole_12pt:
 			stringFont = lucidaConsole_12ptFont;
 			break;
-		case LcdFontM5x7_16pt:
+		case M5x7_16pt:
 			stringFont = m5x7_16ptFont;
 			break;
 		default:
 			stringFont = m3x6_16ptFont;
 	}
-	lcd_st7735_set_font(lcd, &stringFont);
-	lcd_st7735_set_font_colors(lcd, backgroundColour, textColour);
-	lcd_st7735_puts(lcd, (LCD_Point){x, y}, buffer);
+	lcd_st7735_set_font(lcd_, &stringFont);
+	lcd_st7735_set_font_colors(lcd_, backgroundColour, textColour);
+	lcd_st7735_puts(lcd_, (LCD_Point){x, y}, buffer);
 }
 
-void lcd_clean(St7735Context *lcd, uint32_t color)
+void lcd_clean(void *lcd, uint32_t color)
 {
+St7735Context * lcd_ = (St7735Context *) lcd;
 	size_t w, h;
-	lcd_st7735_get_resolution(lcd, &h, &w);
+	lcd_st7735_get_resolution(lcd_, &h, &w);
 	LCD_rectangle rect = {(LCD_Point){0, 0}, w, h};
-	lcd_st7735_fill_rectangle(lcd, rect, color);
+	lcd_st7735_fill_rectangle(lcd_, rect, color);
 }
 
-void lcd_fill_rect(St7735Context *lcd,
+void lcd_fill_rect(void *lcd,
                    uint32_t       x,
                    uint32_t       y,
                    uint32_t       w,
                    uint32_t       h,
                    uint32_t       color)
 {
+St7735Context * lcd_ = (St7735Context *) lcd;
 	LCD_rectangle rect = {(LCD_Point){x, y}, w, h};
-	lcd_st7735_fill_rectangle(lcd, rect, color);
+	lcd_st7735_fill_rectangle(lcd_, rect, color);
 }
 
-void lcd_draw_img(St7735Context *lcd,
+void lcd_draw_img(void *lcd,
                   uint32_t       x,
                   uint32_t       y,
                   uint32_t       w,
                   uint32_t       h,
                   const uint8_t *data)
 {
+St7735Context * lcd_ = (St7735Context *) lcd;
 	LCD_rectangle rect = {(LCD_Point){x, y}, w, h};
-	lcd_st7735_draw_rgb565(lcd, rect, data);
+	lcd_st7735_draw_rgb565(lcd_, rect, data);
 }
