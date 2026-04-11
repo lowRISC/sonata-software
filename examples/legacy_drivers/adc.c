@@ -4,9 +4,9 @@
 
 #include "adc.h"
 
-#include "../../../third_party/sonata-system/sw/legacy/common/dev_access.h"
-#include "../../../third_party/sonata-system/sw/legacy/common/sonata_system.h"
 #include "assert.h"
+#include "dev_access.h"
+#include "sonata_system.h"
 
 /**
  * Sets the bits of a given ADC register. Takes an ADC register, a mask of
