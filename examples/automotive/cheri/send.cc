@@ -151,9 +151,35 @@ void reset_error_seen_and_shown()
  * violation message or not, and display it if so. This will only be
  * drawn once, and then `errorMessageShown` will be set true.
  */
-void lcd_display_cheri_message()
+void update_cheri_error_handling()
 {
-	if (!errorSeen || errorMessageShown)
+	if (!errorSeen)
+	{
+		return;
+	}
+
+	/*
+	 * We expect that we might correct the compartment's fault many times,
+	 * especially since the error is being triggered every frame. As a
+	 * built-in protection, the CHERIoT RTOS switcher places a default
+	 * limit of 512 times a compartment invocation may fault, to help
+	 * stop compartments getting stuck during recovery.
+	 *
+	 * Since this is a legitimate use case, and we don't want our demo
+	 * to stop working after 512 errors, reset the counter each time.
+	 *
+	 * We have to restore it here and not in the error handler as otherwise
+	 * the switcher will decrement its count and then underflow, which it
+	 * will see as a double fault and then unwind.
+	 *
+	 * See:
+	 * https://github.com/CHERIoT-Platform/cheriot-rtos/issues/299
+	 * https://github.com/CHERIoT-Platform/cheriot-rtos/blob/9f3731c0e3805ad56a642987be9bc859e2ee1b4e/sdk/include/switcher.h#L40-L41
+	 */
+	switcher_handler_invocation_count_reset();
+	errorSeen = false;
+
+	if (errorMessageShown)
 	{
 		return;
 	}
@@ -537,7 +563,7 @@ void __cheri_compartment("automotive_send") entry()
 	  .wait                = wait,
 	  .waitTime            = 120 * CyclesPerMillisecond,
 	  .time                = rdcycle64,
-	  .loop                = lcd_display_cheri_message,
+	  .loop                = update_cheri_error_handling,
 	  .start               = reset_error_seen_and_shown,
 	  .joystick_read       = read_joystick,
 	  .digital_pedal_read  = read_pedal_digital,

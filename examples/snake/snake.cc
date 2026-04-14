@@ -39,6 +39,11 @@ static constexpr Color BackgroundColor = Color::Black,
 static constexpr Size TileSize = {10, 10}, TileSpacing = {2, 2},
                       BorderSize = {4, 3};
 
+// Global flag used by the CHERI compartment error handler to detect when a
+// capability violation has occurred, so that we can modify the switcher context
+// appropriately.
+static bool errorSeen = false;
+
 typedef struct Position
 {
 	int32_t x;
@@ -511,6 +516,26 @@ class SnakeGame
 		return true;
 	}
 
+	/* If any fault was seen in the compartment, handle the error.*/
+	void handle_compartment_faults()
+	{
+		/*
+		 * Just in case somebody wants to play 512+ games of Snake without
+		 * resetting, lets be safe and reset the switcher handler invocation
+		 * count due to our PCC re-installation.
+		 *
+		 * We have to restore it here and not in the error handler as otherwise
+		 * the switcher will decrement its count and then underflow, which it
+		 * will see as a double fault and then unwind.
+		 *
+		 * See:
+		 * https://github.com/CHERIoT-Platform/cheriot-rtos/issues/299
+		 * https://github.com/CHERIoT-Platform/cheriot-rtos/blob/9f3731c0e3805ad56a642987be9bc859e2ee1b4e/sdk/include/switcher.h#L40-L41
+		 * */
+		switcher_handler_invocation_count_reset();
+		errorSeen = false;
+	}
+
 	/**
 	 * @brief Runs the main game loop, updating the snake's movement and drawing
 	 * new information to the display, and regulates update/frame timing.
@@ -551,6 +576,11 @@ class SnakeGame
 			currentTime = rdcycle64();
 
 			gameStillActive = update_game_state(gpio, lcd);
+
+			if (errorSeen)
+			{
+				handle_compartment_faults();
+			}
 		}
 	};
 
@@ -627,6 +657,7 @@ compartment_error_handler(ErrorState *frame, size_t mcause, size_t mtval)
 	if (exceptionCode == CauseCode::BoundsViolation ||
 	    exceptionCode == CauseCode::TagViolation)
 	{
+		errorSeen = true;
 		// If an explicit out of bounds access occurs, or bounds are made
 		// invalid by some negative array access, we **assume** that this was
 		// caused by the SnakeGame::check_if_colliding function and that the
