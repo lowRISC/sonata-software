@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "../../../third_party/sonata-system/sw/legacy/common/spi.h"
+#include "spi.h"
 
 struct Netif
 {

@@ -5,6 +5,7 @@
 #ifndef AUTOMOTIVE_COMMON_H
 #define AUTOMOTIVE_COMMON_H
 
+#include "../../common/types.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -17,27 +18,6 @@ enum JoystickDir
 	Down    = 1 << 3,
 	Right   = 1 << 4,
 };
-
-// BGR Colours used for LCD display in the automotive demo
-typedef enum LCDColor
-{
-	ColorBlack      = 0x000000,
-	ColorWhite      = 0xFFFFFF,
-	ColorGrey       = 0xCCCCCC,
-	ColorDarkGrey   = 0xA0A0A0,
-	ColorDarkerGrey = 0x808080,
-	ColorRed        = 0x0000FF,
-	ColorGreen      = 0x00FF00,
-	ColorBlue       = 0xFF0000,
-} LCDColor;
-
-// Fonts available for LCD rendering in the automotive demo
-typedef enum LcdFont
-{
-	M3x6_16pt,          // NOLINT
-	LucidaConsole_10pt, // NOLINT
-	LucidaConsole_12pt, // NOLINT
-} LcdFont;
 
 // Minimal Ethernet Header for sending frames
 typedef struct EthernetHeader
@@ -112,8 +92,10 @@ typedef struct
  */
 typedef struct LcdCallbacks
 {
+	void *lcd;
 	// A function that renders a string to the LCD
-	void (*draw_str)(uint32_t    x, // NOLINT
+	void (*draw_str)(void       *lcd,
+	                 uint32_t    x, // NOLINT
 	                 uint32_t    y,
 	                 LcdFont     font,
 	                 const char *format,
@@ -121,15 +103,17 @@ typedef struct LcdCallbacks
 	                 uint32_t    textColour,
 	                 ...);
 	// A function that fills/cleans the LCD with a given colour.
-	void (*clean)(uint32_t color);
+	void (*clean)(void *lcd, uint32_t color);
 	// A function that fills a rectangle on the LCD with a given colour.
-	void (*fill_rect)(uint32_t x, // NOLINT
+	void (*fill_rect)(void    *lcd,
+	                  uint32_t x, // NOLINT
 	                  uint32_t y,
 	                  uint32_t w,
 	                  uint32_t h,
 	                  uint32_t color);
 	// A function that draws a given RGB565 image to the LCD
-	void (*draw_img_rgb565)(uint32_t       x, // NOLINT
+	void (*draw_img_rgb565)(void          *lcd,
+	                        uint32_t       x, // NOLINT
 	                        uint32_t       y,
 	                        uint32_t       w,
 	                        uint32_t       h,

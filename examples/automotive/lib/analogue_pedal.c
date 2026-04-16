@@ -34,13 +34,13 @@ void init_analogue_pedal_demo_mem(AnalogueTaskOne *taskOne,
  */
 static uint64_t lerp_green_to_red(uint32_t portion, uint32_t segments)
 {
-	uint64_t red   = ColorRed;
-	uint64_t green = ColorGreen;
+	uint64_t red   = RGBColorRed;
+	uint64_t green = RGBColorGreen;
 	red *= portion;
 	green *= (segments - portion);
 	red /= segments;
 	green /= segments;
-	return (red & 0xFF) | (green & 0xFF00);
+	return (red & 0xFF0000) | (green & 0xFF00);
 }
 
 /**
@@ -52,8 +52,10 @@ static uint64_t lerp_green_to_red(uint32_t portion, uint32_t segments)
  */
 static void outline_volume_bar(uint32_t x, uint32_t y, uint32_t maxVolume)
 {
-	callbacks.lcd.fill_rect(x, y, 7 + maxVolume * 6, 13, ColorWhite);
-	callbacks.lcd.fill_rect(x + 2, y + 2, 3 + maxVolume * 6, 9, ColorBlack);
+	callbacks.lcd.fill_rect(
+	  callbacks.lcd.lcd, x, y, 7 + maxVolume * 6, 13, RGBColorWhite);
+	callbacks.lcd.fill_rect(
+	  callbacks.lcd.lcd, x + 2, y + 2, 3 + maxVolume * 6, 9, RGBColorBlack);
 }
 
 /**
@@ -70,8 +72,12 @@ static void draw_volume_bar(uint32_t x, uint32_t y, uint32_t maxVolume)
 {
 	for (uint32_t i = 0; i < maxVolume; ++i)
 	{
-		callbacks.lcd.fill_rect(
-		  x + 4 + (i * 6), y + 4, 5, 5, taskTwoMem->framebuffer[i]);
+		callbacks.lcd.fill_rect(callbacks.lcd.lcd,
+		                        x + 4 + (i * 6),
+		                        y + 4,
+		                        5,
+		                        5,
+		                        taskTwoMem->framebuffer[i]);
 	}
 }
 
@@ -160,27 +166,35 @@ void run_analogue_pedal_demo(uint64_t initTime)
 
 	// Draw static LCD graphics, and populate the frame buffer with colours for
 	// the initial volume bar.
-	callbacks.lcd.draw_img_rgb565(11, 30, 15, 11, soundIconImg15x11);
+	callbacks.lcd.draw_img_rgb565(
+	  callbacks.lcd.lcd, 11, 30, 15, 11, soundIconImg15x11);
 	outline_volume_bar(10, 45, 20);
 	for (uint32_t i = 0; i < 20; ++i)
 	{
 		taskTwoMem->framebuffer[i] =
 		  (i < taskTwoMem->volume) ? lerp_green_to_red(i, 21) : 0;
 	}
-	callbacks.lcd.draw_str(10,
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       10,
 	                       60,
 	                       LucidaConsole_10pt,
 	                       "Exceed max volume",
-	                       ColorBlack,
-	                       ColorDarkGrey);
-	callbacks.lcd.draw_str(
-	  10, 75, LucidaConsole_10pt, "for a bug!", ColorBlack, ColorDarkGrey);
-	callbacks.lcd.draw_str(10,
+	                       RGBColorBlack,
+	                       RGBColorDarkGrey);
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       10,
+	                       75,
+	                       LucidaConsole_10pt,
+	                       "for a bug!",
+	                       RGBColorBlack,
+	                       RGBColorDarkGrey);
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       10,
 	                       12,
 	                       M3x6_16pt,
 	                       "Press the joystick to end the demo.",
-	                       ColorBlack,
-	                       ColorDarkerGrey);
+	                       RGBColorBlack,
+	                       RGBColorDarkerGrey);
 
 	// Call task one and task two sequentially in a loop until the user
 	// selects to quit the demo by pressing the joystick.
@@ -192,12 +206,13 @@ void run_analogue_pedal_demo(uint64_t initTime)
 		analogue_task_two();
 
 		// Draw the volume bar to the screen each frame using the framebuffer
-		uint32_t labelColor = (taskTwoMem->volume > 20) ? ColorRed : ColorWhite;
-		callbacks.lcd.draw_str(33,
+		uint32_t labelColor = (taskTwoMem->volume > 20) ? RGBColorRed : RGBColorWhite;
+		callbacks.lcd.draw_str(callbacks.lcd.lcd,
+		                       33,
 		                       30,
 		                       LucidaConsole_10pt,
 		                       "Volume: %u/%u ",
-		                       ColorBlack,
+		                       RGBColorBlack,
 		                       labelColor,
 		                       (unsigned int)taskTwoMem->volume,
 		                       20u);

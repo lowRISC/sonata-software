@@ -82,8 +82,13 @@ bool digital_task_two()
 
 	// Display bug status information to the LCD
 	const char *bugStr = isBugged ? "Bug triggered" : "Not triggered";
-	callbacks.lcd.draw_str(
-	  10, 10, LucidaConsole_10pt, bugStr, ColorBlack, ColorGrey);
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       0,
+	                       10,
+	                       LucidaConsole_10pt,
+	                       bugStr,
+	                       RGBColorBlack,
+	                       RGBColorGrey);
 
 	// If flagged to be bugged, use an out-of-bounds index
 	uint32_t index = 99;
@@ -125,18 +130,20 @@ void run_digital_pedal_demo(uint64_t initTime)
 	isBugged                 = false;
 
 	// Draw static demo operation/usage information to the LCD
-	callbacks.lcd.draw_str(10,
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       10,
 	                       27,
 	                       M3x6_16pt,
 	                       "Joystick left/right to trigger bug",
-	                       ColorBlack,
-	                       ColorDarkGrey);
-	callbacks.lcd.draw_str(10,
+	                       RGBColorBlack,
+	                       RGBColorDarkGrey);
+	callbacks.lcd.draw_str(callbacks.lcd.lcd,
+	                       10,
 	                       80,
 	                       M3x6_16pt,
 	                       "Press the joystick to end the demo.",
-	                       ColorBlack,
-	                       ColorGrey);
+	                       RGBColorBlack,
+	                       RGBColorGrey);
 
 	// Call task one and task two sequentially in a loop until the user
 	// selects to quit the demo by pressing the joystick
