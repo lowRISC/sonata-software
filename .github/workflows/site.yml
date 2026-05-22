@@ -30,24 +30,24 @@ jobs:
     runs-on: nixos
     steps:
       - name: Install Nix
-        uses: cachix/install-nix-action@v30
+        uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |
             substituters = https://nix-cache.lowrisc.org/public/ https://cache.nixos.org/
             trusted-public-keys = nix-cache.lowrisc.org-public-1:O6JLD0yXzaJDPiQW1meVu32JIDViuaPtGDfjlOopU7o= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Build Documentation
         run: |
           nix build .#sonata-software-documentation
           # copy out of /nix/store with all symlinks dereferenced and with default permissions
           cp -LR --no-preserve=mode result book
       - name: configure
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: upload
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./book/
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
