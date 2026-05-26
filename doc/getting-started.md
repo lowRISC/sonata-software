@@ -1,18 +1,21 @@
 # Getting started guide
 
 This guide tells you how to get started with the Sonata board.
-If you have any issues in following this guide please contact the Sunburst Team at [info@lowrisc.org](mailto:info@lowrisc.org).
+If you have any issues in following this guide please contact the lowRISC team at [info@lowrisc.org](mailto:info@lowrisc.org).
+If you are attending a *workshop*, please feel free to speak to one of the organisers who will be pleased to help.
 
 The Sonata software build environment can be setup under Windows, macOS and Linux.
 We use a tool called [Nix](https://nixos.org/) to manage the build environment on all platforms.
 You need to install Nix but don't need to know anything else about it to follow these instructions.
 
-You also need to setup the Sonata board itself with the latest release.
+If you have a Sonata board, you can also set it up with the latest release.
+If you are attending a *workshop* and are borrowing a board, this step will have already been done for you.
 Read the [updating the sonata system guide](https://lowrisc.github.io/sonata-system/doc/guide/updating-system.html) for instructions on how to do this.
 You only need to follow the first two steps listed there.
+Don't worry if you don't have a board, because you can still follow the rest of this getting started guide.
 
 Only Windows requires specific instructions, Nix handles everything you need on Linux and macOS.
-So if you're not using Windows jump straight to [Installing Nix](#installing-nix).
+So if you are not using Windows jump straight to [Installing Nix](#installing-nix).
 
 ## Windows-specific setup
 
@@ -38,16 +41,16 @@ Follow the Linux (Ubuntu) steps for the rest of this guide.
 
 > ℹ️ If you have installed your WSL a long time ago, `systemd` may not have been enabled by default.
 > It is recommended to enable `systemd`.
-> See https://learn.microsoft.com/en-us/windows/wsl/systemd.
+> Follow the following guide on [using systemd to manage Linux services with WSL](https://learn.microsoft.com/en-us/windows/wsl/systemd).
 
 ## Installing Nix
 
 The Nix package manager is used to create reproducible builds and consistent development environments.
-For Linux systems it's recommended the following command from the official [documentation](https://nixos.org/download/):
+For Linux systems, we recommend the following command from the official [documentation](https://nixos.org/download/):
 ```sh
 sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
 ```
-For other systems such as macOS, Windows(WSL2), Docker and others, follow the official [documentation](https://nixos.org/download/).
+For other systems such as macOS, Windows (WSL2), Docker and others, follow the official [documentation](https://nixos.org/download/).
 
 To use Nix from the terminal you need to open up a new terminal for it to be added to your path.
 
@@ -92,7 +95,11 @@ exit
 ```
 
 These applications are layered on top of your usual environment.
-You can see what was added with `echo $PATH`.
+You can see what was added with: `echo $PATH`
+
+If you see the warning that substituter is ignored, cancel the process with Ctrl+C and check to see that [trusted-users is setup properly](#setup-nix-cache).
+Nix can and will build everything from source if it can't find a cached version, so letting it continue will cause LLVM-CHERIoT to be built from scratch on your machine.
+This is what the warning looks like if you have not configured the cache correctly:
 
 ```
 do you want to allow configuration setting 'extra-substituters' to be set to 'https://nix-cache.lowrisc.org/public/' (y/N)? y
@@ -101,9 +108,6 @@ do you want to allow configuration setting 'extra-trusted-public-keys' to be set
 do you want to permanently mark this value as trusted (y/N)? y
 warning: ignoring untrusted substituter 'https://nix-cache.lowrisc.org/public/', you are not a trusted user.
 ```
-
-If you see the warning that substituter is ignored, cancel the process with Ctrl+C and check to see that [trusted-users is setup properly](#setup-nix-cache).
-Nix can and will build everything from source if it can't find a cached version, so letting it continue will cause LLVM-CHERIoT to be built from scratch on your machine.
 
 ## Your first build
 
@@ -116,8 +120,6 @@ git clone --branch v1.1 \
 cd sonata-software
 ```
 
-Note a particular branch is specified, this must match your release, the release notes will tell you which branch you should use.
-
 Enter the nix development development environment if you haven't already.
 *Note that because we are in the repository we don't need to provide any arguments to `nix develop`.*
 
@@ -128,7 +130,7 @@ nix develop
 Then build the examples with the following command.
 
 ```sh
-xmake -P examples
+xmake build -P examples
 ```
 
 After running this you should see the build run to completion and report success, the critical lines indicating a successful build are:
@@ -155,14 +157,14 @@ For reference the full output (from a build run on a Linux machine) looks like:
 $ xmake build -P examples
 checking for platform ... cheriot
 checking for architecture ... cheriot
-generating /home/mvdmaas/repos/sw-sonata/cheriot-rtos/sdk/firmware.ldscript.in ... ok
-generating /home/mvdmaas/repos/sw-sonata/cheriot-rtos/sdk/firmware.ldscript.in ... ok
-generating /home/mvdmaas/repos/sw-sonata/cheriot-rtos/sdk/firmware.ldscript.in ... ok
-generating /home/mvdmaas/repos/sw-sonata/cheriot-rtos/sdk/firmware.ldscript.in ... ok
-generating /home/mvdmaas/repos/sw-sonata/cheriot-rtos/sdk/firmware.ldscript.in ... ok
-generating /home/mvdmaas/repos/sw-sonata/cheriot-rtos/sdk/firmware.ldscript.in ... ok
-generating /home/mvdmaas/repos/sw-sonata/cheriot-rtos/sdk/firmware.ldscript.in ... ok
-generating /home/mvdmaas/repos/sw-sonata/cheriot-rtos/sdk/firmware.ldscript.in ... ok
+generating sonata-software/cheriot-rtos/sdk/firmware.ldscript.in ... ok
+generating sonata-software/cheriot-rtos/sdk/firmware.ldscript.in ... ok
+generating sonata-software/cheriot-rtos/sdk/firmware.ldscript.in ... ok
+generating sonata-software/cheriot-rtos/sdk/firmware.ldscript.in ... ok
+generating sonata-software/cheriot-rtos/sdk/firmware.ldscript.in ... ok
+generating sonata-software/cheriot-rtos/sdk/firmware.ldscript.in ... ok
+generating sonata-software/cheriot-rtos/sdk/firmware.ldscript.in ... ok
+generating sonata-software/cheriot-rtos/sdk/firmware.ldscript.in ... ok
 [ 29%]: cache compiling.release ../cheriot-rtos/sdk/core/scheduler/main.cc
 [ 29%]: cache compiling.release automotive/lib/automotive_common.c
 [ 30%]: cache compiling.release automotive/lib/no_pedal.c
@@ -191,7 +193,8 @@ generating /home/mvdmaas/repos/sw-sonata/cheriot-rtos/sdk/firmware.ldscript.in .
 [ 39%]: cache compiling.release automotive/lib/automotive_common.c
 [ 40%]: cache compiling.release automotive/cheri/receive.cc
 [ 41%]: cache compiling.release ../cheriot-rtos/sdk/core/scheduler/main.cc
-Not overriding global variable alignment for _ZL10memTaskTwo since it has a section assigned.Not overriding global variable alignment for _ZL18memAnalogueTaskTwo since it has a section assigned.
+Not overriding global variable alignment for _ZL10memTaskTwo since it has a section assigned.
+Not overriding global variable alignment for _ZL18memAnalogueTaskTwo since it has a section assigned.
 [ 42%]: cache compiling.release ../cheriot-rtos/sdk/core/loader/boot.cc
 [ 43%]: cache compiling.release ../cheriot-rtos/sdk/core/allocator/main.cc
 [ 43%]: compiling.release ../cheriot-rtos/sdk/core/loader/boot.S
@@ -315,5 +318,5 @@ warning: ./cheriot-rtos/sdk/xmake.lua:116: unknown language value 'c2x', it may 
 warning: add -v for getting more warnings ..
 ```
 
-If you're following this guide as preparation for a workshop, you are now all set up and don't need to go any further.
-With a successful software build you can now try [running software](./guide/running-software.md).
+If you are following this guide as preparation for a *workshop*, you are now all set up and don't need to go any further.
+If you are here on your own, you can now try [running software](./guide/running-software.md).
