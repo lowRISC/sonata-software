@@ -83,20 +83,35 @@ To do this, you add your username to the trusted users in `/etc/nix/nix.conf`, e
 >
 > You then need to restart your Mac for the changes to take effect.
 
+## Clone the repository
+
+Clone the Sonata software repository, *making sure to recursively clone submodules as well*, then navigate into it.
+
+```sh
+# Clone the repository
+git clone --branch v1.1 \
+    --recurse-submodule \
+    https://github.com/lowRISC/sonata-software.git
+# Enter the repo directory
+cd sonata-software
+```
+
+Currently `v1.1` is required for the firmware auditing exercise.
+
 ## Enter the CHERIoT development environment
 
 Running the following will put you in a shell environment with all the applications needed to build the CHERIoT RTOS.
 
 ```sh
-# Enter the shell with
-nix develop github:lowRISC/sonata-software
+# Enter the shell from within the repository
+nix develop
+# See the extra paths added to your shell
+echo $PATH
 # Exit the shell with
 exit
 ```
 
 These applications are layered on top of your usual environment.
-You can see what was added with: `echo $PATH`
-
 If you see the warning that substituter is ignored, cancel the process with Ctrl+C and check to see that [trusted-users is setup properly](#setup-nix-cache).
 Nix can and will build everything from source if it can't find a cached version, so letting it continue will cause LLVM-CHERIoT to be built from scratch on your machine.
 This is what the warning looks like if you have not configured the cache correctly:
@@ -111,25 +126,18 @@ warning: ignoring untrusted substituter 'https://nix-cache.lowrisc.org/public/',
 
 ## Your first build
 
-Clone the Sonata software repository, *making sure to recursively clone submodules as well*, then navigate into it.
-
-```sh
-git clone --branch v1.1 \
-    --recurse-submodule \
-    https://github.com/lowRISC/sonata-software.git
-cd sonata-software
-```
-
-Enter the nix development development environment if you haven't already.
+Enter the nix development environment if you haven't already.
 *Note that because we are in the repository we don't need to provide any arguments to `nix develop`.*
 
 ```sh
+# Enter the development shell
 nix develop
 ```
 
 Then build the examples with the following command.
 
 ```sh
+# Build the examples
 xmake build -P examples
 ```
 
